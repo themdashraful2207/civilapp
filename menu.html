@@ -165,6 +165,7 @@
             animation: shake 0.5s ease-in-out;
         }
 
+        /* Animations */
         @keyframes slideIn {
             from {
                 transform: translateY(-50px);
@@ -198,6 +199,7 @@
             75% { transform: translateX(5px); }
         }
 
+        /* Media Queries */
         @media (max-width: 480px) {
             .login-container {
                 padding: 1.5rem;
@@ -218,11 +220,11 @@
         <h2>Welcome Back</h2>
         <form id="loginForm" onsubmit="return validateForm(event)">
             <div class="form-group">
-                <input type="text" id="username" placeholder=" " required>
+                <input type="text" id="username" name="username" placeholder=" " required>
                 <label for="username">Username</label>
             </div>
             <div class="form-group">
-                <input type="password" id="password" placeholder=" " required>
+                <input type="password" id="password" name="password" placeholder=" " required>
                 <label for="password">Password</label>
             </div>
             <button type="submit">Sign In</button>
@@ -231,41 +233,43 @@
     </div>
 
     <script>
-        // Immediate session check
-        if (sessionStorage.getItem("isLoggedIn") === "true") {
-            window.location.href = "proxy.html";
+        // Check if the user is already logged in
+        if (localStorage.getItem("isLoggedIn") === "true") {
+            window.location.href = "proxy.html"; // Redirect to proxy.html if already logged in
         }
 
         async function validateForm(event) {
             event.preventDefault();
+            
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
             const errorMessage = document.getElementById("error-message");
-
+            
             try {
                 const response = await fetch('credentials.json');
-                if (!response.ok) throw new Error('Network error');
                 const data = await response.json();
                 
-                const validUser = data.users.some(u => u.username === username && u.password === password);
+                const user = data.users.find(u => u.username === username && u.password === password);
                 
-                if (validUser) {
-                    sessionStorage.setItem("isLoggedIn", "true");
-                    window.location.href = "proxy.html"; // Force immediate redirect
+                if (user) {
+                    localStorage.setItem("isLoggedIn", "true");
+                    errorMessage.textContent = "Login successful! Redirecting...";
+                    errorMessage.style.color = "#16a34a";
+                    setTimeout(() => {
+                        window.location.href = "https://themdashraful2207.github.io/civilapp/proxy.html";
+                    }, 1000);
                 } else {
-                    showError("Invalid credentials");
+                    errorMessage.textContent = "Invalid username or password";
+                    errorMessage.classList.add('shake');
+                    setTimeout(() => errorMessage.classList.remove('shake'), 500);
                 }
             } catch (error) {
-                showError("Login failed. Try again.");
-                console.error("Error:", error);
+                errorMessage.textContent = "Error loading credentials";
+                errorMessage.classList.add('shake');
+                setTimeout(() => errorMessage.classList.remove('shake'), 500);
+                console.error(error);
             }
-        }
-
-        function showError(message) {
-            const errorElement = document.getElementById("error-message");
-            errorElement.textContent = message;
-            errorElement.classList.add('shake');
-            setTimeout(() => errorElement.classList.remove('shake'), 500);
+            return false;
         }
     </script>
 </body>
