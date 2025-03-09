@@ -26,14 +26,14 @@
             margin: 20px 0;
             border: 1px solid #cccccc;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            overflow: hidden; /* Hide overflow for sliding effect */
+            overflow: hidden;
         }
 
         .menu {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            transition: transform 0.5s ease; /* Smooth sliding */
+            transition: transform 0.3s ease;
         }
 
         .menu-item {
@@ -85,20 +85,19 @@
         @media (max-width: 600px) {
             .menu {
                 height: 300px; /* Fixed height for visible area */
-                overflow: hidden; /* Hide items outside the visible area */
                 position: relative;
             }
 
             .menu-item {
                 font-size: 16px;
                 padding: 10px;
-                height: 40px; /* Fixed height for consistency */
+                height: 40px; /* Fixed height */
                 line-height: 40px;
             }
 
             .container {
-                overflow-y: hidden; /* Hide vertical overflow */
-                height: 340px; /* Container height slightly larger than menu */
+                height: 340px; /* Slightly larger than menu height */
+                overflow-y: hidden;
             }
         }
     </style>
@@ -147,14 +146,18 @@
         // Vertical sliding loop functionality for mobile
         if (window.innerWidth <= 600) {
             const menu = document.getElementById('menu');
-            const items = menu.children;
-            const itemHeight = 40 + 10; // Height of item + gap
+            const items = Array.from(menu.children);
+            const itemHeight = 50; // Height (40px) + gap (10px)
             const totalHeight = items.length * itemHeight;
             let position = 0;
 
-            // Clone items for seamless looping
-            const cloneItems = Array.from(items).map(item => item.cloneNode(true));
+            // Clone items and append for seamless looping
+            const cloneItems = items.map(item => item.cloneNode(true));
             cloneItems.forEach(clone => menu.appendChild(clone));
+
+            // Set initial position to show original items
+            position = -totalHeight / 2; // Start in the middle of the doubled list
+            menu.style.transform = `translateY(${position}px)`;
 
             // Touch event handling
             let startY = 0;
@@ -164,7 +167,7 @@
             menu.addEventListener('touchstart', (e) => {
                 startY = e.touches[0].clientY;
                 isDragging = true;
-                menu.style.transition = 'none'; // Disable transition during drag
+                menu.style.transition = 'none';
             });
 
             menu.addEventListener('touchmove', (e) => {
@@ -174,11 +177,11 @@
                 position -= diff;
                 startY = currentY;
 
-                // Loop logic
+                // Seamless looping
                 if (position <= -totalHeight) {
-                    position += totalHeight; // Jump to top
-                } else if (position > 0) {
-                    position -= totalHeight; // Jump to bottom
+                    position += totalHeight; // Jump up by one full set
+                } else if (position >= 0) {
+                    position -= totalHeight; // Jump down by one full set
                 }
 
                 menu.style.transform = `translateY(${position}px)`;
@@ -186,15 +189,36 @@
 
             menu.addEventListener('touchend', () => {
                 isDragging = false;
-                menu.style.transition = 'transform 0.5s ease'; // Re-enable transition
-            });
+                menu.style.transition = 'transform 0.3s ease';
 
-            // Auto-adjust position to snap to nearest item
-            menu.addEventListener('touchend', () => {
+                // Snap to nearest item
                 const nearestItem = Math.round(position / itemHeight) * itemHeight;
                 position = nearestItem;
                 menu.style.transform = `translateY(${position}px)`;
             });
+
+            // Ensure continuous animation when not dragging
+            function autoAdjust() {
+                if (!isDragging) {
+                    if (position > -totalHeight / 2) {
+                        position -= totalHeight;
+                        menu.style.transition = 'none';
+                        menu.style.transform = `translateY(${position}px)`;
+                        requestAnimationFrame(() => {
+                            menu.style.transition = 'transform 0.3s ease';
+                        });
+                    } else if (position < -totalHeight) {
+                        position += totalHeight;
+                        menu.style.transition = 'none';
+                        menu.style.transform = `translateY(${position}px)`;
+                        requestAnimationFrame(() => {
+                            menu.style.transition = 'transform 0.3s ease';
+                        });
+                    }
+                }
+                requestAnimationFrame(autoAdjust);
+            }
+            requestAnimationFrame(autoAdjust);
         }
     </script>
 </body>
