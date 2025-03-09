@@ -218,11 +218,11 @@
         <h2>Welcome Back</h2>
         <form id="loginForm" onsubmit="return validateForm(event)">
             <div class="form-group">
-                <input type="text" id="username" name="username" placeholder=" " required>
+                <input type="text" id="username" placeholder=" " required>
                 <label for="username">Username</label>
             </div>
             <div class="form-group">
-                <input type="password" id="password" name="password" placeholder=" " required>
+                <input type="password" id="password" placeholder=" " required>
                 <label for="password">Password</label>
             </div>
             <button type="submit">Sign In</button>
@@ -231,42 +231,41 @@
     </div>
 
     <script>
+        // Immediate session check
         if (sessionStorage.getItem("isLoggedIn") === "true") {
             window.location.href = "proxy.html";
         }
 
         async function validateForm(event) {
             event.preventDefault();
-            
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
             const errorMessage = document.getElementById("error-message");
-            
+
             try {
                 const response = await fetch('credentials.json');
+                if (!response.ok) throw new Error('Network error');
                 const data = await response.json();
                 
-                const user = data.users.find(u => u.username === username && u.password === password);
+                const validUser = data.users.some(u => u.username === username && u.password === password);
                 
-                if (user) {
+                if (validUser) {
                     sessionStorage.setItem("isLoggedIn", "true");
-                    errorMessage.textContent = "Login successful! Redirecting...";
-                    errorMessage.style.color = "#16a34a";
-                    setTimeout(() => {
-                        window.location.href = "proxy.html";
-                    }, 1000);
+                    window.location.href = "proxy.html"; // Force immediate redirect
                 } else {
-                    errorMessage.textContent = "Invalid username or password";
-                    errorMessage.classList.add('shake');
-                    setTimeout(() => errorMessage.classList.remove('shake'), 500);
+                    showError("Invalid credentials");
                 }
             } catch (error) {
-                errorMessage.textContent = "Error loading credentials";
-                errorMessage.classList.add('shake');
-                setTimeout(() => errorMessage.classList.remove('shake'), 500);
-                console.error(error);
+                showError("Login failed. Try again.");
+                console.error("Error:", error);
             }
-            return false;
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById("error-message");
+            errorElement.textContent = message;
+            errorElement.classList.add('shake');
+            setTimeout(() => errorElement.classList.remove('shake'), 500);
         }
     </script>
 </body>
