@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade Beam Design Calculator (ACI 318-19)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .input-section label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-section input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .input-section input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .result-section {
+            margin-top: 20px;
+        }
+        .result-section div {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .design-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Grade Beam Design Calculator (ACI 318-19)</h1>
+
+<div class="container">
+    <div class="input-section">
+        <label for="f_c">Concrete Strength, f'c (MPa):</label>
+        <input type="number" id="f_c" placeholder="Enter f'c">
+
+        <label for="f_y">Steel Yield Strength, f_y (MPa):</label>
+        <input type="number" id="f_y" placeholder="Enter f_y">
+
+        <label for="b">Beam Width, b (mm):</label>
+        <input type="number" id="b" placeholder="Enter b">
+
+        <label for="d">Effective Depth, d (mm):</label>
+        <input type="number" id="d" placeholder="Enter d">
+
+        <label for="L">Beam Span, L (m):</label>
+        <input type="number" id="L" placeholder="Enter L">
+
+        <label for="P">Point Load, P (kN):</label>
+        <input type="number" id="P" placeholder="Enter P">
+
+        <label for="a">Distance of Load from Left Support, a (m):</label>
+        <input type="number" id="a" placeholder="Enter a">
+
+        <button onclick="calculate()">Calculate</button>
+    </div>
+
+    <div class="result-section">
+        <h2>Results</h2>
+        <div>Applied Moment, M_u (kNm): <span id="M_u"></span></div>
+        <div>Required Tension Reinforcement Area, A_s (mm ): <span id="A_s"></span></div>
+        <div>Minimum Reinforcement Area, A_s_min (mm ): <span id="A_s_min"></span></div>
+        <div>Maximum Reinforcement Area, A_s_max (mm ): <span id="A_s_max"></span></div>
+        <div>Concrete Shear Strength, V_c (kN): <span id="V_c"></span></div>
+        <div>Required Shear Reinforcement Area, A_v (mm ): <span id="A_v"></span></div>
+        <div>Development Length, l_d (mm): <span id="l_d"></span></div>
+    </div>
+
+    <div class="design-summary">
+        <h2>Beam Section Design</h2>
+        <div>Tension Reinforcement: <span id="tension_rebar"></span></div>
+        <div>Shear Reinforcement: <span id="shear_rebar"></span></div>
+        <div>Development Length Check: <span id="dev_length_check"></span></div>
+    </div>
+</div>
+
+<script>
+    function calculate() {
+        // Get user inputs
+        const f_c = parseFloat(document.getElementById('f_c').value);
+        const f_y = parseFloat(document.getElementById('f_y').value);
+        const b = parseFloat(document.getElementById('b').value);
+        const d = parseFloat(document.getElementById('d').value);
+        const L = parseFloat(document.getElementById('L').value);
+        const P = parseFloat(document.getElementById('P').value);
+        const a = parseFloat(document.getElementById('a').value);
+
+        // Calculate Applied Moment (M_u)
+        const R_A = (P * (L - a)) / L; // Reaction at support A
+        const M_u = R_A * a; // Maximum moment at the point load location
+
+        // Constants
+        const phi_flexure = 0.9; // Strength reduction factor for flexure
+        const phi_shear = 0.75; // Strength reduction factor for shear
+        const lambda = 1.0; // Normal-weight concrete
+        const beta1 = 0.85; // For f_c <= 28 MPa
+
+        // Flexural Design
+        const A_s = (M_u * 1e6) / (phi_flexure * f_y * (d - 0.42 * d)); // Simplified formula
+        const A_s_min = (0.25 * Math.sqrt(f_c) / f_y) * b * d; // Minimum reinforcement
+        const A_s_max = 0.85 * beta1 * (f_c / f_y) * b * d * (600 / (600 + f_y)); // Maximum reinforcement
+
+        // Shear Design
+        const V_c = 0.17 * lambda * Math.sqrt(f_c) * b * d / 1000; // Concrete shear strength in kN
+        let A_v = 0;
+        let shearReinforcement = "Not required";
+
+        if (P > phi_shear * V_c) {
+            // Shear reinforcement is required
+            const s_max = Math.min(d / 2, 600); // Maximum spacing
+            A_v = ((P - phi_shear * V_c) * 1e3 * s_max) / (phi_shear * f_y * d); // Required shear reinforcement area
+            shearReinforcement = `10 mm stirrups @ ${s_max.toFixed(0)} mm c/c`;
+        }
+
+        // Development Length
+        const l_d = (f_y * 1.0 * 1.0 * 1.0) / (1.1 * lambda * Math.sqrt(f_c)) * 16; // For 16 mm bar
+
+        // Display results
+        document.getElementById('M_u').textContent = M_u.toFixed(2);
+        document.getElementById('A_s').textContent = A_s.toFixed(2);
+        document.getElementById('A_s_min').textContent = A_s_min.toFixed(2);
+        document.getElementById('A_s_max').textContent = A_s_max.toFixed(2);
+        document.getElementById('V_c').textContent = V_c.toFixed(2);
+        document.getElementById('A_v').textContent = A_v.toFixed(2);
+        document.getElementById('l_d').textContent = l_d.toFixed(2);
+
+        // Beam Section Design
+        const rebarSize = 16; // Assume 16 mm rebars
+        const rebarArea = (Math.PI * Math.pow(rebarSize, 2)) / 4; // Area of one rebar
+        const numRebars = Math.ceil(A_s / rebarArea); // Number of rebars required
+
+        document.getElementById('tension_rebar').textContent = `${numRebars} nos. ${rebarSize} mm bars`;
+        document.getElementById('shear_rebar').textContent = shearReinforcement;
+        document.getElementById('dev_length_check').textContent = `Development length (${l_d.toFixed(0)} mm) must be provided.`;
+    }
+</script>
+
+</body>
+</html>

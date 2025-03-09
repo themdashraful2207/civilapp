@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Structure Weight Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 200px; padding: 5px; }
+        .result { margin-top: 20px; padding: 15px; background: #f0f0f0; }
+        .note { color: #666; font-size: 0.9em; margin-top: 10px; }
+        .highlight { color: #c00; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Advanced Structure Weight Calculator</h1>
+        
+        <div class="input-group">
+            <label>Number of Stories:</label>
+            <input type="number" id="numStories" value="1" min="1">
+        </div>
+
+        <div class="input-group">
+            <label>Column Dimensions (mm):</label>
+            <input type="number" id="colWidth" value="300"> x 
+            <input type="number" id="colDepth" value="300">
+        </div>
+
+        <div class="input-group">
+            <label>Column Height (m):</label>
+            <input type="number" id="colHeight" value="3.281">
+        </div>
+
+        <div class="input-group">
+            <label>Slab Area (sq.ft):</label>
+            <input type="number" id="slabArea" value="150">
+        </div>
+
+        <div class="input-group">
+            <label>Slab Thickness (mm):</label>
+            <input type="number" id="slabThickness" value="125">
+        </div>
+
+        <div class="input-group">
+            <label>Beam Dimensions (mm):</label>
+            <input type="number" id="beamWidth" value="250"> x 
+            <input type="number" id="beamDepth" value="250">
+        </div>
+
+        <div class="input-group">
+            <label>Floor Finish Load (psf):</label>
+            <input type="number" id="floorFinish" value="10">
+        </div>
+
+        <div class="input-group">
+            <label>Live Load (psf):</label>
+            <input type="number" id="liveLoad" value="45">
+        </div>
+
+        <div class="input-group">
+            <label>Dead Load Factor:</label>
+            <input type="number" id="deadFactor" value="1.2" step="0.1">
+        </div>
+
+        <div class="input-group">
+            <label>Live Load Factor:</label>
+            <input type="number" id="liveFactor" value="1.6" step="0.1">
+        </div>
+
+        <div class="input-group">
+            <label>Brick Weight (kg per brick):</label>
+            <input type="number" id="brickWeight" value="3.5">
+        </div>
+
+        <div class="input-group">
+            <label>Number of Bricks:</label>
+            <input type="number" id="numBricks" value="1000">
+        </div>
+
+        <button onclick="calculateWeight()">Calculate Total Weight</button>
+
+        <div class="result">
+            <h3>Load Calculations:</h3>
+            <p>Structural Dead Load (Columns+Slab+Beams): <span id="structuralDead">0.00</span> tons</p>
+            <p>Floor Finish Dead Load: <span id="floorFinishDead">0.00</span> tons</p>
+            <p>Brick Load: <span id="brickLoad">0.00</span> tons</p>
+            <p>Total Dead Load: <span id="totalDead">0.00</span> tons</p>
+            <p>Factored Dead Load (DL   Factor): <span id="factoredDead">0.00</span> tons</p>
+            <p>Live Load: <span id="liveLoadResult">0.00</span> tons</p>
+            <p>Factored Live Load (LL   Factor): <span id="factoredLive">0.00</span> tons</p>
+            <p class="highlight">Total Factored Load: <span id="totalFactored">0.00</span> tons</p>
+        </div>
+
+        <div class="note">
+            * Calculations use: Concrete density = 2400 kg/m , 1 lb = 0.453592 kg<br>
+            * Factors follow common structural design standards (e.g., ACI 318)
+        </div>
+    </div>
+
+    <script>
+        function calculateWeight() {
+            const concreteDensity = 2400;
+            const lbToKg = 0.453592;
+
+            const numStories = parseFloat(document.getElementById('numStories').value);
+            const colWidth = parseFloat(document.getElementById('colWidth').value) / 1000;
+            const colDepth = parseFloat(document.getElementById('colDepth').value) / 1000;
+            const colHeight = parseFloat(document.getElementById('colHeight').value);
+            const slabAreaSqft = parseFloat(document.getElementById('slabArea').value);
+            const slabThickness = parseFloat(document.getElementById('slabThickness').value) / 1000;
+            const beamWidth = parseFloat(document.getElementById('beamWidth').value) / 1000;
+            const beamDepth = parseFloat(document.getElementById('beamDepth').value) / 1000;
+            const floorFinish = parseFloat(document.getElementById('floorFinish').value);
+            const liveLoad = parseFloat(document.getElementById('liveLoad').value);
+            const deadFactor = parseFloat(document.getElementById('deadFactor').value);
+            const liveFactor = parseFloat(document.getElementById('liveFactor').value);
+            const brickWeight = parseFloat(document.getElementById('brickWeight').value);
+            const numBricks = parseFloat(document.getElementById('numBricks').value);
+
+            const slabAreaSqm = slabAreaSqft * 0.092903;
+            const beamLength = 2 * Math.sqrt(slabAreaSqft) * 0.3048;
+
+            const colVolume = colWidth * colDepth * colHeight;
+            const colWeight = (colVolume * concreteDensity / 1000) * numStories;
+            const slabVolume = slabAreaSqm * slabThickness;
+            const slabWeight = (slabVolume * concreteDensity / 1000) * numStories;
+            const beamVolume = beamWidth * beamDepth * beamLength;
+            const beamWeight = (beamVolume * concreteDensity / 1000) * numStories;
+
+            const structuralDead = colWeight + slabWeight + beamWeight;
+            const floorFinishDead = ((slabAreaSqft * floorFinish * lbToKg) / 1000) * numStories;
+            
+            // Brick load in tons
+            const brickLoadTon = (brickWeight * numBricks) / 1000;
+
+            const totalDead = structuralDead + floorFinishDead + brickLoadTon;  // Include brick load in total dead load
+            const factoredDead = totalDead * deadFactor;
+
+            const liveLoadTon = ((slabAreaSqft * liveLoad * lbToKg) / 1000) * numStories;
+            const factoredLive = liveLoadTon * liveFactor;
+
+            const totalFactored = factoredDead + factoredLive;
+
+            document.getElementById('structuralDead').textContent = structuralDead.toFixed(2);
+            document.getElementById('floorFinishDead').textContent = floorFinishDead.toFixed(2);
+            document.getElementById('brickLoad').textContent = brickLoadTon.toFixed(2);
+            document.getElementById('totalDead').textContent = totalDead.toFixed(2);
+            document.getElementById('factoredDead').textContent = factoredDead.toFixed(2);
+            document.getElementById('liveLoadResult').textContent = liveLoadTon.toFixed(2);
+            document.getElementById('factoredLive').textContent = factoredLive.toFixed(2);
+            document.getElementById('totalFactored').textContent = totalFactored.toFixed(2);
+        }
+
+        calculateWeight();
+    </script>
+</body>
+</html>

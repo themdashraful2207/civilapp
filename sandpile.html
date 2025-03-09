@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sand Pile Cost Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .container {
+      max-width: 400px;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0 15px 0;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .output {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #e9ecef;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Sand Pile Cost Calculator</h2>
+    <label for="landArea">Land Area (square feet):</label>
+    <input type="number" id="landArea" placeholder="Enter land area in sqft">
+
+    <label for="pileDiameter">Diameter of Pile (inches):</label>
+    <input type="number" id="pileDiameter" placeholder="Enter diameter in inches">
+
+      <label for="pileSpacing">Spacing of Pile (inches):</label>
+    <input type="number" id="pileSpacing" placeholder="Enter spacing in inches">
+
+    <label for="pileLength">Length of Pile (feet):</label>
+    <input type="number" id="pileLength" placeholder="Enter length in feet">
+
+    <label for="costPerFoot">Cost per Running Foot of Pile (TK):</label>
+    <input type="number" id="costPerFoot" placeholder="Enter cost per running foot">
+
+    <label for="costPerCft">Cost per Cubic Foot of Sand (TK):</label>
+    <input type="number" id="costPerCft" placeholder="Enter cost per cubic foot">
+
+    <button onclick="calculate()">Calculate</button>
+
+    <div class="output" id="output">
+      <h3>Results:</h3>
+      <p id="numPiles"></p>
+      <p id="totalVolume"></p>
+      <p id="totalSandCost"></p>
+      <p id="totalPileCost"></p>
+      <p id="totalCost"></p>
+    </div>
+  </div>
+
+  <script>
+    function calculate() {
+      // Get input values
+      const landArea = parseFloat(document.getElementById("landArea").value);
+      const pileDiameter = parseFloat(document.getElementById("pileDiameter").value);
+      const pileSpacing = parseFloat(document.getElementById("pileSpacing").value);
+      const pileLength = parseFloat(document.getElementById("pileLength").value);
+      const costPerFoot = parseFloat(document.getElementById("costPerFoot").value);
+      const costPerCft = parseFloat(document.getElementById("costPerCft").value);
+
+      // Validate inputs
+      if (isNaN(landArea) || isNaN(pileDiameter) || isNaN(pileSpacing) || isNaN(pileLength) || isNaN(costPerFoot) || isNaN(costPerCft)) {
+        alert("Please fill all fields with valid numbers.");
+        return;
+      }
+
+      // Calculate number of piles
+      const spacing = pileSpacing/12; // 18 inches = 1.5 feet (center-to-center spacing)
+      const areaPerPile = spacing * spacing; // Each pile occupies 2.25 sqft
+      const numPiles = Math.ceil(landArea / areaPerPile); // Round up to the nearest whole number
+
+      // Calculate volume of one pile
+      const radius = (pileDiameter / 12) / 2; // Convert diameter to feet and get radius
+      const volumePerPile = Math.PI * Math.pow(radius, 2) * pileLength;
+
+      // Total volume of sand
+      const totalVolume = volumePerPile * numPiles;
+
+      // Total cost of sand
+      const totalSandCost = totalVolume * costPerCft;
+
+      // Total cost of piles
+      const totalPileCost = numPiles * pileLength * costPerFoot;
+
+      // Total combined cost
+      const totalCost = totalSandCost + totalPileCost;
+
+      // Display results
+      document.getElementById("numPiles").innerHTML = `Number of Piles: <strong>${numPiles}</strong>`;
+      document.getElementById("totalVolume").innerHTML = `Total Volume of Sand: <strong>${totalVolume.toFixed(2)} cubic feet</strong>`;
+      document.getElementById("totalSandCost").innerHTML = `Total Cost of Sand: <strong>${totalSandCost.toFixed(2)} TK</strong>`;
+      document.getElementById("totalPileCost").innerHTML = `Total Cost of Piles: <strong>${totalPileCost.toFixed(2)} TK</strong>`;
+      document.getElementById("totalCost").innerHTML = `Total Combined Cost: <strong>${totalCost.toFixed(2)} TK</strong>`;
+    }
+  </script>
+</body>
+</html>

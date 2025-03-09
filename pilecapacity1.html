@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pile Capacity Calculator</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            margin: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555555;
+            font-weight: bold;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #output {
+            text-align: center;
+            font-size: 18px;
+            color: #333333;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        table, th, td {
+            border: 1px solid #cccccc;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f4f4f9;
+        }
+
+        td.editable {
+            cursor: pointer;
+        }
+
+        td.editable:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            input[type="number"], select {
+                font-size: 14px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+
+            #output {
+                font-size: 16px;
+            }
+        }
+    </style>
+    <script>
+        let currentDepth = 5;
+        let sptData = [];
+
+        function addInterval() {
+            let sptValue = parseInt(document.getElementById("sptInput").value) || 0;
+            let unitWeight = parseInt(document.getElementById("unitWeightSoil").value) || 120;
+
+            sptData.push({ depth: currentDepth, nValue: sptValue, unitWeight: unitWeight });
+            currentDepth += 5;
+            renderTable();
+        }
+
+        function renderTable() {
+            let tableBody = document.getElementById("sptTableBody");
+            tableBody.innerHTML = "";
+
+            sptData.forEach((data, index) => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${data.depth} ft</td>
+                    <td class="editable" onclick="editNValue(${index}, this)">${data.nValue}</td>
+                    <td class="editable" onclick="editUnitWeight(${index}, this)">${data.unitWeight} pcf</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function editNValue(index, cell) {
+            let input = document.createElement("input");
+            input.type = "number";
+            input.value = sptData[index].nValue;
+            input.style.width = "100%";
+            input.style.textAlign = "center";
+            input.onblur = () => {
+                sptData[index].nValue = parseInt(input.value) || 0;
+                renderTable();
+            };
+            input.onkeypress = (e) => {
+                if (e.key === "Enter") {
+                    sptData[index].nValue = parseInt(input.value) || 0;
+                    renderTable();
+                }
+            };
+            cell.innerHTML = "";
+            cell.appendChild(input);
+            input.focus();
+        }
+
+        function editUnitWeight(index, cell) {
+            let input = document.createElement("input");
+            input.type = "number";
+            input.value = sptData[index].unitWeight;
+            input.style.width = "100%";
+            input.style.textAlign = "center";
+            input.onblur = () => {
+                sptData[index].unitWeight = parseInt(input.value) || 120;
+                renderTable();
+            };
+            input.onkeypress = (e) => {
+                if (e.key === "Enter") {
+                    sptData[index].unitWeight = parseInt(input.value) || 120;
+                    renderTable();
+                }
+            };
+            cell.innerHTML = "";
+            cell.appendChild(input);
+            input.focus();
+        }
+
+        function calculatePileCapacity() {
+            let pileDia = parseFloat(document.getElementById("pileDia").value) / 12; // Convert inches to feet
+            let pileLength = parseFloat(document.getElementById("pileLength").value);
+            let factorOfSafety = parseFloat(document.getElementById("factorOfSafety").value); // Get factor of safety
+            let perimeter = Math.PI * pileDia;
+            let area = Math.PI * (pileDia / 2) ** 2;
+
+            // Calculate sum of N-values and average unit weight at the tip
+            let sumN = sptData.reduce((sum, data) => sum + data.nValue, 0);
+            let lastTwoUnitWeights = sptData.slice(-2).map(data => data.unitWeight);
+            let avgUnitWeightTip = lastTwoUnitWeights.length > 0 ? (lastTwoUnitWeights[0] + lastTwoUnitWeights[1]) / 2 : 120;
+
+            // End bearing capacity using Meyerhof s equation
+            let lastTwoNValues = sptData.slice(-2).map(data => data.nValue);
+            let avgNtip = lastTwoNValues.length > 0 ? (lastTwoNValues[0] + lastTwoNValues[1]) / 2 : 0;
+            let qu = 40 * avgNtip * avgUnitWeightTip;
+            let qa = qu / factorOfSafety; // Apply user-defined factor of safety
+            let Qb = qa * area;
+
+            // Skin friction capacity
+            let fs = 0.8 * sumN; // fs = 0.8 * N (in psf per foot)
+            let Qs = fs * perimeter * pileLength;
+
+            // Total pile capacity
+            let Q_total = (Qb + Qs) / 1000; // Convert to kips
+
+            document.getElementById("output").innerHTML = `Total Pile Capacity: <strong>${Q_total.toFixed(2)} kips</strong>`;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Pile Capacity Calculator</h2>
+        <label>Enter Pile Diameter (in inches):</label>
+        <input type="number" id="pileDia" value="18" required>
+
+        <label>Enter Pile Length (in feet):</label>
+        <input type="number" id="pileLength" value="50" required>
+
+        <label>Enter SPT N-value:</label>
+        <input type="number" id="sptInput" required>
+
+        <label>Select Unit Weight of Soil (pcf):</label>
+        <select id="unitWeightSoil" required>
+            <option value="90">Loose Sand (90 pcf)</option>
+            <option value="100">Medium Dense Sand (100 pcf)</option>
+            <option value="110">Dense Sand (110 pcf)</option>
+            <option value="120">Sandy Gravel (120 pcf)</option>
+            <option value="130">Stiff Clay (130 pcf)</option>
+            <option value="140">Very Stiff Clay (140 pcf)</option>
+        </select>
+
+        <button onclick="addInterval()">Add 5 ft Interval</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Depth (ft)</th>
+                    <th>SPT N-value</th>
+                    <th>Unit Weight (pcf)</th>
+                </tr>
+            </thead>
+            <tbody id="sptTableBody">
+                <!-- Rows will be dynamically added here -->
+            </tbody>
+        </table>
+
+        <label>Enter Factor of Safety:</label>
+        <input type="number" id="factorOfSafety" value="3" required>
+
+        <button onclick="calculatePileCapacity()">Calculate Pile Capacity</button>
+        <h3 id="output"></h3>
+    </div>
+</body>
+</html>

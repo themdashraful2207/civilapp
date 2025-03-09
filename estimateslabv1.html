@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Way Slab Estimate Calculator (ft/in)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 90%;
+            width: 400px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                margin: 10px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            input, select, button {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Two-Way Slab Estimate Calculator</h1>
+        <div class="form-group">
+            <label for="length">Length (ft):</label>
+            <input type="number" id="length" min="0" step="0.1" required>
+        </div>
+        <div class="form-group">
+            <label for="width">Width (ft):</label>
+            <input type="number" id="width" min="0" step="0.1" required>
+        </div>
+        <div class="form-group">
+            <label for="thickness">Thickness (in):</label>
+            <input type="number" id="thickness" min="0" step="0.1" required>
+        </div>
+        <div class="form-group">
+            <label for="mixRatio">Concrete Mix Ratio:</label>
+            <select id="mixRatio" required>
+                <option value="1:1.5:3">1:1.5:3</option>
+                <option value="1:2:4">1:2:4</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="mainBar">Main Bar Size:</label>
+            <select id="mainBar" required>
+                <option value="10">10mm</option>
+                <option value="12">12mm</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="spacing">Main Bar Spacing (in c/c):</label>
+            <input type="number" id="spacing" min="0" step="0.1" required>
+        </div>
+        <div class="form-group">
+            <label for="extraBar">Extra Top Bar Size:</label>
+            <select id="extraBar" required>
+                <option value="10">10mm</option>
+                <option value="12">12mm</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="extraBarsNum">Number of Extra Top Bars Sets:</label>
+            <input type="number" id="extraBarsNum" min="0" step="1" required>
+        </div>
+        <button onclick="calculateEstimate()">Calculate Estimate</button>
+    </div>
+
+    <script>
+        function calculateEstimate() {
+            // Get input values
+            const length = parseFloat(document.getElementById('length').value); // ft
+            const width = parseFloat(document.getElementById('width').value);   // ft
+            const thickness = parseFloat(document.getElementById('thickness').value) / 12; // convert in to ft
+            const mixRatio = document.getElementById('mixRatio').value;
+            const mainBar = parseFloat(document.getElementById('mainBar').value); // mm
+            const spacing = parseFloat(document.getElementById('spacing').value); // in
+            const extraBar = parseFloat(document.getElementById('extraBar').value); // mm
+            const extraBarsNum = parseInt(document.getElementById('extraBarsNum').value);
+
+            // Validate inputs
+            if (isNaN(length) || isNaN(width) || isNaN(thickness) || isNaN(mainBar) || 
+                isNaN(spacing) || isNaN(extraBar) || isNaN(extraBarsNum) ||
+                length <= 0 || width <= 0 || thickness <= 0 || spacing <= 0) {
+                alert('Please enter valid positive numbers for all fields');
+                return;
+            }
+
+            // Basic calculations
+            const area = length * width; // sq.ft
+            const volume = area * thickness; // cu.ft
+
+            // Concrete mix ratio calculation
+            let cementRatio, sandRatio, aggregateRatio, totalParts;
+            if (mixRatio === "1:1.5:3") {
+                cementRatio = 1 / 5.5;
+                sandRatio = 1.5 / 5.5;
+                aggregateRatio = 3 / 5.5;
+                totalParts = 5.5;
+            } else { // 1:2:4
+                cementRatio = 1 / 7;
+                sandRatio = 2 / 7;
+                aggregateRatio = 4 / 7;
+                totalParts = 7;
+            }
+
+            const cementVolume = volume * cementRatio * 1.54; // 1.54 is shrinkage factor
+            const sandVolume = volume * sandRatio * 1.54;
+            const aggregateVolume = volume * aggregateRatio * 1.54;
+            const cementBags = Math.ceil(cementVolume / 1.25); // 1 bag = 1.25 cu.ft
+
+            // Steel calculation
+            const spacingFt = spacing / 12; // convert spacing to ft
+            const numBarsLength = Math.floor(length / spacingFt) + 1;
+            const numBarsWidth = Math.floor(width / spacingFt) + 1;
+            const totalMainBarLength = (numBarsLength * width + numBarsWidth * length) * 1.05; // 5% extra for laps
+            
+            const sqrtArea = Math.sqrt(area); // ft
+            const perimeterInches = sqrtArea * 4 * 12; // convert to inches
+            const numBars = Math.floor(perimeterInches / (spacing * 2)); // number of bars
+            const barLength = sqrtArea / 3; // length of each bar in ft
+            const totalTopBarLength = numBars * barLength * extraBarsNum; // total length in ft
+
+            const mainBarWeight = ((mainBar * mainBar) / 162) * (totalMainBarLength * 0.3048); // ft to m
+            const topBarWeight = ((extraBar * extraBar) / 162) * (totalTopBarLength * 0.3048); // ft to m
+
+            // Open new window with estimate
+            const estimatePage = window.open("", "_blank");
+            estimatePage.document.write(`
+                <html>
+                    <head>
+                        <title>Two-Way Slab Construction Estimate</title>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            body { 
+                                font-family: Arial; 
+                                padding: 15px; 
+                                margin: 0;
+                                font-size: 16px;
+                            }
+                            h2 { 
+                                color: #2c3e50; 
+                                border-bottom: 2px solid #3498db; 
+                                padding-bottom: 10px;
+                                font-size: 1.5rem;
+                            }
+                            table { 
+                                width: 100%; 
+                                max-width: 100%;
+                                border-collapse: collapse; 
+                                margin: 20px 0;
+                                overflow-x: auto;
+                                display: block;
+                            }
+                            th, td { 
+                                padding: 12px; 
+                                border: 1px solid #ddd; 
+                                text-align: left; 
+                                min-width: 120px;
+                            }
+                            th { 
+                                background: #3498db; 
+                                color: white; 
+                                font-size: 0.95rem;
+                            }
+                            .total-row { 
+                                background-color: #f8f9fa; 
+                                font-weight: bold; 
+                            }
+                            @media (max-width: 768px) {
+                                body { padding: 10px; font-size: 15px; }
+                                th, td { padding: 10px; font-size: 0.85rem; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>Two-Way Slab Construction Estimate</h2>
+                        <h3>Material Summary (Mix Ratio: ${mixRatio})</h3>
+                        <table id="materialSummary">
+                            <tr><th>Material</th><th>Quantity</th></tr>
+                            <tr><td>Cement Bags (50kg)</td><td>${cementBags}</td></tr>
+                            <tr><td>Sand (cft)</td><td>${sandVolume.toFixed(1)}</td></tr>
+                            <tr><td>Aggregate (cft)</td><td>${aggregateVolume.toFixed(1)}</td></tr>
+                            <tr><td>Rebar (${mainBar}mm)</td><td>${mainBarWeight.toFixed(1)} kg</td></tr>
+                            <tr><td>Extra Top Bars (${extraBar}mm)</td><td>${topBarWeight.toFixed(1)} kg</td></tr>
+                        </table>
+                        <h3>Detailed Slab Specifications</h3>
+                        <table id="slabSpecifications">
+                            <tr>
+                                <th>Dimensions (ft)</th>
+                                <th>Thickness (ft)</th>
+                                <th>Area (sq.ft)</th>
+                                <th>Volume (cft)</th>
+                                <th>Reinforcement</th>
+                            </tr>
+                            <tr>
+                                <td>${length.toFixed(2)}x${width.toFixed(2)}</td>
+                                <td>${thickness.toFixed(2)}</td>
+                                <td>${area.toFixed(2)}</td>
+                                <td>${volume.toFixed(2)}</td>
+                                <td>
+                                    Main Bars: ${mainBar}mm @ ${spacing}in c/c (${totalMainBarLength.toFixed(2)} ft)<br>
+                                    Extra Top Bars: ${numBars * extraBarsNum} bars of ${extraBar}mm, Each ${barLength.toFixed(2)} ft (${totalTopBarLength.toFixed(2)} ft)
+                                </td>
+                            </tr>
+                        </table>
+                    </body>
+                </html>
+            `);
+            estimatePage.document.close();
+        }
+    </script>
+</body>
+</html>

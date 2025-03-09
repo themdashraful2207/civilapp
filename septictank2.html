@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Septic Tank Estimate</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            margin: auto;
+            overflow: hidden;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            width: 100%;
+            background: #007bff;
+            color: white;
+            border: none;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #output {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Septic Tank Estimate Calculator</h2>
+        
+        <label for="floors">Number of Floors:</label>
+        <input type="number" id="floors" min="1" value="1">
+
+        <label for="units">Number of Units per Floor:</label>
+        <input type="number" id="units" min="1" value="1">
+
+        <label for="persons">Persons per Unit:</label>
+        <input type="number" id="persons" min="1" value="4">
+
+        <label for="waterUsage">Water Usage per Person (Liters):</label>
+        <input type="number" id="waterUsage" min="50" value="120">
+
+        <label for="retention">Retention Time (Days):</label>
+        <input type="number" id="retention" min="1" max="3" value="2">
+
+        <button onclick="calculateSepticTank()">Calculate</button>
+
+        <div id="output"></div>
+    </div>
+
+    <script>
+        function calculateSepticTank() {
+            let floors = parseInt(document.getElementById("floors").value);
+            let units = parseInt(document.getElementById("units").value);
+            let persons = parseInt(document.getElementById("persons").value);
+            let waterUsage = parseInt(document.getElementById("waterUsage").value);
+            let retention = parseInt(document.getElementById("retention").value);
+
+            if (floors < 1 || units < 1 || persons < 1 || waterUsage < 50 || retention < 1 || retention > 3) {
+                alert("Please enter valid values.");
+                return;
+            }
+
+            let totalPersons = floors * units * persons;
+            let dailyWastewater = totalPersons * waterUsage; // User-defined water usage per person
+            let totalVolume = dailyWastewater * retention; // Retention time in days
+
+            let height = 6; // Standard depth in feet
+            let width = Math.sqrt(totalVolume / (height * 7.48)); // Convert liters to cubic feet (7.48L = 1 ft³)
+            let length = 1.5 * width; // Length is usually 1.5 times width
+
+            let capacityDays = Math.round(totalVolume / dailyWastewater);
+
+            document.getElementById("output").innerHTML = `
+                <p>Total Persons: ${totalPersons}</p>
+                <p>Water Usage per Person: ${waterUsage} L</p>
+                <p>Daily Wastewater: ${dailyWastewater} L</p>
+                <p>Tank Volume: ${totalVolume} L</p>
+                <p>Tank Size: ${length.toFixed(2)} ft × ${width.toFixed(2)} ft × ${height} ft</p>
+                <p>Capacity: ${capacityDays} Days</p>
+            `;
+        }
+    </script>
+
+</body>
+</html>

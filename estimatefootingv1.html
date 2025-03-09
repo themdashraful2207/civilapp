@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footing Estimate Input</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 90%;
+            width: 400px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+        input, button, select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .rebar-container {
+            margin-bottom: 20px;
+            overflow: auto;
+        }
+        .rebar-input {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+            gap: 5px;
+            flex-wrap: nowrap; /* Keep in one line */
+        }
+        .rebar-input button {
+            width: 25px; /* Smaller buttons */
+            height: 25px;
+            padding: 0;
+            font-size: 14px;
+            line-height: 25px;
+        }
+        .rebar-input input {
+            width: 80px; /* Smaller inputs */
+            padding: 5px;
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            overflow-x: auto;
+            display: block;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+            min-width: 80px;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                margin: 10px;
+            }
+            .rebar-input {
+                flex-wrap: wrap; /* Allow wrapping on small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Footing Input</h2>
+        <label>Concrete Mix Ratio:</label>
+        <select id="mixRatio" onchange="updateMixRatio()">
+            <option value="1:1.5:3">1:1.5:3 (Cement:Sand:Aggregate)</option>
+            <option value="1:2:4">1:2:4 (Cement:Sand:Aggregate)</option>
+        </select>
+
+        <label>Footing Name:</label>
+        <input type="text" id="footingName" placeholder="Enter footing name" required>
+
+        <label>Footing Length (ft):</label>
+        <input type="number" id="footingLength" placeholder="Enter length" required>
+
+        <label>Footing Breadth (ft):</label>
+        <input type="number" id="footingBreadth" placeholder="Enter breadth" required>
+
+        <label>Footing Thickness (in):</label>
+        <input type="number" id="footingThickness" placeholder="Enter thickness" required>
+
+        <label>Number of Footings:</label>
+        <input type="number" id="footingNos" placeholder="Enter number of footings" required>
+
+        <div class="rebar-container" id="rebarContainer">
+            <div class="rebar-input">
+                <button type="button" onclick="addRebarField()">+</button>
+                <button type="button" onclick="removeRebarField(this)">-</button>
+                <input type="number" class="barDia" placeholder="Bar Dia (mm)" required>
+                <input type="number" class="barSpacing" placeholder="Spacing (in)" required>
+            </div>
+        </div>
+
+        <button onclick="addFooting()">Add Footing</button>
+
+        <h3>Footing List</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Footing Nos</th>
+                    <th>Name</th>
+                    <th>Dimensions (ft)</th>
+                    <th>Thickness (ft)</th>
+                    <th>Rebars</th>
+                </tr>
+            </thead>
+            <tbody id="footingList"></tbody>
+        </table>
+
+        <button onclick="showEstimate()">Estimate</button>
+    </div>
+
+    <script>
+        let selectedMixRatio = "1:1.5:3"; // Default mix ratio
+
+        function updateMixRatio() {
+            selectedMixRatio = document.getElementById("mixRatio").value;
+        }
+
+        function addRebarField() {
+            let container = document.getElementById("rebarContainer");
+            let div = document.createElement("div");
+            div.classList.add("rebar-input");
+            div.innerHTML = `
+                <button type="button" onclick="addRebarField()">+</button>
+                <button type="button" onclick="removeRebarField(this)">-</button>
+                <input type="number" class="barDia" placeholder="Bar Dia (mm)" required>
+                <input type="number" class="barSpacing" placeholder="Spacing (in)" required>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeRebarField(button) {
+            let container = document.getElementById("rebarContainer");
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+            }
+        }
+
+        function addFooting() {
+            let footingName = document.getElementById("footingName").value;
+            let footingLength = document.getElementById("footingLength").value;
+            let footingBreadth = document.getElementById("footingBreadth").value;
+            let footingThickness = document.getElementById("footingThickness").value;
+            let footingNos = document.getElementById("footingNos").value;
+            let rebars = document.querySelectorAll(".rebar-input");
+            let rebarDetails = [];
+
+            rebars.forEach((rebar, index) => {
+                let barDia = rebar.querySelector(".barDia").value;
+                let barSpacing = rebar.querySelector(".barSpacing").value;
+                rebarDetails.push(`${barDia}mm @ ${barSpacing}in c/c`);
+            });
+
+            let footingList = document.getElementById("footingList");
+            let row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${footingNos}</td>
+                <td>${footingName}</td>
+                <td>${footingLength}x${footingBreadth}</td>
+                <td>${footingThickness}</td>
+                <td>${rebarDetails.join("<br>")}</td>
+            `;
+            footingList.appendChild(row);
+
+            document.getElementById("footingName").value = "";
+            document.getElementById("footingLength").value = "";
+            document.getElementById("footingBreadth").value = "";
+            document.getElementById("footingThickness").value = "";
+            document.getElementById("footingNos").value = "";
+            document.getElementById("rebarContainer").innerHTML = `
+                <div class="rebar-input">
+                    <button type="button" onclick="addRebarField()">+</button>
+                    <button type="button" onclick="removeRebarField(this)">-</button>
+                    <input type="number" class="barDia" placeholder="Bar Dia (mm)" required>
+                    <input type="number" class="barSpacing" placeholder="Spacing (in)" required>
+                </div>
+            `;
+        }
+
+        function showEstimate() {
+            const footings = Array.from(document.querySelectorAll("#footingList tr"));
+            const estimateData = footings.map(row => {
+                const cells = row.querySelectorAll("td");
+                return {
+                    footingNos: parseFloat(cells[0].innerText),
+                    name: cells[1].innerText,
+                    dimensions: cells[2].innerText,
+                    thickness: parseFloat(cells[3].innerText) / 12, // Convert inches to feet
+                    rebars: cells[4].innerHTML.replace(/<br>/g, "\n")
+                };
+            });
+
+            const estimatePage = window.open("", "_blank");
+            estimatePage.document.write(`
+                <html>
+                    <head>
+                        <title>Footing Construction Estimate</title>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            body { 
+                                font-family: Arial; 
+                                padding: 15px; 
+                                margin: 0;
+                                font-size: 16px;
+                            }
+                            h2 { 
+                                color: #2c3e50; 
+                                border-bottom: 2px solid #3498db; 
+                                padding-bottom: 10px;
+                                font-size: 1.5rem;
+                            }
+                            table { 
+                                width: 100%; 
+                                max-width: 100%;
+                                border-collapse: collapse; 
+                                margin: 20px 0;
+                                overflow-x: auto;
+                                display: block;
+                            }
+                            th, td { 
+                                padding: 12px; 
+                                border: 1px solid #ddd; 
+                                text-align: left; 
+                                min-width: 120px;
+                            }
+                            th { 
+                                background: #3498db; 
+                                color: white; 
+                                font-size: 0.95rem;
+                            }
+                            .total-row { 
+                                background-color: #f8f9fa; 
+                                font-weight: bold; 
+                            }
+                            @media (max-width: 768px) {
+                                body { padding: 10px; font-size: 15px; }
+                                th, td { padding: 10px; font-size: 0.85rem; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>Footing Construction Estimate</h2>
+                        <h3>Material Summary (Mix Ratio: ${selectedMixRatio})</h3>
+                        <table id="materialSummary">
+                            <tr><th>Material</th><th>Quantity</th></tr>
+                        </table>
+                        <h3>Detailed Footing Specifications</h3>
+                        <table id="footingSpecifications">
+                            <tr>
+                                <th>Footing Nos</th>
+                                <th>Name</th>
+                                <th>Dimensions (ft)</th>
+                                <th>Thickness (ft)</th>
+                                <th>Rebars</th>
+                            </tr>
+                        </table>
+                    </body>
+                </html>
+            `);
+
+            // Material Calculations
+            let totalDryVolume = 0;
+            const steelBySize = {};
+
+            estimateData.forEach(data => {
+                const length = parseFloat(data.dimensions.split('x')[0]);
+                const breadth = parseFloat(data.dimensions.split('x')[1]);
+                const volume = length * breadth * data.thickness * data.footingNos;
+                const dryVolume = volume * 1.54;
+                totalDryVolume += dryVolume;
+
+                // Rebar Calculations
+                let rebarDetails = data.rebars.split("\n").map(rebarText => {
+                    const diaMatch = rebarText.match(/(\d+)mm/);
+                    const spacingMatch = rebarText.match(/(\d+)in/);
+                    if (!diaMatch || !spacingMatch) return;
+
+                    const dia = parseFloat(diaMatch[1]);
+                    const spacingInches = parseFloat(spacingMatch[1]);
+                    const spacingFeet = spacingInches / 12;
+                    const numRebarsLength = Math.ceil(length / spacingFeet) + 1;
+                    const numRebarsBreadth = Math.ceil(breadth / spacingFeet) + 1;
+                    const totalLengthLength = numRebarsLength * breadth * data.footingNos;
+                    const totalLengthBreadth = numRebarsBreadth * length * data.footingNos;
+                    const totalLength = totalLengthLength + totalLengthBreadth;
+                    const totalLengthMeters = totalLength * 0.3048;
+                    const weight = (Math.pow(dia, 2) / 162) * totalLengthMeters;
+
+                    steelBySize[dia] = (steelBySize[dia] || 0) + weight;
+                    return rebarText;
+                });
+
+                // Add footing details to table
+                estimatePage.document.querySelector('#footingSpecifications').innerHTML += `
+                    <tr>
+                        <td>${data.footingNos}</td>
+                        <td>${data.name}</td>
+                        <td>${data.dimensions}</td>
+                        <td>${data.thickness.toFixed(2)}</td>
+                        <td>${rebarDetails.join("<br>")}</td>
+                    </tr>
+                `;
+            });
+
+            // Material Summary based on selected mix ratio
+            const materialTable = estimatePage.document.querySelector('#materialSummary');
+            const [cementRatio, sandRatio, aggregateRatio] = selectedMixRatio.split(':').map(Number);
+            const totalParts = cementRatio + sandRatio + aggregateRatio;
+            const cementBags = Math.ceil((totalDryVolume * (cementRatio / totalParts)) / 1.25);
+            materialTable.innerHTML += `
+                <tr><td>Cement Bags (50kg)</td><td>${cementBags}</td></tr>
+                <tr><td>Sand (cft)</td><td>${(totalDryVolume * (sandRatio / totalParts)).toFixed(1)}</td></tr>
+                <tr><td>Aggregate (cft)</td><td>${(totalDryVolume * (aggregateRatio / totalParts)).toFixed(1)}</td></tr>
+            `;
+
+            // Steel Summary
+            Object.entries(steelBySize).forEach(([size, weight]) => {
+                materialTable.innerHTML += `
+                    <tr><td>Rebar (${size}mm)</td><td>${weight.toFixed(1)} kg</td></tr>
+                `;
+            });
+
+            estimatePage.document.close();
+        }
+    </script>
+</body>
+</html>

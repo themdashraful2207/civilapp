@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Span Thickness Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .calculator {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: inline-block;
+            width: 150px;
+            margin-right: 10px;
+        }
+
+        input {
+            width: 200px;
+            padding: 5px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+        }
+
+        .formula {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fff3e0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h2>Span Thickness Calculator</h2>
+        
+        <div class="formula">
+            <strong>Formula:</strong><br>
+            β = Long Span / Short Span<br>
+            T (ft) = [Long Span × (0.80 + fy/200000)] / (36 + 9β)<br>
+            T (in) = T (ft) × 12
+        </div>
+
+        <div class="input-group">
+            <label for="fy">Steel Yield (fy, PSI):</label>
+            <input type="number" id="fy" value="72000">
+        </div>
+
+        <div class="input-group">
+            <label for="longSpan">Long Span (ft):</label>
+            <input type="number" id="longSpan" value="15.5" step="0.1">
+        </div>
+
+        <div class="input-group">
+            <label for="shortSpan">Short Span (ft):</label>
+            <input type="number" id="shortSpan" value="19.5" step="0.1">
+        </div>
+
+        <button onclick="calculate()">Calculate</button>
+
+        <div class="result" id="results">
+            <strong>Results:</strong><br>
+            β Ratio: <span id="betaResult"></span><br>
+            T (feet): <span id="tFeet"></span><br>
+            T (inches): <span id="tInches"></span>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            // Get input values
+            const fy = parseFloat(document.getElementById('fy').value);
+            const longSpan = parseFloat(document.getElementById('longSpan').value);
+            const shortSpan = parseFloat(document.getElementById('shortSpan').value);
+
+            // Calculate β ratio
+            const beta = longSpan / shortSpan;
+
+            // Calculate thickness in feet
+            const tFeet = (longSpan * (0.80 + fy / 200000)) / (36 + 9 * beta);
+
+            // Convert to inches
+            const tInches = tFeet * 12;
+
+            // Display results with 6 decimal places
+            document.getElementById('betaResult').textContent = beta.toFixed(6);
+            document.getElementById('tFeet').textContent = tFeet.toFixed(6);
+            document.getElementById('tInches').textContent = tInches.toFixed(6);
+        }
+    </script>
+</body>
+</html>

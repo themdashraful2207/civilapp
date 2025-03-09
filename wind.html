@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BNBC 2020 Wind Speed Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+
+        .search-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        input[type="text"], datalist {
+            width: 70%;
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0052a3;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4ff;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .district-name {
+            color: #0066cc;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .speed-value {
+            font-size: 1.4em;
+            margin: 5px 0;
+        }
+
+        .unit {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <h2>BNBC 2020 District Wind Speed Search</h2>
+        <input type="text" id="districtInput" list="districts" placeholder="Enter district name">
+        <datalist id="districts"></datalist>
+        <button onclick="searchWindSpeed()">Search</button>
+        
+        <div class="result" id="result">
+            <div class="district-name" id="districtResult"></div>
+            <div class="speed-value">
+                <span id="speedMs">0</span> 
+                <span class="unit">m/s</span>
+            </div>
+            <div class="speed-value">
+                <span id="speedKmh">0</span> 
+                <span class="unit">km/h</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Wind speed data
+        const windData = {
+            "angarpota": 47.8, "bagerhat": 77.5, "bandarban": 62.5, "barguna": 80.0, 
+            "barisal": 78.7, "bhola": 69.5, "bogra": 61.9, "brahmanbaria": 56.7, 
+            "chandpur": 50.6, "chapai nawabganj": 41.4, "chittagong": 80.0, "chuadanga": 61.9, 
+            "comilla": 61.4, "cox’s bazar": 80.0, "dahagram": 47.8, "dhaka": 65.7, 
+            "dinajpur": 41.4, "faridpur": 63.1, "feni": 64.1, "gaibandha": 65.6, 
+            "gazipur": 66.5, "gopalganj": 74.5, "habiganj": 54.2, "hatiya": 80.0, 
+            "ishurdi": 69.5, "jamalpur": 56.7, "jessore": 64.1, "jhalakati": 80.0, 
+            "jhenaidah": 65.0, "khagrachhari": 56.7, "khulna": 73.3, "kishoreganj": 64.7, 
+            "kurigram": 65.6, "kushtia": 66.9, "lalmonirhat": 63.7, "madaripur": 68.1, 
+            "magura": 65.0, "manikganj": 58.2, "meherpur": 58.2, "maheshkhali": 80.0, 
+            "moulvibazar": 53.0, "munshiganj": 57.1, "mymensingh": 67.4, "naogaon": 55.2, 
+            "narail": 68.6, "narayanganj": 61.1, "narsingdi": 59.7, "natore": 61.9, 
+            "netrokona": 65.6, "nilphamari": 44.7, "noakhali": 57.1, "pabna": 63.1, 
+            "panchagarh": 41.4, "patuakhali": 80.0, "pirojpur": 80.0, "rajbari": 59.1, 
+            "rajshahi": 49.2, "rangamati": 56.7, "rangpur": 65.3, "satkhira": 57.6, 
+            "shariatpur": 61.9, "sherpur": 62.5, "sirajganj": 50.6, "srimangal": 50.6, 
+            "st. martin’s": 80.0, "sunamganj": 61.1, "sylhet": 61.1, "tangail": 50.6, 
+            "teknaf": 80.0, "thakurgaon": 41.4
+        };
+
+        // Populate the datalist with district names in alphabetical order
+        function populateDatalist() {
+            const districtList = document.getElementById('districts');
+            districtList.innerHTML = ''; // Clear previous options
+
+            const sortedDistricts = Object.keys(windData).sort(); // Sort districts alphabetically
+
+            sortedDistricts.forEach(district => {
+                let option = document.createElement('option');
+                option.value = district.charAt(0).toUpperCase() + district.slice(1); // Capitalize first letter
+                districtList.appendChild(option);
+            });
+        }
+
+        function searchWindSpeed() {
+            const input = document.getElementById('districtInput').value.toLowerCase();
+            const resultDiv = document.getElementById('result');
+            const districtResult = document.getElementById('districtResult');
+            const speedMs = document.getElementById('speedMs');
+            const speedKmh = document.getElementById('speedKmh');
+
+            if (windData[input]) {
+                const ms = windData[input];
+                const kmh = (ms * 3.6).toFixed(1);
+                
+                districtResult.textContent = input.charAt(0).toUpperCase() + input.slice(1);
+                speedMs.textContent = ms;
+                speedKmh.textContent = kmh;
+                resultDiv.style.display = 'block';
+            } else {
+                districtResult.textContent = "District not found";
+                speedMs.textContent = "N/A";
+                speedKmh.textContent = "N/A";
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // Initialize datalist on page load
+        document.addEventListener("DOMContentLoaded", populateDatalist);
+    </script>
+</body>
+</html>

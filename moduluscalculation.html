@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concrete Modulus of Elasticity Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .calculator {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .calculator h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            background: #4CAF50;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f4f4f4;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .result p {
+            margin: 8px 0;
+        }
+        @media (max-width: 600px) {
+            .calculator {
+                padding: 15px;
+            }
+            button {
+                padding: 10px;
+                font-size: 14px;
+            }
+            input {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h2>Concrete Modulus Calculator</h2>
+        
+        <div class="input-group">
+            <label for="fc">Compressive Strength (f'c) in psi:</label>
+            <input type="number" id="fc" value="3500" step="100">
+        </div>
+
+        <h3>Stone Chips Concrete</h3>
+        <div class="input-group">
+            <label for="density-stone">Density (lb/ft³):</label>
+            <input type="number" id="density-stone" value="145" step="1">
+        </div>
+
+        <h3>Brick Chips Concrete</h3>
+        <div class="input-group">
+            <label for="density-brick">Density (lb/ft³):</label>
+            <input type="number" id="density-brick" value="125" step="1">
+        </div>
+
+        <button onclick="calculate()">Calculate Modulus</button>
+
+        <div class="result">
+            <h4>Results:</h4>
+            <p>Stone Chips Concrete: <span id="result-stone">-</span> psi</p>
+            <p>Brick Chips Concrete: <span id="result-brick">-</span> psi</p>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            // Get input values
+            const fc = parseFloat(document.getElementById('fc').value);
+            const wcStone = parseFloat(document.getElementById('density-stone').value);
+            const wcBrick = parseFloat(document.getElementById('density-brick').value);
+
+            // Calculate modulus for stone
+            const E_stone = 33 * Math.pow(wcStone, 1.5) * Math.sqrt(fc);
+            
+            // Calculate modulus for brick
+            const E_brick = 33 * Math.pow(wcBrick, 1.5) * Math.sqrt(fc);
+
+            // Display results with commas
+            document.getElementById('result-stone').textContent = 
+                E_stone.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            
+            document.getElementById('result-brick').textContent = 
+                E_brick.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+    </script>
+</body>
+</html>

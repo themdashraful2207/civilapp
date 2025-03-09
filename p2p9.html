@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P File Sharing</title>
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <style>
+       /* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+    background-color: #f4f4f9;
+    margin: 0;
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%; /* Ensure container takes full width on mobile */
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.section {
+    margin: 20px 0;
+}
+
+input[type="text"], input[type="file"] {
+    width: 90%;
+    padding: 10px;
+    margin: 10px auto;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    display: block;
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+input[type="text"]:read-only {
+    background-color: #f0f0f0;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: inline-block;
+    margin: 5px;
+    width: 90%; /* Make buttons full width on mobile */
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+#connect-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+#connect-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+#disconnect-btn {
+    background-color: #dc3545;
+    color: white;
+    display: none;
+}
+
+#disconnect-btn:hover {
+    background-color: #c82333;
+}
+
+#send-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+#send-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+#send-btn.sent {
+    background-color: #dc3545;
+}
+
+#file-list {
+    text-align: left;
+    margin: 10px 0;
+    padding-left: 5%;
+}
+
+#download-link {
+    display: block;
+    padding: 10px;
+    background-color: #17a2b8;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin: 5px auto;
+    width: 90%; /* Make download link full width on mobile */
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+#download-link:hover {
+    background-color: #138496;
+}
+
+#received-files {
+    margin-top: 10px;
+}
+
+.center-text {
+    text-align: center;
+}
+
+.connected-peer-id {
+    display: none;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #28a745;
+}
+
+/* Responsive Design for Mobile Devices */
+@media (max-width: 600px) {
+    .container {
+        padding: 15px; /* Reduce padding for smaller screens */
+    }
+
+    input[type="text"], input[type="file"] {
+        width: 100%; /* Full width for inputs on mobile */
+    }
+
+    button {
+        width: 100%; /* Full width for buttons on mobile */
+        margin: 5px 0; /* Adjust margin for better spacing */
+    }
+
+    #file-list {
+        padding-left: 0; /* Remove left padding for better alignment */
+    }
+
+    #download-link {
+        width: 100%; /* Full width for download link on mobile */
+    }
+}
+
+/* Responsive Design for Tablets */
+@media (min-width: 601px) and (max-width: 1024px) {
+    .container {
+        width: 70%; /* Slightly wider container for tablets */
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>P2P File Sharing</h2>
+
+        <div class="section center-text">
+            <h3>Your Peer ID</h3>
+            <input type="text" id="peer-id" readonly>
+        </div>
+
+        <div class="section">
+            <h3>Connect to Peer</h3>
+            <input type="text" id="connect-peer-id" placeholder="Enter 4-digit Peer ID">
+            <div class="connected-peer-id" id="connected-peer-id">Connected to Peer ID: <span id="connected-id"></span></div>
+            <div>
+                <button id="connect-btn" onclick="connectToPeer()" disabled>Connect</button>
+                <button id="disconnect-btn" onclick="disconnectFromPeer()">Disconnect</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Send Files</h3>
+            <input type="file" id="file-input" multiple>
+            <div id="file-list"></div>
+            <button id="send-btn" onclick="sendFiles()" disabled>Send</button>
+        </div>
+
+        <div class="section">
+            <h3>Received Files</h3>
+            <div id="received-files"></div>
+        </div>
+    </div>
+
+    <script>
+        // Generate a 4-digit random numeric ID
+function generatePeerID() {
+    return Math.floor(1000 + Math.random() * 9000).toString();
+}
+
+const peer = new Peer(generatePeerID());
+let conn;
+
+// Display Peer ID when connected to PeerJS Server
+peer.on('open', id => {
+    document.getElementById('peer-id').value = id;
+});
+
+// Show selected files in the UI
+document.getElementById('file-input').addEventListener('change', function () {
+    const fileList = document.getElementById('file-list');
+    fileList.innerHTML = '';
+    const files = this.files;
+    for (let i = 0; i < files.length; i++) {
+        const fileItem = document.createElement('div');
+        fileItem.textContent = files[i].name;
+        fileList.appendChild(fileItem);
+    }
+    document.getElementById('send-btn').disabled = files.length === 0;
+});
+
+// Enable/Disable Connect button based on input
+document.getElementById('connect-peer-id').addEventListener('input', function () {
+    const connectBtn = document.getElementById('connect-btn');
+    connectBtn.disabled = this.value.length !== 4 || isNaN(this.value);
+});
+
+// Connect to a Peer
+function connectToPeer(peerId = null) {
+    const targetPeerId = peerId || document.getElementById("connect-peer-id").value;
+    if (targetPeerId.length !== 4 || isNaN(targetPeerId)) {
+        return;
+    }
+    conn = peer.connect(targetPeerId);
+    conn.on("open", () => {
+        document.getElementById("connect-btn").style.display = "none";
+        document.getElementById("disconnect-btn").style.display = "inline-block";
+        document.getElementById("connect-peer-id").style.display = "none";
+        document.getElementById("connected-peer-id").style.display = "block";
+        document.getElementById("connected-id").textContent = targetPeerId;
+    });
+    conn.on("close", () => {
+        document.getElementById("connect-btn").style.display = "inline-block";
+        document.getElementById("disconnect-btn").style.display = "none";
+        document.getElementById("connect-peer-id").style.display = "block";
+        document.getElementById("connected-peer-id").style.display = "none";
+        conn = null;
+    });
+    conn.on("error", (err) => {
+        document.getElementById("connect-btn").style.display = "inline-block";
+        document.getElementById("disconnect-btn").style.display = "none";
+        document.getElementById("connect-peer-id").style.display = "block";
+        document.getElementById("connected-peer-id").style.display = "none";
+        conn = null;
+    });
+    conn.on("data", data => {
+        if (data.fileName && data.fileData) {
+            const blob = new Blob([data.fileData]);
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = data.fileName;
+            link.id = "download-link";
+            link.innerText = `Download ${data.fileName}`;
+            document.getElementById("received-files").appendChild(link);
+        }
+    });
+}
+
+// Disconnect from Peer
+function disconnectFromPeer() {
+    if (conn) {
+        conn.close();
+        document.getElementById("connect-btn").style.display = "inline-block";
+        document.getElementById("disconnect-btn").style.display = "none";
+        document.getElementById("connect-peer-id").style.display = "block";
+        document.getElementById("connected-peer-id").style.display = "none";
+        conn = null;
+    }
+}
+
+// Send Multiple Files
+function sendFiles() {
+    const fileInput = document.getElementById("file-input");
+    const files = fileInput.files;
+    if (!files.length || !conn) {
+        return;
+    }
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+        reader.readAsArrayBuffer(file);
+        reader.onload = function () {
+            conn.send({
+                fileName: file.name,
+                fileData: reader.result
+            });
+            if (i === files.length - 1) {
+                fileInput.value = '';
+                document.getElementById('file-list').innerHTML = '';
+                const sendBtn = document.getElementById('send-btn');
+                sendBtn.textContent = "Sent";
+                sendBtn.classList.add('sent');
+                sendBtn.disabled = true;
+                setTimeout(() => {
+                    sendBtn.textContent = "Send";
+                    sendBtn.classList.remove('sent');
+                    sendBtn.disabled = true;
+                }, 3000);
+            }
+        };
+    }
+}
+
+// Handle Incoming Connection
+peer.on('connection', connection => {
+    conn = connection;
+    conn.on("open", () => {
+        document.getElementById("connect-btn").style.display = "none";
+        document.getElementById("disconnect-btn").style.display = "inline-block";
+        document.getElementById("connect-peer-id").style.display = "none";
+        document.getElementById("connected-peer-id").style.display = "block";
+        document.getElementById("connected-id").textContent = conn.peer;
+    });
+    conn.on("close", () => {
+        document.getElementById("connect-btn").style.display = "inline-block";
+        document.getElementById("disconnect-btn").style.display = "none";
+        document.getElementById("connect-peer-id").style.display = "block";
+        document.getElementById("connected-peer-id").style.display = "none";
+        conn = null;
+    });
+    conn.on("error", (err) => {
+        document.getElementById("connect-btn").style.display = "inline-block";
+        document.getElementById("disconnect-btn").style.display = "none";
+        document.getElementById("connect-peer-id").style.display = "block";
+        document.getElementById("connected-peer-id").style.display = "none";
+        conn = null;
+    });
+    conn.on("data", data => {
+        if (data.fileName && data.fileData) {
+            const blob = new Blob([data.fileData]);
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = data.fileName;
+            link.id = "download-link";
+            link.innerText = `Download ${data.fileName}`;
+            document.getElementById("received-files").appendChild(link);
+        }
+    });
+});
+
+// Handle Peer disconnection
+peer.on('disconnected', () => {
+    document.getElementById("connect-btn").style.display = "inline-block";
+    document.getElementById("disconnect-btn").style.display = "none";
+    document.getElementById("connect-peer-id").style.display = "block";
+    document.getElementById("connected-peer-id").style.display = "none";
+    conn = null;
+});
+    </script>
+</body>
+</html>

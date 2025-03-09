@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beam BMD & SFD Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+        .container { display: flex; flex-wrap: wrap; max-width: 1000px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+        .charts, .inputs { flex: 1; padding: 20px; }
+        .charts canvas { width: 100% !important; height: auto !important; }
+        .input-group { margin-bottom: 10px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, button { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { background: #007BFF; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        @media (max-width: 768px) {
+            .container { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="charts">
+            <h2>BMD & SFD Graphs</h2>
+            <canvas id="bmdChart"></canvas>
+            <canvas id="sfdChart"></canvas>
+        </div>
+        <div class="inputs">
+            <h2>Beam Input Data</h2>
+            <div class="input-group">
+                <label>Beam Span (m):</label>
+                <input type="number" id="beamSpan" value="6">
+            </div>
+            <div class="input-group">
+                <label>Support Type:</label>
+                <select id="supportType">
+                    <option value="simply_supported">Simply Supported</option>
+                    <option value="cantilever">Cantilever</option>
+                    <option value="continuous">Continuous Beam</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Point Load (kN) & Location (m):</label>
+                <input type="number" id="pointLoad" value="10"> @ <input type="number" id="pointLoadPos" value="3">
+            </div>
+            <div class="input-group">
+                <label>Uniform Load (kN/m):</label>
+                <input type="number" id="udl" value="5">
+            </div>
+            <button onclick="calculateBMD_SFD()">Calculate</button>
+        </div>
+    </div>
+
+    <script>
+        let sfdChart, bmdChart;
+
+        function calculateBMD_SFD() {
+            const L = parseFloat(document.getElementById('beamSpan').value);
+            const P = parseFloat(document.getElementById('pointLoad').value);
+            const a = parseFloat(document.getElementById('pointLoadPos').value);
+            const w = parseFloat(document.getElementById('udl').value);
+            const supportType = document.getElementById('supportType').value;
+            
+            let RA = 0, RB = 0, Mmax = 0, SFD = [], BMD = [];
+            
+            if (supportType === 'simply_supported') {
+                RA = ((w * L) / 2) + ((P * (L - a)) / L);
+                RB = (w * L) - RA;
+                Mmax = (RA * a) - (w * a * a / 2);
+            } else if (supportType === 'cantilever') {
+                RA = w * L + P;
+                Mmax = P * a + (w * L * L) / 2;
+            } else if (supportType === 'continuous') {
+                RA = ((w * L) / 3) + ((P * (L - a)) / (2 * L));
+                RB = (w * L) - RA;
+                Mmax = (RA * a) - (w * a * a / 2);
+            }
+            
+            for (let x = 0; x <= L; x += 0.1) {
+                let shear = RA - (w * x);
+                if (x >= a) shear -= P;
+                SFD.push({ x, shear });
+                let moment = (RA * x) - (w * x * x / 2);
+                if (x >= a) moment -= P * (x - a);
+                BMD.push({ x, moment });
+            }
+            
+            // Clear existing charts before plotting new data
+            if (sfdChart) sfdChart.destroy();
+            if (bmdChart) bmdChart.destroy();
+            
+            plotChart('sfdChart', 'Shear Force Diagram', SFD);
+            plotChart('bmdChart', 'Bending Moment Diagram', BMD);
+        }
+        
+        function plotChart(canvasId, label, data) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.x.toFixed(1)),
+                    datasets: [{ label, data: data.map(d => d.shear || d.moment), borderColor: 'blue', fill: false }]
+                },
+                options: { 
+                    responsive: true, 
+                    scales: { 
+                        x: { title: { display: true, text: 'Position (m)' } }, 
+                        y: { title: { display: true, text: label } } 
+                    } 
+                }
+            });
+
+            // Store the chart globally so it can be destroyed on next calculation
+            if (canvasId === 'sfdChart') {
+                sfdChart = chart;
+            } else if (canvasId === 'bmdChart') {
+                bmdChart = chart;
+            }
+        }
+    </script>
+</body>
+</html>

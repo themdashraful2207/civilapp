@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footing Load Release Calculator</title>
+    <style>
+        /* Previous CSS remains unchanged */
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+
+        .calculator {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9f5ff;
+            border-radius: 4px;
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .calculator {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h2>Footing Load Release Calculator</h2>
+        
+        <div class="input-group">
+            <label>Footing Depth Below EGL (ft)</label>
+            <input type="number" id="depth" value="5">
+        </div>
+
+        <div class="input-group">
+            <label>Footing Size (ft)</label>
+            <input type="number" id="size" value="5">
+        </div>
+
+        <div class="input-group">
+            <label>Applied Load (ton)</label>
+            <input type="number" id="load" value="30">
+        </div>
+
+        <h3>Soil Bearing Capacity</h3>
+        <div class="input-group">
+            <label>At 5ft EGL (kg)</label>
+            <input type="number" id="sbc5" value="500">
+        </div>
+        <div class="input-group">
+            <label>At 10ft EGL (kg)</label>
+            <input type="number" id="sbc10" value="350">
+        </div>
+        <div class="input-group">
+            <label>At 15ft EGL (kg)</label>
+            <input type="number" id="sbc15" value="860">
+        </div>
+        <div class="input-group">
+            <label>At 20ft EGL (kg)</label>
+            <input type="number" id="sbc20" value="450">
+        </div>
+
+        <button onclick="calculate()">Calculate</button>
+        
+        <div class="result" id="result">
+            <strong>Result:</strong><br>
+            <span id="resultText"></span>
+        </div>
+    </div>
+
+    <script>
+        function getInterpolatedSBC(currentDepth, sbcValues) {
+            const depths = [5, 10, 15, 20];
+            if (currentDepth <= depths[0]) return sbcValues[5];
+            if (currentDepth >= depths[3]) return sbcValues[20];
+
+            // Find interpolation points
+            let upper = depths.find(d => d >= currentDepth);
+            let lower = depths.reverse().find(d => d <= currentDepth);
+            depths.reverse(); // restore original order
+            
+            // Linear interpolation
+            const x0 = lower;
+            const x1 = upper;
+            const y0 = sbcValues[lower];
+            const y1 = sbcValues[upper];
+            
+            return y0 + (currentDepth - x0) * (y1 - y0) / (x1 - x0);
+        }
+
+        function calculate() {
+            // Get input values
+            const depthEGL = parseFloat(document.getElementById('depth').value);
+            const size = parseFloat(document.getElementById('size').value);
+            const load = parseFloat(document.getElementById('load').value) * 1000; // Convert to kg
+            const sbcValues = {
+                5: parseFloat(document.getElementById('sbc5').value),
+                10: parseFloat(document.getElementById('sbc10').value),
+                15: parseFloat(document.getElementById('sbc15').value),
+                20: parseFloat(document.getElementById('sbc20').value)
+            };
+
+            // Calculation parameters
+            let z = 0;
+            let foundDepth = null;
+            const increment = 0.1; // Precision: 0.1 ft
+
+            while (!foundDepth && z < 50) { // Max search depth 50ft
+                const currentDepthBelowFooting = z;
+                const currentEGLDepth = depthEGL + z;
+                
+                // Calculate stress using 2:1 method
+                const stress = load / Math.pow(size + currentDepthBelowFooting, 2);
+                
+                // Get interpolated SBC
+                const sbc = getInterpolatedSBC(currentEGLDepth, sbcValues);
+                
+                // Check load termination condition
+                if (stress <= sbc) {
+                    foundDepth = currentEGLDepth;
+                }
+                
+                z += increment;
+            }
+
+            // Display results
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            
+            document.getElementById('resultText').innerHTML = foundDepth 
+                ? `Load becomes negligible at: <strong>${foundDepth.toFixed(1)} ft below EGL</strong>`
+                : "No negligible load depth found within 50ft";
+        }
+    </script>
+</body>
+</html>

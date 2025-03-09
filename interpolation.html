@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Interpolation Calculator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: rgba(248, 249, 250, 0.4);
+        }
+        .container {
+            max-width: 320px;
+            margin: 10px auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #1a73e8;
+            margin: 0 0 15px 0;
+            font-size: 20px;
+        }
+        .input-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 5px;
+            color: #5f6368;
+            font-size: 13px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dadce0;
+            border-radius: 6px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 14px;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 16px;
+            margin-top: 10px;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+        button:active {
+            opacity: 1;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 16px;
+            background-color: rgba(232, 240, 254, 0.9);
+            color: #1967d2;
+        }
+        .error {
+            color: #d93025;
+            background-color: rgba(252, 232, 230, 0.9);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        @media (max-width: 480px) {
+            .container {
+                max-width: 280px;
+                padding: 12px;
+            }
+            input {
+                padding: 10px;
+                font-size: 15px;
+            }
+            button {
+                padding: 12px;
+                font-size: 15px;
+            }
+        }
+@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: rgba(248, 249, 250, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 320px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: top center;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.4s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .input-group:nth-child(1) { animation-delay: 0.2s; }
+        .input-group:nth-child(2) { animation-delay: 0.3s; }
+        .input-group:nth-child(3) { animation-delay: 0.4s; }
+        .input-group:nth-child(4) { animation-delay: 0.5s; }
+        .input-group:nth-child(5) { animation-delay: 0.6s; }
+
+        input {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:focus {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(26, 115, 232, 0.2);
+        }
+
+        button {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            border-radius: 50%;
+            animation: rippleEffect 0.6s linear;
+        }
+
+        @keyframes rippleEffect {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 1;
+            }
+            100% {
+                width: 400px;
+                height: 400px;
+                opacity: 0;
+            }
+        }
+
+        .result {
+            animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .error {
+            animation: shake 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Linear Interpolation</h2>
+        
+        <div class="input-group">
+            <label>X1</label>
+            <input type="number" id="x1" placeholder="X1">
+        </div>
+        
+        <div class="input-group">
+            <label>Y1</label>
+            <input type="number" id="y1" placeholder="Y1">
+        </div>
+        
+        <div class="input-group">
+            <label>X2</label>
+            <input type="number" id="x2" placeholder="X2">
+        </div>
+        
+        <div class="input-group">
+            <label>Y2</label>
+            <input type="number" id="y2" placeholder="Y2">
+        </div>
+        
+        <div class="input-group">
+            <label>Target X</label>
+            <input type="number" id="x" placeholder="X">
+        </div>
+
+        <button onclick="interpolate()">Calculate</button>
+        
+        <div class="result" id="result"></div>
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        function createRipple(event) {
+            const button = event.currentTarget;
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            
+            const rect = button.getBoundingClientRect();
+            ripple.style.left = `${event.clientX - rect.left}px`;
+            ripple.style.top = `${event.clientY - rect.top}px`;
+            
+            button.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        }
+
+        function interpolate() {
+            // Clear previous messages
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
+
+            // Get input values
+            const x1 = parseFloat(document.getElementById("x1").value);
+            const y1 = parseFloat(document.getElementById("y1").value);
+            const x2 = parseFloat(document.getElementById("x2").value);
+            const y2 = parseFloat(document.getElementById("y2").value);
+            const x = parseFloat(document.getElementById("x").value);
+
+            // Validation
+            const errorElement = document.getElementById('error');
+            if ([x1, y1, x2, y2, x].some(isNaN)) {
+                errorElement.innerText = "Please fill all fields";
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            if (x2 === x1) {
+                errorElement.innerText = "X values cannot be equal";
+                errorElement.style.display = 'block';
+                return;
+            }
+
+            // Calculation
+            const y = y1 + ((y2 - y1) / (x2 - x1)) * (x - x1);
+            
+            // Display result
+            const resultElement = document.getElementById('result');
+            resultElement.innerHTML = `Y = ${y.toFixed(4)}`;
+            resultElement.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

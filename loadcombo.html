@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load Combination Effects</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        .table-container {
+            overflow-x: auto; /* Enable horizontal scrolling on small screens */
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        th:hover {
+            background-color: #45a049;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        /* Column width adjustments */
+        th:nth-child(1), td:nth-child(1) { /* No. column */
+            width: 10%;
+        }
+        th:nth-child(2), td:nth-child(2) { /* Formula column */
+            width: 65%;
+        }
+        th:nth-child(3), td:nth-child(3) { /* Load Effect column */
+            width: 25%;
+        }
+        .input-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+        .input-section label {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #555;
+        }
+        .input-section input {
+            width: 80px;
+            padding: 8px;
+            margin-left: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .input-section input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        .input-section button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .input-section button:hover {
+            background-color: #45a049;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            h2 {
+                font-size: 1.2em;
+            }
+            .input-section {
+                padding: 15px;
+                gap: 10px;
+            }
+            .input-section label {
+                font-size: 12px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .input-section input {
+                width: 60px;
+                margin-left: 0;
+                margin-top: 5px;
+                font-size: 12px;
+            }
+            .input-section button {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+            th, td {
+                padding: 8px;
+                font-size: 12px;
+            }
+            th:nth-child(1), td:nth-child(1) { /* No. */
+                width: 15%;
+            }
+            th:nth-child(2), td:nth-child(2) { /* Formula */
+                width: 55%;
+            }
+            th:nth-child(3), td:nth-child(3) { /* Load Effect */
+                width: 30%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>Load Combination Effects (Sorted by Largest Load Effect)</h2>
+
+    <!-- Input Section -->
+    <div class="input-section">
+        <label>Dead Load (DL): <input type="number" id="dl" value="100" step="0.1"></label>
+        <label>Live Load (LL): <input type="number" id="ll" value="50" step="0.1"></label>
+        <label>Roof Live Load (RL): <input type="number" id="rl" value="20" step="0.1"></label>
+        <label>Earthquake Load (EQ): <input type="number" id="eq" value="30" step="0.1"></label>
+        <label>Wind Load (W): <input type="number" id="w" value="25" step="0.1"></label>
+        <button onclick="updateTable()">Update Table</button>
+    </div>
+
+    <!-- Table with Overflow Container -->
+    <div class="table-container">
+        <table id="loadTable">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Formula</th>
+                    <th>Load Effect (kips)</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // Load combination definitions (50 combos)
+        const loadCombinations = [
+            { formula: "1.4DL", factors: { dl: 1.4, ll: 0, rl: 0, eq: 0, w: 0 } },
+            { formula: "1.2DL + 1.6LL + 0.5RL", factors: { dl: 1.2, ll: 1.6, rl: 0.5, eq: 0, w: 0 } },
+            { formula: "1.2DL + 0.5LL", factors: { dl: 1.2, ll: 0.5, rl: 0, eq: 0, w: 0 } },
+            { formula: "0.9DL", factors: { dl: 0.9, ll: 0, rl: 0, eq: 0, w: 0 } },
+            { formula: "DL", factors: { dl: 1.0, ll: 0, rl: 0, eq: 0, w: 0 } },
+            { formula: "DL + LL + RL", factors: { dl: 1.0, ll: 1.0, rl: 1.0, eq: 0, w: 0 } },
+            { formula: "DL + 0.75LL + 0.75RL", factors: { dl: 1.0, ll: 0.75, rl: 0.75, eq: 0, w: 0 } },
+            { formula: "0.6DL", factors: { dl: 0.6, ll: 0, rl: 0, eq: 0, w: 0 } },
+            { formula: "1.2DL + EQ + 0.25LL", factors: { dl: 1.2, ll: 0.25, rl: 0, eq: 1.0, w: 0 } },
+            { formula: "1.2DL - EQ + 0.25LL", factors: { dl: 1.2, ll: 0.25, rl: 0, eq: -1.0, w: 0 } },
+            { formula: "1.2DL + EQ + 0.25RL", factors: { dl: 1.2, ll: 0, rl: 0.25, eq: 1.0, w: 0 } },
+            { formula: "1.2DL - EQ + 0.25RL", factors: { dl: 1.2, ll: 0, rl: 0.25, eq: -1.0, w: 0 } },
+            { formula: "0.9DL + EQ", factors: { dl: 0.9, ll: 0, rl: 0, eq: 1.0, w: 0 } },
+            { formula: "0.9DL - EQ", factors: { dl: 0.9, ll: 0, rl: 0, eq: -1.0, w: 0 } },
+            { formula: "1.2DL + 1.0EQ + 0.3EQ + 0.25LL", factors: { dl: 1.2, ll: 0.25, rl: 0, eq: 1.3, w: 0 } },
+            { formula: "1.2DL - 1.0EQ + 0.3EQ + 0.25LL", factors: { dl: 1.2, ll: 0.25, rl: 0, eq: -0.7, w: 0 } },
+            { formula: "1.2DL + 1.0EQ - 0.3EQ + 0.25LL", factors: { dl: 1.2, ll: 0.25, rl: 0, eq: 0.7, w: 0 } },
+            { formula: "1.2DL - 1.0EQ - 0.3EQ + 0.25LL", factors: { dl: 1.2, ll: 0.25, rl: 0, eq: -1.3, w: 0 } },
+            { formula: "0.9DL + 1.0EQ + 0.3EQ", factors: { dl: 0.9, ll: 0, rl: 0, eq: 1.3, w: 0 } },
+            { formula: "0.9DL - 1.0EQ + 0.3EQ", factors: { dl: 0.9, ll: 0, rl: 0, eq: -0.7, w: 0 } },
+            { formula: "0.9DL + 1.0EQ - 0.3EQ", factors: { dl: 0.9, ll: 0, rl: 0, eq: 0.7, w: 0 } },
+            { formula: "0.9DL - 1.0EQ - 0.3EQ", factors: { dl: 0.9, ll: 0, rl: 0, eq: -1.3, w: 0 } },
+            { formula: "1.2DL + 1.6W + 0.5LL + 0.5RL", factors: { dl: 1.2, ll: 0.5, rl: 0.5, eq: 0, w: 1.6 } },
+            { formula: "1.2DL - 1.6W + 0.5LL + 0.5RL", factors: { dl: 1.2, ll: 0.5, rl: 0.5, eq: 0, w: -1.6 } },
+            { formula: "0.9DL + 1.6W", factors: { dl: 0.9, ll: 0, rl: 0, eq: 0, w: 1.6 } },
+            { formula: "0.9DL - 1.6W", factors: { dl: 0.9, ll: 0, rl: 0, eq: 0, w: -1.6 } },
+            { formula: "DL + 0.75LL + 0.75W", factors: { dl: 1.0, ll: 0.75, rl: 0, eq: 0, w: 0.75 } },
+            { formula: "DL + 0.75LL - 0.75W", factors: { dl: 1.0, ll: 0.75, rl: 0, eq: 0, w: -0.75 } },
+            { formula: "DL + 0.75RL + 0.75W", factors: { dl: 1.0, ll: 0, rl: 0.75, eq: 0, w: 0.75 } },
+            { formula: "DL + 0.75RL - 0.75W", factors: { dl: 1.0, ll: 0, rl: 0.75, eq: 0, w: -0.75 } },
+            { formula: "1.2DL + 0.5EQ + 0.7W + 0.25LL", factors: { dl: 1.2, ll: 0.25, rl: 0, eq: 0.5, w: 0.7 } },
+            { formula: "1.2DL - 0.5EQ + 0.7W + 0.25LL", factors: { dl: 1.2, ll: 0.25, rl: 0, eq: -0.5, w: 0.7 } },
+            { formula: "0.9DL + 0.5EQ + 0.7W", factors: { dl: 0.9, ll: 0, rl: 0, eq: 0.5, w: 0.7 } },
+            { formula: "0.9DL - 0.5EQ + 0.7W", factors: { dl: 0.9, ll: 0, rl: 0, eq: -0.5, w: 0.7 } },
+            { formula: "1.2DL + 1.0W + 0.25LL + 0.25RL", factors: { dl: 1.2, ll: 0.25, rl: 0.25, eq: 0, w: 1.0 } },
+            { formula: "1.2DL - 1.0W + 0.25LL + 0.25RL", factors: { dl: 1.2, ll: 0.25, rl: 0.25, eq: 0, w: -1.0 } },
+            { formula: "1.2DL + 0.5EQ + 0.25LL + 0.25RL", factors: { dl: 1.2, ll: 0.25, rl: 0.25, eq: 0.5, w: 0 } },
+            { formula: "1.2DL - 0.5EQ + 0.25LL + 0.25RL", factors: { dl: 1.2, ll: 0.25, rl: 0.25, eq: -0.5, w: 0 } },
+            { formula: "0.9DL + 0.5EQ + 0.25RL", factors: { dl: 0.9, ll: 0, rl: 0.25, eq: 0.5, w: 0 } },
+            { formula: "0.9DL - 0.5EQ + 0.25RL", factors: { dl: 0.9, ll: 0, rl: 0.25, eq: -0.5, w: 0 } },
+            { formula: "1.2DL + 1.0EQ + 0.5W + 0.25LL", factors: { dl: 1.2, ll: 0.25, rl: 0, eq: 1.0, w: 0.5 } },
+            { formula: "1.2DL - 1.0EQ + 0.5W + 0.25LL", factors: { dl: 1.2, ll: 0.25, rl: 0, eq: -1.0, w: 0.5 } },
+            { formula: "0.9DL + 1.0EQ + 0.5W", factors: { dl: 0.9, ll: 0, rl: 0, eq: 1.0, w: 0.5 } },
+            { formula: "0.9DL - 1.0EQ + 0.5W", factors: { dl: 0.9, ll: 0, rl: 0, eq: -1.0, w: 0.5 } },
+            { formula: "1.2DL + 0.7W + 0.5RL", factors: { dl: 1.2, ll: 0, rl: 0.5, eq: 0, w: 0.7 } },
+            { formula: "1.2DL - 0.7W + 0.5RL", factors: { dl: 1.2, ll: 0, rl: 0.5, eq: 0, w: -0.7 } },
+            { formula: "1.2DL + 0.5EQ + 0.7RL", factors: { dl: 1.2, ll: 0, rl: 0.7, eq: 0.5, w: 0 } },
+            { formula: "1.2DL - 0.5EQ + 0.7RL", factors: { dl: 1.2, ll: 0, rl: 0.7, eq: -0.5, w: 0 } },
+            { formula: "0.9DL + 0.7W + 0.5RL", factors: { dl: 0.9, ll: 0, rl: 0.5, eq: 0, w: 0.7 } },
+            { formula: "0.9DL - 0.7W + 0.5RL", factors: { dl: 0.9, ll: 0, rl: 0.5, eq: 0, w: -0.7 } },
+        ];
+
+        // Function to calculate load effect
+        function calculateLoadEffect(combo, dl, ll, rl, eq, w) {
+            return (combo.factors.dl * dl) + (combo.factors.ll * ll) + 
+                   (combo.factors.rl * rl) + (combo.factors.eq * eq) + 
+                   (combo.factors.w * w);
+        }
+
+        // Function to update and sort table
+        function updateTable() {
+            const dl = parseFloat(document.getElementById("dl").value) || 0;
+            const ll = parseFloat(document.getElementById("ll").value) || 0;
+            const rl = parseFloat(document.getElementById("rl").value) || 0;
+            const eq = parseFloat(document.getElementById("eq").value) || 0;
+            const w = parseFloat(document.getElementById("w").value) || 0;
+
+            // Calculate load effects for all combinations
+            const results = loadCombinations.map(combo => ({
+                formula: combo.formula,
+                effect: calculateLoadEffect(combo, dl, ll, rl, eq, w)
+            }));
+
+            // Sort by load effect (descending)
+            results.sort((a, b) => b.effect - a.effect);
+
+            // Update table body with row numbers
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = "";
+            results.forEach((result, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${result.formula}</td>
+                    <td>${result.effect.toFixed(2)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Initial table load
+        window.onload = updateTable;
+
+        // Add click event to sort by column
+        document.querySelectorAll("th").forEach((th, index) => {
+            th.addEventListener("click", () => {
+                const tbody = document.getElementById("tableBody");
+                const rows = Array.from(tbody.querySelectorAll("tr"));
+                const isAscending = th.dataset.order === "asc";
+                rows.sort((a, b) => {
+                    const aVal = index === 2 ? parseFloat(a.cells[index].textContent) : a.cells[index].textContent;
+                    const bVal = index === 2 ? parseFloat(b.cells[index].textContent) : b.cells[index].textContent;
+                    return isAscending ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1);
+                });
+                th.dataset.order = isAscending ? "desc" : "asc";
+                tbody.innerHTML = "";
+                rows.forEach((row, i) => {
+                    row.cells[0].textContent = i + 1; // Update row numbers after sorting
+                    tbody.appendChild(row);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

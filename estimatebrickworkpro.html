@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brickwork and Plaster Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Brickwork and Plaster Calculator</h1>
+        <form id="calcForm">
+            <!-- Building Dimensions -->
+            <label>Building Length (ft):</label>
+            <input type="number" id="length" step="0.01" required>
+            
+            <label>Building Width (ft):</label>
+            <input type="number" id="width" step="0.01" required>
+            
+            <!-- Spans -->
+            <label>Number of Spans along Length:</label>
+            <input type="number" id="lengthSpans" step="1" required>
+            
+            <label>Number of Spans along Width:</label>
+            <input type="number" id="widthSpans" step="1" required>
+            
+            <label>Wall Height (ft):</label>
+            <input type="number" id="height" step="0.01" required>
+            
+            <!-- Openings -->
+            <label>Number of Windows:</label>
+            <input type="number" id="windowCount" step="1" required>
+            
+            <label>Window Width (ft):</label>
+            <input type="number" id="windowWidth" step="0.01" required>
+            
+            <label>Window Height (ft):</label>
+            <input type="number" id="windowHeight" step="0.01" required>
+            
+            <label>Number of Doors:</label>
+            <input type="number" id="doorCount" step="1" required>
+            
+            <label>Door Width (ft):</label>
+            <input type="number" id="doorWidth" step="0.01" required>
+            
+            <label>Door Height (ft):</label>
+            <input type="number" id="doorHeight" step="0.01" required>
+            
+            <!-- Brick and Wall Details -->
+            <label>Wall Thickness (inches):</label>
+            <select id="wallThickness" required>
+                <option value="10">10 inches</option>
+                <option value="5">5 inches</option>
+            </select>
+            
+            <label>Brick Length (in):</label>
+            <input type="number" id="brickLength" step="0.01" required>
+            
+            <label>Brick Width (in):</label>
+            <input type="number" id="brickWidth" step="0.01" required>
+            
+            <label>Brick Height (in):</label>
+            <input type="number" id="brickHeight" step="0.01" required>
+            
+            <!-- Plaster -->
+            <label>Plaster Thickness (mm):</label>
+            <input type="number" id="plasterThickness" step="0.01" required>
+            
+            <button type="button" onclick="calculate()">Calculate</button>
+        </form>
+        
+        <div id="results">
+            <h2>Results</h2>
+            <p><strong>Brickwork:</strong></p>
+            <p>Total Bricks: <span id="totalBricks"></span></p>
+            <p>Cement for Brickwork (bags): <span id="cementBrick"></span></p>
+            <p>Sand for Brickwork (cu.ft): <span id="sandBrick"></span></p>
+            <p><strong>Plaster (Both Sides):</strong></p>
+            <p>Cement for Plaster (bags): <span id="cementPlaster"></span></p>
+            <p>Sand for Plaster (cu.ft): <span id="sandPlaster"></span></p>
+            <p><strong>Total:</strong></p>
+            <p>Total Cement (bags): <span id="totalCement"></span></p>
+            <p>Total Sand (cu.ft): <span id="totalSand"></span></p>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            // Get input values
+            const length = parseFloat(document.getElementById('length').value);
+            const width = parseFloat(document.getElementById('width').value);
+            const lengthSpans = parseInt(document.getElementById('lengthSpans').value);
+            const widthSpans = parseInt(document.getElementById('widthSpans').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const windowCount = parseInt(document.getElementById('windowCount').value);
+            const windowWidth = parseFloat(document.getElementById('windowWidth').value);
+            const windowHeight = parseFloat(document.getElementById('windowHeight').value);
+            const doorCount = parseInt(document.getElementById('doorCount').value);
+            const doorWidth = parseFloat(document.getElementById('doorWidth').value);
+            const doorHeight = parseFloat(document.getElementById('doorHeight').value);
+            const wallThickness = parseFloat(document.getElementById('wallThickness').value) / 12; // Convert to ft
+            const brickLength = (parseFloat(document.getElementById('brickLength').value) + 0.5) / 12; // Add 0.5 in mortar, convert to ft
+            const brickWidth = (parseFloat(document.getElementById('brickWidth').value) + 0.5) / 12;
+            const brickHeight = (parseFloat(document.getElementById('brickHeight').value) + 0.5) / 12;
+            const plasterThickness = parseFloat(document.getElementById('plasterThickness').value) / 304.8; // Convert mm to ft
+
+            // Step 1: Calculate Wall Area
+            const perimeterArea = 2 * (length * height) + 2 * (width * height);
+            const internalLengthWalls = (lengthSpans - 1) * width * height;
+            const internalWidthWalls = (widthSpans - 1) * length * height;
+            const totalWallArea = perimeterArea + internalLengthWalls + internalWidthWalls;
+
+            // Step 2: Subtract Openings
+            const windowArea = windowCount * windowWidth * windowHeight;
+            const doorArea = doorCount * doorWidth * doorHeight;
+            const netWallArea = totalWallArea - windowArea - doorArea;
+
+            // Step 3: Brickwork Calculation
+            const brickVolume = brickLength * brickWidth * brickHeight;
+            const wallVolume = netWallArea * wallThickness;
+            const bricksPerCuFt = 1 / brickVolume;
+            const totalBricks = Math.ceil(wallVolume * bricksPerCuFt);
+
+            const mortarVolume = wallVolume * 0.3; // 30% mortar
+            const cementBrick = mortarVolume / 5; // 1:4 mix
+            const sandBrick = cementBrick * 4;
+            const cementBrickBags = Math.ceil(cementBrick / 1.25); // 1 bag = 1.25 cu.ft
+
+            // Step 4: Plaster Calculation
+            const plasterArea = netWallArea * 2; // Both sides
+            const plasterVolume = plasterArea * plasterThickness;
+            const cementPlaster = plasterVolume / 5; // 1:4 mix
+            const sandPlaster = cementPlaster * 4;
+            const cementPlasterBags = Math.ceil(cementPlaster / 1.25);
+
+            // Step 5: Total Materials
+            const totalCementBags = cementBrickBags + cementPlasterBags;
+            const totalSand = sandBrick + sandPlaster;
+
+            // Display Results
+            document.getElementById('totalBricks').textContent = totalBricks;
+            document.getElementById('cementBrick').textContent = cementBrickBags;
+            document.getElementById('sandBrick').textContent = sandBrick.toFixed(2);
+            document.getElementById('cementPlaster').textContent = cementPlasterBags;
+            document.getElementById('sandPlaster').textContent = sandPlaster.toFixed(2);
+            document.getElementById('totalCement').textContent = totalCementBags;
+            document.getElementById('totalSand').textContent = totalSand.toFixed(2);
+            document.getElementById('results').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

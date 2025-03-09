@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concrete Volume Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            font-size: 16px;
+        }
+        .result-container {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .result-container h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .result-container p {
+            font-size: 14px;
+            margin: 5px 0;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Concrete Volume Calculator</h2>
+        <label>Length (ft)</label>
+        <input type="number" id="length" placeholder="Enter length">
+        
+        <label>Width (ft)</label>
+        <input type="number" id="width" placeholder="Enter width">
+        
+        <label>Height (ft)</label>
+        <input type="number" id="height" placeholder="Enter height">
+        
+        <label>Steel Percentage (%)</label>
+        <input type="number" id="steel" placeholder="Enter steel percentage">
+        
+        <label>Concrete Ratio</label>
+        <select id="ratio">
+            <option value="1:1.5:3">1:1.5:3</option>
+            <option value="1:2:4">1:2:4</option>
+        </select>
+        
+        <button onclick="calculateConcrete()">Calculate</button>
+        
+        <div class="result-container">
+            <h3>Results</h3>
+            <p id="wetVolume"></p>
+            <p id="dryVolume"></p>
+            <p id="cement"></p>
+            <p id="cementBags"></p>
+            <p id="sand"></p>
+            <p id="aggregate"></p>
+            <p id="steelWeight"></p>
+        </div>
+    </div>
+    
+    <script>
+        function calculateConcrete() {
+            let length = parseFloat(document.getElementById('length').value);
+            let width = parseFloat(document.getElementById('width').value);
+            let height = parseFloat(document.getElementById('height').value);
+            let steelPercent = parseFloat(document.getElementById('steel').value) / 100;
+            let ratio = document.getElementById('ratio').value;
+            
+            if (isNaN(length) || isNaN(width) || isNaN(height) || isNaN(steelPercent)) {
+                alert("Please enter valid values.");
+                return;
+            }
+            
+            let wetVolume = length * width * height; // Total wet concrete volume in cubic feet
+            let dryVolume = wetVolume * 1.54; // Approximate dry volume conversion factor
+            let totalParts = ratio === "1:1.5:3" ? 5.5 : 7; // Sum of mix proportions
+            let cementRatio = ratio === "1:1.5:3" ? 1 : 1;
+            let sandRatio = ratio === "1:1.5:3" ? 1.5 : 2;
+            let aggregateRatio = ratio === "1:1.5:3" ? 3 : 4;
+            
+            let cement = (cementRatio / totalParts) * dryVolume;
+            let sand = (sandRatio / totalParts) * dryVolume;
+            let aggregate = (aggregateRatio / totalParts) * dryVolume;
+            let steelWeight = steelPercent * wetVolume * 490; // Steel density approx. 490 lb/ft³ converted to kg
+            let cementBags = cement / 1.25; // Assuming 1 bag of cement = 1.25 cft
+            
+            document.getElementById('wetVolume').innerText = `Total Wet Volume: ${wetVolume.toFixed(2)} cft`;
+            document.getElementById('dryVolume').innerText = `Total Dry Volume: ${dryVolume.toFixed(2)} cft`;
+            document.getElementById('cement').innerText = `Cement: ${cement.toFixed(2)} cft`;
+            document.getElementById('cementBags').innerText = `Cement Bags: ${cementBags.toFixed(2)} bags`;
+            document.getElementById('sand').innerText = `Sand: ${sand.toFixed(2)} cft`;
+            document.getElementById('aggregate').innerText = `Aggregate: ${aggregate.toFixed(2)} cft`;
+            document.getElementById('steelWeight').innerText = `Steel: ${steelWeight.toFixed(2)} kg`;
+        }
+    </script>
+</body>
+</html>

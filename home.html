@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Construction Menu</title>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #121212;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            max-width: 400px;
+            background: #1e1e1e;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            padding: 20px 0;
+            margin: 20px 0;
+        }
+
+        .menu {
+            width: 100%;
+        }
+
+        .menu-item {
+            position: relative;
+            padding: 15px 20px;
+            margin: 10px;
+            text-align: center;
+            font-size: 18px;
+            color: #ffffff;
+            text-decoration: none;
+            display: block;
+            border: 1px solid #333333;
+            border-radius: 10px;
+            background: #242424;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .menu-item:hover, .menu-item:focus {
+            background: #333333;
+            color: #4caf50;
+            transform: scale(1.05);
+        }
+
+        header {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            width: 100%;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 15px 0;
+            border-bottom: 1px solid #333333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            padding: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .menu-item {
+                font-size: 16px;
+                padding: 12px;
+            }
+
+            header {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>Construction Menu</header>
+    <div class="container">
+        <div class="menu">
+            <a href="https://hybridcivilbd.github.io/engineeringapp/p2p9.html" class="menu-item" aria-label="Column">p2p3</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/colindex.html" class="menu-item" aria-label="Column">Column</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/loadrelease1.html" class="menu-item" aria-label="Footing">Footing</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/loadrelease.html" class="menu-item" aria-label="Load Release">Load Release</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/gradebeam.html" class="menu-item" aria-label="Grade Beam">Grade Beam</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/slab.html" class="menu-item" aria-label="Slab">Slab</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/wind.html" class="menu-item" aria-label="Slab">Wind Speed</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/loadcombo.html" class="menu-item" aria-label="Slab">Load Combo</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/interpolation.html" class="menu-item" aria-label="Slab">Interpolation</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/volume.html" class="menu-item" aria-label="Slab">Concrete Vol</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/loadofacolumn.html" class="menu-item" aria-label="Load of a Column">Load of a Column</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/moduluscalculation.html" class="menu-item" aria-label="Modulus">Modulus</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/bmdsfd.html" class="menu-item" aria-label="BMDSFD">BMDSFD</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/pilecapacity1.html" class="menu-item" aria-label="Pile Capacity">Pile Capacity</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/situpilecal1.html" class="menu-item" aria-label="Pile Capacity">Situ Pile Calculation</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/sandpile.html" class="menu-item" aria-label="Pile Capacity">Sand Pile Calculation</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/estimatecolumnv1.html" class="menu-item" aria-label="Column Estimate">Column Estimate</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/estimatefootingnv1.html" class="menu-item" aria-label="Footing Estimate">Footing Estimate</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/estimatebeam.html" class="menu-item" aria-label="Beam Estimate">Beam Estimate</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/estimateslabv1.html" class="menu-item" aria-label="Slab Estimate">Slab Estimate</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/estimatebrickworkpro.html" class="menu-item" aria-label="Brick Estimate">Brick Estimate</a>
+            <a href="https://hybridcivilbd.github.io/engineeringapp/septictank2.html" class="menu-item" aria-label="Septic Tank Estimate">Septic Tank</a>
+        </div>
+    </div>
+    <footer>
+        © 2025 Hybrid Civil Engineering
+    </footer>
+</body>
+</html>
+
+<script>
+    // Check if user is logged in
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+        // Redirect back to login page
+        window.location.href = "https://hybridcivilbd.github.io/engineeringapp/menu.html"; // Replace with your login page URL
+    }
+    
+    // Optional: Logout function
+    function logout() {
+        localStorage.removeItem("isLoggedIn");
+        window.location.href = "https://hybridcivilbd.github.io/engineeringapp/menu.html"; // Replace with your login page URL
+    }
+</script>
