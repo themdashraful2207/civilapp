@@ -37,16 +37,16 @@
 <body>
     <iframe src="https://themdashraful2207.github.io/civilapp/home.html"></iframe>
     <script>
-        // Check login state
-        if (localStorage.getItem("isLoggedIn") !== "true") {
-            window.location.href = "./menu.html"; // Relative path to login.html
-            // Replace with full URL if hosted, e.g., "https://yourusername.github.io/yourrepo/login.html"
-        }
+    // কঠোরভাবে লগইন চেক করুন
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+        window.location.href = "menu.html"; // ফুল URL ব্যবহার করুন
+    }
 
-        // Logout when page is closed
-        window.onbeforeunload = function() {
-            localStorage.removeItem("isLoggedIn");
-        };
-    </script>
+    // লগআউট ফাংশন যোগ করুন (প্রয়োজনে বাটন যোগ করুন)
+    function logout() {
+        localStorage.removeItem("isLoggedIn");
+        window.location.href = "menu.html";
+    }
+</script>
 </body>
 </html>
