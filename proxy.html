@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecting...</title>
+    <title>Secure Portal</title>
     <style>
         html, body {
             margin: 0;
@@ -18,12 +18,9 @@
             height: 100%;
             border: none;
             display: block;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
         }
 
-        @media screen and (max-width: 768px) {
+        @media (max-width: 768px) {
             iframe {
                 height: 100vh;
                 width: 100vw;
@@ -33,9 +30,12 @@
 </head>
 <body>
     <iframe src="https://themdashraful2207.github.io/civilapp/home.html"></iframe>
+
     <script>
+        // Strict session verification
         if (sessionStorage.getItem("isLoggedIn") !== "true") {
-            window.location.href = "./menu.html";
+            sessionStorage.removeItem("isLoggedIn");
+            window.location.href = "menu.html";
         }
     </script>
 </body>
