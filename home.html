@@ -26,14 +26,15 @@
             margin: 20px 0;
             border: 1px solid #cccccc;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            overflow-y: auto; /* Allow scrolling on small screens */
+            max-height: 340px; /* Prevent overflowing */
         }
 
         .menu {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            transition: transform 0.3s ease;
+            transition: transform 0.2s ease-out;
         }
 
         .menu-item {
@@ -80,33 +81,13 @@
                 grid-template-columns: 1fr 1fr;
             }
         }
-
-        /* Mobile: Vertical sliding loop */
-        @media (max-width: 600px) {
-            .menu {
-                height: 300px; /* Fixed height for visible area */
-                position: relative;
-            }
-
-            .menu-item {
-                font-size: 16px;
-                padding: 10px;
-                height: 40px; /* Fixed height */
-                line-height: 40px;
-            }
-
-            .container {
-                height: 340px; /* Slightly larger than menu height */
-                overflow-y: hidden;
-            }
-        }
     </style>
 </head>
 <body>
     <header>Construction Menu</header>
     <div class="container">
-        <div class="menu" id="menu">
-            <a href="https://themdashraful2207.github.io/civilapp/p2p9.html" class="menu-item">p2p3</a>
+        <div class="menu">
+            <a href="https://themdashraful2207.github.io/civilapp/p2p9.html" class="menu-item">p2p9</a>
             <a href="https://themdashraful2207.github.io/civilapp/colindex.html" class="menu-item">Column</a>
             <a href="https://themdashraful2207.github.io/civilapp/loadrelease1.html" class="menu-item">Footing</a>
             <a href="https://themdashraful2207.github.io/civilapp/loadrelease.html" class="menu-item">Load Release</a>
@@ -141,57 +122,6 @@
         function logout() {
             localStorage.removeItem("isLoggedIn");
             window.location.href = "https://themdashraful2207.github.io/civilapp/menu.html";
-        }
-
-        // Vertical sliding loop functionality for mobile
-        if (window.innerWidth <= 600) {
-            const menu = document.getElementById('menu');
-            const items = Array.from(menu.children);
-            const itemHeight = 50; // Height (40px) + gap (10px)
-            const totalHeight = items.length * itemHeight;
-            let position = 0;
-
-            // Clone items and append for seamless looping
-            const cloneItems = items.map(item => item.cloneNode(true));
-            cloneItems.forEach(clone => menu.appendChild(clone));
-
-            // Touch event handling
-            let startY = 0;
-            let currentY = 0;
-            let isDragging = false;
-
-            menu.addEventListener('touchstart', (e) => {
-                startY = e.touches[0].clientY;
-                isDragging = true;
-                menu.style.transition = 'none';
-            });
-
-            menu.addEventListener('touchmove', (e) => {
-                if (!isDragging) return;
-                currentY = e.touches[0].clientY;
-                const diff = startY - currentY; // Reverse diff for intuitive direction
-                position += diff; // Swipe up increases position (moves up), swipe down decreases (moves down)
-                startY = currentY;
-
-                // Seamless looping
-                if (position >= totalHeight) {
-                    position -= totalHeight; // Jump back to top
-                } else if (position <= -totalHeight) {
-                    position += totalHeight; // Jump back to bottom
-                }
-
-                menu.style.transform = `translateY(${-position}px)`; // Negative position to match direction
-            });
-
-            menu.addEventListener('touchend', () => {
-                isDragging = false;
-                menu.style.transition = 'transform 0.3s ease';
-
-                // Snap to nearest item
-                const nearestItem = Math.round(position / itemHeight) * itemHeight;
-                position = nearestItem;
-                menu.style.transform = `translateY(${-position}px)`;
-            });
         }
     </script>
 </body>
