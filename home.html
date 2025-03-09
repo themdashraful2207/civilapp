@@ -6,86 +6,99 @@
     <title>Construction Menu</title>
     <style>
         body {
-            font-family: 'Roboto', Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: #121212;
-            color: #ffffff;
+            background: #ffffff;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            color: #000000;
         }
 
         .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             width: 90%;
-            max-width: 400px;
-            background: #1e1e1e;
-            border-radius: 15px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
-            padding: 20px 0;
+            max-width: 600px;
+            background: #ffffff;
+            padding: 20px;
             margin: 20px 0;
+            border: 1px solid #cccccc;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden; /* Hide overflow for sliding effect */
         }
 
         .menu {
-            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: transform 0.5s ease; /* Smooth sliding */
         }
 
         .menu-item {
-            position: relative;
-            padding: 15px 20px;
-            margin: 10px;
-            text-align: center;
+            padding: 12px 15px;
+            text-align: left;
             font-size: 18px;
-            color: #ffffff;
+            color: #000000;
             text-decoration: none;
-            display: block;
-            border: 1px solid #333333;
-            border-radius: 10px;
-            background: #242424;
-            transition: all 0.3s ease;
-            cursor: pointer;
+            border: 1px solid #e0e0e0;
+            background: #f9f9f9;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .menu-item:hover, .menu-item:focus {
-            background: #333333;
-            color: #4caf50;
-            transform: scale(1.05);
+            background: #666666;
+            color: #ffffff;
         }
 
         header {
-            background-color: #1e1e1e;
-            color: #ffffff;
             width: 100%;
             text-align: center;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             padding: 15px 0;
-            border-bottom: 1px solid #333333;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-bottom: 2px solid #666666;
+            color: #333333;
+            background: #ffffff;
         }
 
         footer {
             margin-top: 20px;
             text-align: center;
-            color: rgba(255, 255, 255, 0.7);
+            color: #666666;
             font-size: 14px;
             padding: 10px;
+            border-top: 1px solid #cccccc;
+            width: 100%;
         }
 
+        /* Desktop: Two-column layout */
+        @media (min-width: 600px) {
+            .menu {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Mobile: Vertical sliding loop */
         @media (max-width: 600px) {
-            .menu-item {
-                font-size: 16px;
-                padding: 12px;
+            .menu {
+                height: 300px; /* Fixed height for visible area */
+                overflow: hidden; /* Hide items outside the visible area */
+                position: relative;
             }
 
-            header {
-                font-size: 20px;
+            .menu-item {
+                font-size: 16px;
+                padding: 10px;
+                height: 40px; /* Fixed height for consistency */
+                line-height: 40px;
+            }
+
+            .container {
+                overflow-y: hidden; /* Hide vertical overflow */
+                height: 340px; /* Container height slightly larger than menu */
             }
         }
     </style>
@@ -93,47 +106,96 @@
 <body>
     <header>Construction Menu</header>
     <div class="container">
-        <div class="menu">
-            <a href="https://themdashraful2207.github.io/civilapp/p2p9.html" class="menu-item" aria-label="Column">p2p3</a>
-            <a href="https://themdashraful2207.github.io/civilapp/colindex.html" class="menu-item" aria-label="Column">Column</a>
-            <a href="https://themdashraful2207.github.io/civilapp/loadrelease1.html" class="menu-item" aria-label="Footing">Footing</a>
-            <a href="https://themdashraful2207.github.io/civilapp/loadrelease.html" class="menu-item" aria-label="Load Release">Load Release</a>
-            <a href="https://themdashraful2207.github.io/civilapp/gradebeam.html" class="menu-item" aria-label="Grade Beam">Grade Beam</a>
-            <a href="https://themdashraful2207.github.io/civilapp/slab.html" class="menu-item" aria-label="Slab">Slab</a>
-            <a href="https://themdashraful2207.github.io/civilapp/wind.html" class="menu-item" aria-label="Slab">Wind Speed</a>
-            <a href="https://themdashraful2207.github.io/civilapp/loadcombo.html" class="menu-item" aria-label="Slab">Load Combo</a>
-            <a href="https://themdashraful2207.github.io/civilapp/interpolation.html" class="menu-item" aria-label="Slab">Interpolation</a>
-            <a href="https://themdashraful2207.github.io/civilapp/volume.html" class="menu-item" aria-label="Slab">Concrete Vol</a>
-            <a href="https://themdashraful2207.github.io/civilapp/loadofacolumn.html" class="menu-item" aria-label="Load of a Column">Load of a Column</a>
-            <a href="https://themdashraful2207.github.io/civilapp/moduluscalculation.html" class="menu-item" aria-label="Modulus">Modulus</a>
-            <a href="https://themdashraful2207.github.io/civilapp/bmdsfd.html" class="menu-item" aria-label="BMDSFD">BMDSFD</a>
-            <a href="https://themdashraful2207.github.io/civilapp/pilecapacity1.html" class="menu-item" aria-label="Pile Capacity">Pile Capacity</a>
-            <a href="https://themdashraful2207.github.io/civilapp/situpilecal1.html" class="menu-item" aria-label="Pile Capacity">Situ Pile Calculation</a>
-            <a href="https://themdashraful2207.github.io/civilapp/sandpile.html" class="menu-item" aria-label="Pile Capacity">Sand Pile Calculation</a>
-            <a href="https://themdashraful2207.github.io/civilapp/estimatecolumnv1.html" class="menu-item" aria-label="Column Estimate">Column Estimate</a>
-            <a href="https://themdashraful2207.github.io/civilapp/estimatefootingv1.html" class="menu-item" aria-label="Footing Estimate">Footing Estimate</a>
-            <a href="https://themdashraful2207.github.io/civilapp/estimatebeam.html" class="menu-item" aria-label="Beam Estimate">Beam Estimate</a>
-            <a href="https://themdashraful2207.github.io/civilapp/estimateslabv1.html" class="menu-item" aria-label="Slab Estimate">Slab Estimate</a>
-            <a href="https://themdashraful2207.github.io/civilapp/estimatebrickworkpro.html" class="menu-item" aria-label="Brick Estimate">Brick Estimate</a>
-            <a href="https://themdashraful2207.github.io/civilapp/septictank2.html" class="menu-item" aria-label="Septic Tank Estimate">Septic Tank</a>
+        <div class="menu" id="menu">
+            <a href="https://themdashraful2207.github.io/civilapp/p2p9.html" class="menu-item">p2p3</a>
+            <a href="https://themdashraful2207.github.io/civilapp/colindex.html" class="menu-item">Column</a>
+            <a href="https://themdashraful2207.github.io/civilapp/loadrelease1.html" class="menu-item">Footing</a>
+            <a href="https://themdashraful2207.github.io/civilapp/loadrelease.html" class="menu-item">Load Release</a>
+            <a href="https://themdashraful2207.github.io/civilapp/gradebeam.html" class="menu-item">Grade Beam</a>
+            <a href="https://themdashraful2207.github.io/civilapp/slab.html" class="menu-item">Slab</a>
+            <a href="https://themdashraful2207.github.io/civilapp/wind.html" class="menu-item">Wind Speed</a>
+            <a href="https://themdashraful2207.github.io/civilapp/loadcombo.html" class="menu-item">Load Combo</a>
+            <a href="https://themdashraful2207.github.io/civilapp/interpolation.html" class="menu-item">Interpolation</a>
+            <a href="https://themdashraful2207.github.io/civilapp/volume.html" class="menu-item">Concrete Volume</a>
+            <a href="https://themdashraful2207.github.io/civilapp/loadofacolumn.html" class="menu-item">Load of a Column</a>
+            <a href="https://themdashraful2207.github.io/civilapp/moduluscalculation.html" class="menu-item">Modulus</a>
+            <a href="https://themdashraful2207.github.io/civilapp/bmdsfd.html" class="menu-item">BMDSFD</a>
+            <a href="https://themdashraful2207.github.io/civilapp/pilecapacity1.html" class="menu-item">Pile Capacity</a>
+            <a href="https://themdashraful2207.github.io/civilapp/situpilecal1.html" class="menu-item">Situ Pile Calculation</a>
+            <a href="https://themdashraful2207.github.io/civilapp/sandpile.html" class="menu-item">Sand Pile Calculation</a>
+            <a href="https://themdashraful2207.github.io/civilapp/estimatecolumnv1.html" class="menu-item">Column Estimate</a>
+            <a href="https://themdashraful2207.github.io/civilapp/estimatefootingv1.html" class="menu-item">Footing Estimate</a>
+            <a href="https://themdashraful2207.github.io/civilapp/estimatebeam.html" class="menu-item">Beam Estimate</a>
+            <a href="https://themdashraful2207.github.io/civilapp/estimateslabv1.html" class="menu-item">Slab Estimate</a>
+            <a href="https://themdashraful2207.github.io/civilapp/estimatebrickworkpro.html" class="menu-item">Brick Estimate</a>
+            <a href="https://themdashraful2207.github.io/civilapp/septictank2.html" class="menu-item">Septic Tank</a>
         </div>
     </div>
-    <footer>
-        © 2025 Hybrid Civil Engineering
-    </footer>
+    <footer>© 2025 Hybrid Civil Engineering</footer>
+
+    <script>
+        // Check if user is logged in
+        if (localStorage.getItem("isLoggedIn") !== "true") {
+            window.location.href = "https://themdashraful2207.github.io/civilapp/menu.html";
+        }
+        
+        function logout() {
+            localStorage.removeItem("isLoggedIn");
+            window.location.href = "https://themdashraful2207.github.io/civilapp/menu.html";
+        }
+
+        // Vertical sliding loop functionality for mobile
+        if (window.innerWidth <= 600) {
+            const menu = document.getElementById('menu');
+            const items = menu.children;
+            const itemHeight = 40 + 10; // Height of item + gap
+            const totalHeight = items.length * itemHeight;
+            let position = 0;
+
+            // Clone items for seamless looping
+            const cloneItems = Array.from(items).map(item => item.cloneNode(true));
+            cloneItems.forEach(clone => menu.appendChild(clone));
+
+            // Touch event handling
+            let startY = 0;
+            let currentY = 0;
+            let isDragging = false;
+
+            menu.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+                isDragging = true;
+                menu.style.transition = 'none'; // Disable transition during drag
+            });
+
+            menu.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                currentY = e.touches[0].clientY;
+                const diff = currentY - startY;
+                position -= diff;
+                startY = currentY;
+
+                // Loop logic
+                if (position <= -totalHeight) {
+                    position += totalHeight; // Jump to top
+                } else if (position > 0) {
+                    position -= totalHeight; // Jump to bottom
+                }
+
+                menu.style.transform = `translateY(${position}px)`;
+            });
+
+            menu.addEventListener('touchend', () => {
+                isDragging = false;
+                menu.style.transition = 'transform 0.5s ease'; // Re-enable transition
+            });
+
+            // Auto-adjust position to snap to nearest item
+            menu.addEventListener('touchend', () => {
+                const nearestItem = Math.round(position / itemHeight) * itemHeight;
+                position = nearestItem;
+                menu.style.transform = `translateY(${position}px)`;
+            });
+        }
+    </script>
 </body>
 </html>
-
-<script>
-    // Check if user is logged in
-    if (localStorage.getItem("isLoggedIn") !== "true") {
-        // Redirect back to login page
-        window.location.href = "https://themdashraful2207.github.io/civilapp/menu.html"; // Replace with your login page URL
-    }
-    
-    // Optional: Logout function
-    function logout() {
-        localStorage.removeItem("isLoggedIn");
-        window.location.href = "https://themdashraful2207.github.io/civilapp/menu.html"; // Replace with your login page URL
-    }
-</script>
