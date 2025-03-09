@@ -155,10 +155,6 @@
             const cloneItems = items.map(item => item.cloneNode(true));
             cloneItems.forEach(clone => menu.appendChild(clone));
 
-            // Set initial position to show original items
-            position = -totalHeight / 2; // Start in the middle of the doubled list
-            menu.style.transform = `translateY(${position}px)`;
-
             // Touch event handling
             let startY = 0;
             let currentY = 0;
@@ -173,18 +169,18 @@
             menu.addEventListener('touchmove', (e) => {
                 if (!isDragging) return;
                 currentY = e.touches[0].clientY;
-                const diff = currentY - startY;
-                position -= diff;
+                const diff = startY - currentY; // Reverse diff for intuitive direction
+                position += diff; // Swipe up increases position (moves up), swipe down decreases (moves down)
                 startY = currentY;
 
                 // Seamless looping
-                if (position <= -totalHeight) {
-                    position += totalHeight; // Jump up by one full set
-                } else if (position >= 0) {
-                    position -= totalHeight; // Jump down by one full set
+                if (position >= totalHeight) {
+                    position -= totalHeight; // Jump back to top
+                } else if (position <= -totalHeight) {
+                    position += totalHeight; // Jump back to bottom
                 }
 
-                menu.style.transform = `translateY(${position}px)`;
+                menu.style.transform = `translateY(${-position}px)`; // Negative position to match direction
             });
 
             menu.addEventListener('touchend', () => {
@@ -194,31 +190,8 @@
                 // Snap to nearest item
                 const nearestItem = Math.round(position / itemHeight) * itemHeight;
                 position = nearestItem;
-                menu.style.transform = `translateY(${position}px)`;
+                menu.style.transform = `translateY(${-position}px)`;
             });
-
-            // Ensure continuous animation when not dragging
-            function autoAdjust() {
-                if (!isDragging) {
-                    if (position > -totalHeight / 2) {
-                        position -= totalHeight;
-                        menu.style.transition = 'none';
-                        menu.style.transform = `translateY(${position}px)`;
-                        requestAnimationFrame(() => {
-                            menu.style.transition = 'transform 0.3s ease';
-                        });
-                    } else if (position < -totalHeight) {
-                        position += totalHeight;
-                        menu.style.transition = 'none';
-                        menu.style.transform = `translateY(${position}px)`;
-                        requestAnimationFrame(() => {
-                            menu.style.transition = 'transform 0.3s ease';
-                        });
-                    }
-                }
-                requestAnimationFrame(autoAdjust);
-            }
-            requestAnimationFrame(autoAdjust);
         }
     </script>
 </body>
