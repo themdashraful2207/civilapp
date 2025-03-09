@@ -17,7 +17,7 @@
         /* Make iframe fully responsive */
         iframe {
             width: 100%;
-            height: 100%;
+            height: calc(100% - 40px); /* Adjust height to accommodate footer */
             border: none;
             display: block;
             margin: 0;
@@ -25,10 +25,33 @@
             box-sizing: border-box;
         }
 
+        /* Footer styling */
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #ffffff;
+            text-align: center;
+            padding: 10px 0;
+            border-top: 1px solid #cccccc;
+            z-index: 1000; /* Ensure footer is above iframe */
+        }
+
+        .logout-link {
+            color: #666666;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .logout-link:hover {
+            text-decoration: underline;
+        }
+
         /* Ensure responsiveness on smaller screens */
         @media screen and (max-width: 768px) {
             iframe {
-                height: 100vh; /* Full viewport height */
+                height: calc(100vh - 40px); /* Adjust height for mobile */
                 width: 100vw;  /* Full viewport width */
             }
         }
@@ -36,11 +59,23 @@
 </head>
 <body>
     <iframe src="https://themdashraful2207.github.io/civilapp/home.html"></iframe>
+
+    <!-- Footer with logout link -->
+    <footer>
+        <a href="#" class="logout-link" onclick="logout()">Logout</a>
+    </footer>
+
     <script>
         // Check login state
         if (localStorage.getItem("isLoggedIn") !== "true") {
             window.location.href = "./menu.html"; // Relative path to login.html
             // Replace with full URL if hosted, e.g., "https://yourusername.github.io/yourrepo/login.html"
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem("isLoggedIn");
+            window.location.href = "./menu.html"; // Redirect to login page
         }
 
         // Logout when page is closed
