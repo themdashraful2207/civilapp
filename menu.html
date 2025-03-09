@@ -232,45 +232,43 @@
         <p id="error-message" class="error"></p>
     </div>
 
-    <script>
-        // Check if the user is already logged in
-        if (localStorage.getItem("isLoggedIn") === "true") {
-            window.location.href = "https://themdashraful2207.github.io/civilapp/proxy.html"; // Redirect to proxy.html if already logged in
-        }
+<script>
+    // পেজ লোড হওয়ার সাথে সাথেই লগইন স্ট্যাটাস চেক করুন
+    if (localStorage.getItem("isLoggedIn") === "true") {
+        window.location.replace("proxy.html"); // ব্রাউজার হিস্টোরি ম্যানিপুলেট করবে না
+    }
 
-        async function validateForm(event) {
-            event.preventDefault();
+    async function validateForm(event) {
+        event.preventDefault();
+        
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const errorMessage = document.getElementById("error-message");
+        
+        try {
+            const response = await fetch('credentials.json');
+            const data = await response.json();
             
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-            const errorMessage = document.getElementById("error-message");
+            const user = data.users.find(u => u.username === username && u.password === password);
             
-            try {
-                const response = await fetch('credentials.json');
-                const data = await response.json();
-                
-                const user = data.users.find(u => u.username === username && u.password === password);
-                
-                if (user) {
-                    localStorage.setItem("isLoggedIn", "true");
-                    errorMessage.textContent = "Login successful! Redirecting...";
-                    errorMessage.style.color = "#16a34a";
-                    setTimeout(() => {
-                        window.location.href = "https://themdashraful2207.github.io/civilapp/proxy.html";
-                    }, 1000);
-                } else {
-                    errorMessage.textContent = "Invalid username or password";
-                    errorMessage.classList.add('shake');
-                    setTimeout(() => errorMessage.classList.remove('shake'), 500);
-                }
-            } catch (error) {
-                errorMessage.textContent = "Error loading credentials";
+            if (user) {
+                localStorage.setItem("isLoggedIn", "true");
+                errorMessage.textContent = "লগইন সফল! রিডাইরেক্ট হচ্ছে...";
+                errorMessage.style.color = "#16a34a";
+                window.location.replace("proxy.html"); // হিস্টোরি এভয়েড করে
+            } else {
+                errorMessage.textContent = "ভুল ইউজারনেম বা পাসওয়ার্ড";
                 errorMessage.classList.add('shake');
                 setTimeout(() => errorMessage.classList.remove('shake'), 500);
-                console.error(error);
             }
-            return false;
+        } catch (error) {
+            errorMessage.textContent = "ক্রেডেনশিয়াল লোড করতে সমস্যা";
+            errorMessage.classList.add('shake');
+            setTimeout(() => errorMessage.classList.remove('shake'), 500);
+            console.error(error);
         }
-    </script>
+        return false;
+    }
+</script>
 </body>
 </html>
