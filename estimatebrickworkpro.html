@@ -7,25 +7,32 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 0;
             background-color: #f4f4f4;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
         }
         .container {
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
+            max-width: 100%; /* Full width on mobile */
+            width: 100%; /* Full width */
+            margin: 0 auto; /* Center the container */
+            padding: 10px; /* Reduced padding for mobile */
             background: white;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-sizing: border-box; /* Include padding in width calculation */
         }
         h1 {
             text-align: center;
             color: #333;
+            font-size: 24px; /* Smaller font size for mobile */
+            margin: 10px 0; /* Reduced margin */
         }
         label {
             display: block;
             margin: 10px 0 5px;
             font-weight: bold;
+            font-size: 14px; /* Smaller font size for mobile */
         }
         input, select {
             width: 100%;
@@ -33,6 +40,8 @@
             margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            font-size: 14px; /* Smaller font size for mobile */
+            box-sizing: border-box; /* Include padding in width calculation */
         }
         button {
             background-color: #28a745;
@@ -41,6 +50,8 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            width: 100%; /* Full width button on mobile */
+            font-size: 16px; /* Larger font size for better touch */
         }
         button:hover {
             background-color: #218838;
@@ -51,6 +62,33 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             display: none;
+            font-size: 14px; /* Smaller font size for mobile */
+        }
+        #results p {
+            margin: 5px 0; /* Reduced margin for mobile */
+        }
+
+        /* Media query for larger screens */
+        @media (min-width: 600px) {
+            .container {
+                max-width: 800px; /* Wider container for larger screens */
+                padding: 20px; /* More padding for larger screens */
+            }
+            h1 {
+                font-size: 28px; /* Larger font size for larger screens */
+            }
+            label {
+                font-size: 16px; /* Larger font size for larger screens */
+            }
+            input, select {
+                font-size: 16px; /* Larger font size for larger screens */
+            }
+            button {
+                width: auto; /* Auto width for larger screens */
+            }
+            #results {
+                font-size: 16px; /* Larger font size for larger screens */
+            }
         }
     </style>
 </head>
