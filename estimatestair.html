@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staircase Material Calculator</title>
+    <style>
+      body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 90%;
+    max-width: 500px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2, h3 {
+    text-align: center;
+}
+
+.input-section, .output-section {
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background: #28a745;
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button:hover {
+    background: #218838;
+}
+
+.output-section p {
+    font-size: 18px;
+    font-weight: bold;
+}
+      </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Staircase Material Calculator</h2>
+        <div class="input-section">
+            <label>Length (feet & inches):</label>
+            <input type="number" id="lengthFeet" placeholder="Feet"> 
+            <input type="number" id="lengthInches" placeholder="Inches">
+            
+            <label>Width (feet):</label>
+            <input type="number" id="width" placeholder="Feet">
+            
+            <label>Thickness (inches):</label>
+            <input type="number" id="thickness" placeholder="Inches">
+            
+            <label>Number of Risers:</label>
+            <input type="number" id="risers" placeholder="Count">
+            
+            <label>Number of Treads:</label>
+            <input type="number" id="treads" placeholder="Count">
+            
+            <label>Riser Height (inches):</label>
+            <input type="number" id="riserHeight" placeholder="Inches">
+            
+            <label>Tread Width (inches):</label>
+            <input type="number" id="treadWidth" placeholder="Inches">
+            
+            <label>Main Bar (mm) & Spacing (inches):</label>
+            <input type="number" id="mainBar" placeholder="Diameter (mm)">
+            <input type="number" id="mainSpacing" placeholder="Spacing (inches)">
+            
+            <label>Distribution Bar (mm) & Spacing (inches):</label>
+            <input type="number" id="distBar" placeholder="Diameter (mm)">
+            <input type="number" id="distSpacing" placeholder="Spacing (inches)">
+            
+            <button onclick="calculateMaterials()">Calculate</button>
+        </div>
+
+        <div class="output-section">
+            <h3>Results</h3>
+            <p>Cement: <span id="cement"></span> bags</p>
+            <p>Sand: <span id="sand"></span> CFT</p>
+            <p>Aggregate: <span id="aggregate"></span> CFT</p>
+            <p>12mm Steel: <span id="steel12"></span> kg</p>
+            <p>10mm Steel: <span id="steel10"></span> kg</p>
+        </div>
+    </div>
+    <script>
+      function calculateMaterials() {
+    let lengthFeet = parseFloat(document.getElementById("lengthFeet").value) || 0;
+    let lengthInches = parseFloat(document.getElementById("lengthInches").value) || 0;
+    let width = parseFloat(document.getElementById("width").value) || 0;
+    let thickness = parseFloat(document.getElementById("thickness").value) || 0;
+    let risers = parseFloat(document.getElementById("risers").value) || 0;
+    let treads = parseFloat(document.getElementById("treads").value) || 0;
+    let riserHeight = parseFloat(document.getElementById("riserHeight").value) || 0;
+    let treadWidth = parseFloat(document.getElementById("treadWidth").value) || 0;
+    let mainBar = parseFloat(document.getElementById("mainBar").value) || 12;
+    let mainSpacing = parseFloat(document.getElementById("mainSpacing").value) || 5;
+    let distBar = parseFloat(document.getElementById("distBar").value) || 10;
+    let distSpacing = parseFloat(document.getElementById("distSpacing").value) || 5;
+
+    let length = lengthFeet + (lengthInches / 12);
+    let thicknessFeet = thickness / 12;
+    let riserFeet = riserHeight / 12;
+    let treadFeet = treadWidth / 12;
+
+    let volumeSlab = length * width * thicknessFeet;
+    let areaTreadRiser = (0.5 * treadFeet * riserFeet) * width * treads;
+    let totalVolume = volumeSlab + areaTreadRiser;
+    let finalVolume = totalVolume * 1.05; // 5% wastage
+    let dryVolume = finalVolume * 1.54;
+
+    let cement = dryVolume / 5.5;
+    let sand = (cement * 1.5);
+    let aggregate = (cement * 3);
+
+    let steel12 = ((length / mainSpacing) * width * mainBar**2 / 162) * 2;
+    let steel10 = ((width / distSpacing) * length * distBar**2 / 162) * 2;
+
+    document.getElementById("cement").innerText = Math.round(cement / 1.25);
+    document.getElementById("sand").innerText = Math.round(sand);
+    document.getElementById("aggregate").innerText = Math.round(aggregate);
+    document.getElementById("steel12").innerText = Math.round(steel12);
+    document.getElementById("steel10").innerText = Math.round(steel10);
+}
+    </script>
+</body>
+</html>
