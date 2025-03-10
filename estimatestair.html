@@ -146,9 +146,23 @@
             const sand = cement * mixRatio[1];
             const aggregate = cement * mixRatio[2];
 
-            // Calculate reinforcement (two layers)
-            const steel12 = ((length / (mainSpacing/12)) * width * Math.pow(mainBar/1000, 2) * 7850 / 162) * 2;
-            const steel10 = ((width / (distSpacing/12)) * length * Math.pow(distBar/1000, 2) * 7850 / 162) * 2;
+            // Calculate reinforcement
+            const lengthMeters = length * 0.3048; // feet to meters
+            const widthMeters = width * 0.3048;   // feet to meters
+            const mainSpacingMeters = mainSpacing / 12 * 0.3048; // inches to meters
+            const distSpacingMeters = distSpacing / 12 * 0.3048; // inches to meters
+            
+            // Calculate number of bars
+            const numMainBars = Math.ceil(length / (mainSpacing / 12)) + 1; // Along length
+            const numDistBars = Math.ceil(width / (distSpacing / 12)) + 1;  // Along width
+            
+            // Calculate total length of steel in meters
+            const totalLengthMain = numMainBars * widthMeters * 2;  // 2 layers
+            const totalLengthDist = numDistBars * lengthMeters * 2; // 2 layers
+            
+            // Steel weight calculation (kg)
+            const steel12 = (Math.pow(mainBar, 2) / 162) * totalLengthMain;
+            const steel10 = (Math.pow(distBar, 2) / 162) * totalLengthDist;
 
             // Display results
             document.getElementById("cement").innerText = Math.ceil(cement / 1.25); // 1 bag = 1.25 CFT
