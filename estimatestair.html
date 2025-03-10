@@ -6,54 +6,106 @@
     <title>Staircase Material Calculator</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         }
         .container {
             width: 90%;
-            max-width: 500px;
-            margin: 20px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
-        h2, h3 {
+        h2 {
             text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 28px;
         }
-        .input-section, .output-section {
-            margin-bottom: 20px;
+        .input-section {
+            margin-bottom: 30px;
         }
         label {
-            font-weight: bold;
+            font-weight: 600;
             display: block;
-            margin-top: 10px;
+            margin: 15px 0 5px;
+            color: #34495e;
         }
         input, select {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             margin: 5px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        .unit-group {
+            display: flex;
+            gap: 10px;
+        }
+        .unit-group input {
+            flex: 1;
         }
         button {
             width: 100%;
-            padding: 10px;
-            background: #28a745;
+            padding: 12px;
+            background: #2ecc71;
             color: white;
             border: none;
+            border-radius: 6px;
             font-size: 16px;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 20px;
+            transition: background 0.3s;
         }
         button:hover {
-            background: #218838;
+            background: #27ae60;
         }
-        .output-section p {
-            font-size: 18px;
-            font-weight: bold;
+        .output-section {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .output-section h3 {
+            color: #2980b9;
+            margin: 0 0 15px 0;
+            text-align: center;
+            font-size: 22px;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            margin: 8px 0;
+            background: #ffffff;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            font-size: 16px;
+        }
+        .result-label {
+            color: #7f8c8d;
+            font-weight: 600;
+        }
+        .result-value {
+            color: #e74c3c;
+            font-weight: 700;
+        }
+        .result-unit {
+            color: #95a5a6;
+            font-weight: 500;
+            margin-left: 5px;
         }
     </style>
 </head>
@@ -68,11 +120,16 @@
             </select>
 
             <label>Length (feet & inches):</label>
-            <input type="number" id="lengthFeet" placeholder="Feet">
-            <input type="number" id="lengthInches" placeholder="Inches">
+            <div class="unit-group">
+                <input type="number" id="lengthFeet" placeholder="Feet">
+                <input type="number" id="lengthInches" placeholder="Inches">
+            </div>
 
-            <label>Width (feet):</label>
-            <input type="number" id="width" placeholder="Feet">
+            <label>Width (feet & inches):</label>
+            <div class="unit-group">
+                <input type="number" id="widthFeet" placeholder="Feet">
+                <input type="number" id="widthInches" placeholder="Inches">
+            </div>
 
             <label>Thickness (inches):</label>
             <input type="number" id="thickness" placeholder="Inches">
@@ -90,23 +147,42 @@
             <input type="number" id="treadWidth" placeholder="Inches">
 
             <label>Main Bar (mm) & Spacing (inches):</label>
-            <input type="number" id="mainBar" placeholder="Diameter (mm)">
-            <input type="number" id="mainSpacing" placeholder="Spacing (inches)">
+            <div class="unit-group">
+                <input type="number" id="mainBar" placeholder="Diameter (mm)">
+                <input type="number" id="mainSpacing" placeholder="Spacing (inches)">
+            </div>
 
             <label>Distribution Bar (mm) & Spacing (inches):</label>
-            <input type="number" id="distBar" placeholder="Diameter (mm)">
-            <input type="number" id="distSpacing" placeholder="Spacing (inches)">
+            <div class="unit-group">
+                <input type="number" id="distBar" placeholder="Diameter (mm)">
+                <input type="number" id="distSpacing" placeholder="Spacing (inches)">
+            </div>
 
-            <button onclick="calculateMaterials()">Calculate</button>
+            <button onclick="calculateMaterials()">Calculate Materials</button>
         </div>
 
         <div class="output-section">
-            <h3>Results</h3>
-            <p>Cement: <span id="cement"></span> bags</p>
-            <p>Sand: <span id="sand"></span> CFT</p>
-            <p>Aggregate: <span id="aggregate"></span> CFT</p>
-            <p>12mm Steel: <span id="steel12"></span> kg</p>
-            <p>10mm Steel: <span id="steel10"></span> kg</p>
+            <h3>Material Requirements</h3>
+            <div class="result-item">
+                <span class="result-label">Cement</span>
+                <span><span id="cement"></span><span class="result-unit">bags</span></span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Sand</span>
+                <span><span id="sand"></span><span class="result-unit">CFT</span></span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Aggregate</span>
+                <span><span id="aggregate"></span><span class="result-unit">CFT</span></span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Main Steel</span>
+                <span><span id="steel12"></span><span class="result-unit">kg</span></span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Distribution Steel</span>
+                <span><span id="steel10"></span><span class="result-unit">kg</span></span>
+            </div>
         </div>
     </div>
 
@@ -116,7 +192,8 @@
             const mixRatio = document.getElementById("mixRatio").value.split(":").map(Number);
             const lengthFeet = parseFloat(document.getElementById("lengthFeet").value) || 0;
             const lengthInches = parseFloat(document.getElementById("lengthInches").value) || 0;
-            const width = parseFloat(document.getElementById("width").value) || 0;
+            const widthFeet = parseFloat(document.getElementById("widthFeet").value) || 0;
+            const widthInches = parseFloat(document.getElementById("widthInches").value) || 0;
             const thickness = parseFloat(document.getElementById("thickness").value) || 0;
             const risers = parseFloat(document.getElementById("risers").value) || 0;
             const treads = parseFloat(document.getElementById("treads").value) || 0;
@@ -129,6 +206,7 @@
 
             // Convert all measurements to feet
             const length = lengthFeet + (lengthInches / 12);
+            const width = widthFeet + (widthInches / 12);
             const thicknessFeet = thickness / 12;
             const riserFeet = riserHeight / 12;
             const treadFeet = treadWidth / 12;
@@ -165,7 +243,7 @@
             const steel10 = (Math.pow(distBar, 2) / 162) * totalLengthDist;
 
             // Display results
-            document.getElementById("cement").innerText = Math.ceil(cement / 1.25); // 1 bag = 1.25 CFT
+            document.getElementById("cement").innerText = Math.ceil(cement / 1.25);
             document.getElementById("sand").innerText = Math.round(sand);
             document.getElementById("aggregate").innerText = Math.round(aggregate);
             document.getElementById("steel12").innerText = Math.round(steel12);
