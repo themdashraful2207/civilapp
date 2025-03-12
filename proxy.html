@@ -33,14 +33,14 @@
     </style>
 </head>
 <body>
-    <iframe src="https://themdashraful2207.github.io/civilapp/home.html"></iframe>
+    <iframe src="./home.html"></iframe>
     <script>
         console.log("Proxy page loaded");
-        console.log("isLoggedIn:", localStorage.getItem("isLoggedIn"));
-        
+        console.log("Checking isLoggedIn:", localStorage.getItem("isLoggedIn"));
+
         if (localStorage.getItem("isLoggedIn") !== "true") {
-            console.log("Not logged in, redirecting to menu.html");
-            window.location.href = "https://themdashraful2207.github.io/civilapp/menu.html";
+            console.log("isLoggedIn is not 'true', redirecting to menu.html");
+            window.location.href = "./menu.html";
         } else {
             console.log("User is logged in, staying on proxy page");
         }
@@ -48,7 +48,7 @@
         function logout() {
             localStorage.removeItem("isLoggedIn");
             console.log("Logged out, redirecting to menu.html");
-            window.location.href = "https://themdashraful2207.github.io/civilapp/menu.html";
+            window.location.href = "./menu.html";
         }
     </script>
 </body>
