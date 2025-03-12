@@ -235,7 +235,7 @@
 <script>
     // পেজ লোড হওয়ার সাথে সাথেই লগইন স্ট্যাটাস চেক করুন
     if (localStorage.getItem("isLoggedIn") === "true") {
-        window.location.replace("proxy.html"); // ব্রাউজার হিস্টোরি ম্যানিপুলেট করবে না
+        window.location.replace("https://themdashraful2207.github.io/civilapp/proxy.html"); // ব্রাউজার হিস্টোরি ম্যানিপুলেট করবে না
     }
 
     async function validateForm(event) {
@@ -255,7 +255,7 @@
                 localStorage.setItem("isLoggedIn", "true");
                 errorMessage.textContent = "লগইন সফল! রিডাইরেক্ট হচ্ছে...";
                 errorMessage.style.color = "#16a34a";
-                window.location.replace("proxy.html"); // হিস্টোরি এভয়েড করে
+                window.location.replace("https://themdashraful2207.github.io/civilapp/proxy.html"); // হিস্টোরি এভয়েড করে
             } else {
                 errorMessage.textContent = "ভুল ইউজারনেম বা পাসওয়ার্ড";
                 errorMessage.classList.add('shake');
