@@ -238,7 +238,7 @@
         window.location.replace("https://themdashraful2207.github.io/civilapp/proxy.html"); // ব্রাউজার হিস্টোরি ম্যানিপুলেট করবে না
     }
 
-    async function validateForm(event) {
+ async function validateForm(event) {
         event.preventDefault();
         
         const username = document.getElementById("username").value;
@@ -253,17 +253,26 @@
             
             if (user) {
                 localStorage.setItem("isLoggedIn", "true");
+                // Update success message display
                 errorMessage.textContent = "লগইন সফল! রিডাইরেক্ট হচ্ছে...";
-                errorMessage.style.color = "#16a34a";
-                window.location.replace("https://themdashraful2207.github.io/civilapp/proxy.html"); // হিস্টোরি এভয়েড করে
+                errorMessage.style.color = "#16a34a"; // Green color
+                errorMessage.classList.remove('error'); // Remove red error styling
+                
+                // Add brief delay before redirect
+                setTimeout(() => {
+                    window.location.replace("https://themdashraful2207.github.io/civilapp/proxy.html");
+                }, 1500); // 1.5 second delay
+                
             } else {
                 errorMessage.textContent = "ভুল ইউজারনেম বা পাসওয়ার্ড";
-                errorMessage.classList.add('shake');
+                errorMessage.style.color = "#dc2626"; // Red color
+                errorMessage.classList.add('error', 'shake');
                 setTimeout(() => errorMessage.classList.remove('shake'), 500);
             }
         } catch (error) {
             errorMessage.textContent = "ক্রেডেনশিয়াল লোড করতে সমস্যা";
-            errorMessage.classList.add('shake');
+            errorMessage.style.color = "#dc2626";
+            errorMessage.classList.add('error', 'shake');
             setTimeout(() => errorMessage.classList.remove('shake'), 500);
             console.error(error);
         }
