@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moment Coefficient Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input, select {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #218838;
+    }
+
+    .results {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e9ecef;
+      border-radius: 4px;
+      display: none; /* Hidden by default */
+    }
+
+    .results h2 {
+      margin-bottom: 10px;
+    }
+
+    .results p {
+      margin: 5px 0;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Moment Coefficient Calculator</h1>
+    <form id="coefficientForm">
+      <!-- Input Fields -->
+      <label for="lx">Shorter Span (L<sub>x</sub>) in feet:</label>
+      <input type="number" id="lx" step="0.01" required>
+
+      <label for="ly">Longer Span (L<sub>y</sub>) in feet:</label>
+      <input type="number" id="ly" step="0.01" required>
+
+      <!-- Boundary Condition Input -->
+      <label for="boundary">Boundary Condition:</label>
+      <select id="boundary" required>
+        <option value="all_continuous">All Edges Continuous</option>
+        <option value="two_adjacent_discontinuous">Two Adjacent Edges Discontinuous</option>
+        <option value="one_long_discontinuous">One Long Edge Discontinuous</option>
+        <option value="two_short_discontinuous">Two Short Edges Discontinuous</option>
+        <option value="all_discontinuous">All Edges Discontinuous</option>
+      </select>
+
+      <button type="submit">Calculate</button>
+    </form>
+
+    <!-- Results Section -->
+    <div id="results" class="results">
+      <h2>Moment Coefficients</h2>
+      <p><strong>Aspect Ratio (L<sub>y</sub>/L<sub>x</sub>):</strong> <span id="aspectRatio"></span></p>
+      <p><strong>C<sub>x</sub> (Positive Moment in Shorter Span):</strong> <span id="cxResult"></span></p>
+      <p><strong>C<sub>y</sub> (Positive Moment in Longer Span):</strong> <span id="cyResult"></span></p>
+      <p><strong>C<sub>x-neg</sub> (Negative Moment in Shorter Span):</strong> <span id="cxNegResult"></span></p>
+      <p><strong>C<sub>y-neg</sub> (Negative Moment in Longer Span):</strong> <span id="cyNegResult"></span></p>
+    </div>
+  </div>
+
+  <script>
+    // Moment Coefficient Data
+    const momentCoefficients = {
+      all_continuous: [
+        { ratio: 1.0, cx: 0.024, cy: 0.024, cx_neg: 0.032, cy_neg: 0.032 },
+        { ratio: 1.1, cx: 0.028, cy: 0.023, cx_neg: 0.037, cy_neg: 0.031 },
+        { ratio: 1.2, cx: 0.032, cy: 0.022, cx_neg: 0.042, cy_neg: 0.029 },
+        { ratio: 1.3, cx: 0.035, cy: 0.020, cx_neg: 0.046, cy_neg: 0.027 },
+        { ratio: 1.4, cx: 0.038, cy: 0.018, cx_neg: 0.049, cy_neg: 0.025 },
+        { ratio: 1.5, cx: 0.040, cy: 0.016, cx_neg: 0.052, cy_neg: 0.023 },
+        { ratio: 2.0, cx: 0.048, cy: 0.008, cx_neg: 0.064, cy_neg: 0.014 },
+      ],
+      two_adjacent_discontinuous: [
+        { ratio: 1.0, cx: 0.036, cy: 0.036, cx_neg: 0.047, cy_neg: 0.047 },
+        { ratio: 1.1, cx: 0.041, cy: 0.034, cx_neg: 0.053, cy_neg: 0.044 },
+        { ratio: 1.2, cx: 0.046, cy: 0.032, cx_neg: 0.058, cy_neg: 0.041 },
+        { ratio: 1.3, cx: 0.050, cy: 0.030, cx_neg: 0.063, cy_neg: 0.038 },
+        { ratio: 1.4, cx: 0.054, cy: 0.027, cx_neg: 0.067, cy_neg: 0.035 },
+        { ratio: 1.5, cx: 0.057, cy: 0.024, cx_neg: 0.070, cy_neg: 0.032 },
+        { ratio: 2.0, cx: 0.068, cy: 0.012, cx_neg: 0.083, cy_neg: 0.018 },
+      ],
+      one_long_discontinuous: [
+        { ratio: 1.0, cx: 0.045, cy: 0.045, cx_neg: 0.060, cy_neg: 0.060 },
+        { ratio: 1.1, cx: 0.051, cy: 0.042, cx_neg: 0.067, cy_neg: 0.056 },
+        { ratio: 1.2, cx: 0.056, cy: 0.039, cx_neg: 0.073, cy_neg: 0.052 },
+        { ratio: 1.3, cx: 0.061, cy: 0.036, cx_neg: 0.078, cy_neg: 0.048 },
+        { ratio: 1.4, cx: 0.065, cy: 0.033, cx_neg: 0.082, cy_neg: 0.044 },
+        { ratio: 1.5, cx: 0.069, cy: 0.029, cx_neg: 0.086, cy_neg: 0.040 },
+        { ratio: 2.0, cx: 0.082, cy: 0.015, cx_neg: 0.100, cy_neg: 0.022 },
+      ],
+      two_short_discontinuous: [
+        { ratio: 1.0, cx: 0.045, cy: 0.045, cx_neg: 0.060, cy_neg: 0.060 },
+        { ratio: 1.1, cx: 0.051, cy: 0.042, cx_neg: 0.067, cy_neg: 0.056 },
+        { ratio: 1.2, cx: 0.056, cy: 0.039, cx_neg: 0.073, cy_neg: 0.052 },
+        { ratio: 1.3, cx: 0.061, cy: 0.036, cx_neg: 0.078, cy_neg: 0.048 },
+        { ratio: 1.4, cx: 0.065, cy: 0.033, cx_neg: 0.082, cy_neg: 0.044 },
+        { ratio: 1.5, cx: 0.069, cy: 0.029, cx_neg: 0.086, cy_neg: 0.040 },
+        { ratio: 2.0, cx: 0.082, cy: 0.015, cx_neg: 0.100, cy_neg: 0.022 },
+      ],
+      all_discontinuous: [
+        { ratio: 1.0, cx: 0.056, cy: 0.056, cx_neg: 0.075, cy_neg: 0.075 },
+        { ratio: 1.1, cx: 0.063, cy: 0.052, cx_neg: 0.083, cy_neg: 0.069 },
+        { ratio: 1.2, cx: 0.069, cy: 0.048, cx_neg: 0.090, cy_neg: 0.063 },
+        { ratio: 1.3, cx: 0.075, cy: 0.044, cx_neg: 0.096, cy_neg: 0.057 },
+        { ratio: 1.4, cx: 0.080, cy: 0.040, cx_neg: 0.101, cy_neg: 0.051 },
+        { ratio: 1.5, cx: 0.084, cy: 0.035, cx_neg: 0.106, cy_neg: 0.045 },
+        { ratio: 2.0, cx: 0.100, cy: 0.018, cx_neg: 0.122, cy_neg: 0.025 },
+      ],
+    };
+
+    // Function to interpolate moment coefficients
+    function interpolateCoefficients(aspectRatio, data) {
+      for (let i = 0; i < data.length - 1; i++) {
+        if (aspectRatio >= data[i].ratio && aspectRatio <= data[i + 1].ratio) {
+          const ratio1 = data[i].ratio;
+          const ratio2 = data[i + 1].ratio;
+          const t = (aspectRatio - ratio1) / (ratio2 - ratio1);
+
+          return {
+            cx: data[i].cx + t * (data[i + 1].cx - data[i].cx),
+            cy: data[i].cy + t * (data[i + 1].cy - data[i].cy),
+            cx_neg: data[i].cx_neg + t * (data[i + 1].cx_neg - data[i].cx_neg),
+            cy_neg: data[i].cy_neg + t * (data[i + 1].cy_neg - data[i].cy_neg),
+          };
+        }
+      }
+      return null;
+    }
+
+    document.getElementById('coefficientForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      // Input values
+      const lx = parseFloat(document.getElementById('lx').value);
+      const ly = parseFloat(document.getElementById('ly').value);
+      const boundary = document.getElementById('boundary').value;
+
+      // Calculate Aspect Ratio
+      const aspectRatio = ly / lx;
+
+      // Get moment coefficients based on boundary condition
+      const coefficients = interpolateCoefficients(aspectRatio, momentCoefficients[boundary]);
+
+      // Display Results
+      if (coefficients) {
+        document.getElementById('aspectRatio').textContent = aspectRatio.toFixed(2);
+        document.getElementById('cxResult').textContent = coefficients.cx.toFixed(4);
+        document.getElementById('cyResult').textContent = coefficients.cy.toFixed(4);
+        document.getElementById('cxNegResult').textContent = coefficients.cx_neg.toFixed(4);
+        document.getElementById('cyNegResult').textContent = coefficients.cy_neg.toFixed(4);
+        document.getElementById('results').style.display = 'block';
+      } else {
+        alert('Aspect ratio is out of range. Please ensure L_y / L_x is between 1.0 and 2.0.');
+      }
+    });
+  </script>
+</body>
+</html>
