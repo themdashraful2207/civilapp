@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS Tracker</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        #mapContainer { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; }
+        canvas { width: 100%; height: 100%; }
+        button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h2>GPS Tracking</h2>
+    <button onclick="trackLocation()">Track</button>
+    <button onclick="finishTracking()">Finish</button>
+    <p id="status">Click "Track" to save your location.</p>
+
+    <div id="mapContainer">
+        <canvas id="mapCanvas"></canvas>
+    </div>
+
+    <script>
+        let trackedPoints = [];
+
+        function trackLocation() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    let lat = position.coords.latitude;
+                    let lon = position.coords.longitude;
+                    trackedPoints.push({ lat, lon });
+                    document.getElementById("status").innerText = `Tracked ${trackedPoints.length} points`;
+                }, error => {
+                    console.error(error);
+                }, { enableHighAccuracy: true });
+            } else {
+                alert("Geolocation is not supported by your browser.");
+            }
+        }
+
+        function finishTracking() {
+            document.body.innerHTML = '<div id="mapContainer"><canvas id="mapCanvas"></canvas></div>';
+            drawTrackedPoints();
+        }
+
+        function drawTrackedPoints() {
+            const canvas = document.getElementById("mapCanvas");
+            const ctx = canvas.getContext("2d");
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            ctx.fillStyle = "black";
+
+            // Normalize points to fit canvas
+            if (trackedPoints.length > 1) {
+                const minLat = Math.min(...trackedPoints.map(p => p.lat));
+                const maxLat = Math.max(...trackedPoints.map(p => p.lat));
+                const minLon = Math.min(...trackedPoints.map(p => p.lon));
+                const maxLon = Math.max(...trackedPoints.map(p => p.lon));
+
+                trackedPoints.forEach(point => {
+                    let x = ((point.lon - minLon) / (maxLon - minLon)) * canvas.width * 0.9 + canvas.width * 0.05;
+                    let y = canvas.height - ((point.lat - minLat) / (maxLat - minLat)) * canvas.height * 0.9 - canvas.height * 0.05;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                    ctx.fill();
+                });
+            }
+        }
+    </script>
+</body>
+</html>
