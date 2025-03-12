@@ -7,7 +7,7 @@
     <style>
         body { text-align: center; font-family: Arial, sans-serif; }
         #mapContainer { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; }
-        canvas { width: 100%; height: 100%; }
+        canvas { display: block; width: 100%; height: 100%; }
         button { padding: 10px 20px; margin: 10px; font-size: 16px; cursor: pointer; border: none; }
         #trackBtn { background: green; color: white; }
         #finishBtn { background: red; color: white; font-size: 18px; }
@@ -25,57 +25,31 @@
 
     <script>
         let trackedPoints = [];
-        let trackBtn = document.getElementById("trackBtn");
 
         function trackLocation() {
             if ("geolocation" in navigator) {
-                trackBtn.innerText = "Tracking...";
-                trackBtn.style.background = "orange";
+                document.getElementById("trackBtn").innerText = "Tracking...";
+                document.getElementById("trackBtn").style.background = "orange";
 
                 navigator.geolocation.getCurrentPosition(position => {
                     let lat = position.coords.latitude;
                     let lon = position.coords.longitude;
                     trackedPoints.push({ lat, lon });
 
-                    trackBtn.innerText = "Tracked!";
-                    trackBtn.style.background = "green";
+                    document.getElementById("trackBtn").innerText = "Tracked!";
+                    document.getElementById("trackBtn").style.background = "green";
                     setTimeout(() => {
-                        trackBtn.innerText = "Track";
+                        document.getElementById("trackBtn").innerText = "Track";
                     }, 1500);
 
                     document.getElementById("status").innerText = `Tracked ${trackedPoints.length} point(s)`;
 
                 }, error => {
-                    handleError(error);
+                    alert("Error getting location!");
                 }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
             } else {
                 alert("Geolocation is not supported by your browser.");
             }
-        }
-
-        function handleError(error) {
-            let errorMsg = "Unknown error occurred.";
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    errorMsg = "Permission denied! Please allow location access.";
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    errorMsg = "Location unavailable! Try again later.";
-                    break;
-                case error.TIMEOUT:
-                    errorMsg = "GPS took too long! Move to an open area.";
-                    break;
-                case error.UNKNOWN_ERROR:
-                    errorMsg = "An unknown GPS error occurred.";
-                    break;
-            }
-            alert(errorMsg);
-            trackBtn.innerText = "Error!";
-            trackBtn.style.background = "red";
-            setTimeout(() => {
-                trackBtn.innerText = "Track";
-                trackBtn.style.background = "green";
-            }, 2000);
         }
 
         function finishTracking() {
@@ -84,17 +58,16 @@
                 return;
             }
 
-            document.body.innerHTML = '<div id="mapContainer"><canvas id="mapCanvas"></canvas></div>';
+            document.getElementById("mapContainer").style.display = "block";
             drawTrackedPoints();
         }
 
         function drawTrackedPoints() {
             const canvas = document.getElementById("mapCanvas");
             const ctx = canvas.getContext("2d");
+
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-
-            ctx.fillStyle = "black";
 
             let minLat = Math.min(...trackedPoints.map(p => p.lat));
             let maxLat = Math.max(...trackedPoints.map(p => p.lat));
@@ -110,11 +83,11 @@
 
                 ctx.beginPath();
                 if (index === 0) {
-                    ctx.fillStyle = "green"; // First point = GREEN FLAG
+                    ctx.fillStyle = "green"; // First point = GREEN FLAG 🚩
                 } else if (index === trackedPoints.length - 1) {
-                    ctx.fillStyle = "red"; // Last point = RED CROSS
+                    ctx.fillStyle = "red"; // Last point = RED CROSS ❌
                 } else {
-                    ctx.fillStyle = "black"; // Middle points = BLACK DOT
+                    ctx.fillStyle = "black"; // Middle points = BLACK DOT ⚫
                 }
                 ctx.arc(x, y, 6, 0, 2 * Math.PI); // Adjust dot size
                 ctx.fill();
