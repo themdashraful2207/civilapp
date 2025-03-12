@@ -84,12 +84,6 @@
     <label>Long Span (Ly) in feet:</label>
     <input type="number" id="Ly" value="22" min="1" step="0.1">
 
-    <label>Dead Load (DL) in tons:</label>
-    <input type="number" id="DL" value="20" min="0" step="0.1">
-
-    <label>Live Load (LL) in tons:</label>
-    <input type="number" id="LL" value="25" min="0" step="0.1">
-
     <label>Concrete Strength f'c (psi):</label>
     <input type="number" id="fc" value="3000" min="2000" max="8000" step="500">
 
@@ -103,77 +97,89 @@
 
 <script>
     function calculateSlab() {
+        console.log("Calculate button clicked"); // Debug to confirm function runs
+
         // Get input values
         let Mx = parseFloat(document.getElementById("Mx").value);
         let My = parseFloat(document.getElementById("My").value);
         let Lx = parseFloat(document.getElementById("Lx").value);
         let Ly = parseFloat(document.getElementById("Ly").value);
-        let DL = parseFloat(document.getElementById("DL").value);
-        let LL = parseFloat(document.getElementById("LL").value);
         let fc = parseFloat(document.getElementById("fc").value);
         let fy = parseFloat(document.getElementById("fy").value);
 
         // Input validation
-        if (Lx <= 0 || Ly <= 0 || DL < 0 || LL < 0 || fc < 2000 || fy < 40000) {
+        if (Lx <= 0 || Ly <= 0 || fc < 2000 || fy < 40000) {
             document.getElementById("output").innerHTML = "Please enter valid input values.";
             return;
         }
 
-        // Calculate factored load in psf
-        let factoredLoad = (1.2 * DL + 1.6 * LL) * 2000 / (Lx * Ly); // tons to psf with load factors
-        let Lx_in = Lx * 12, Ly_in = Ly * 12; // Convert to inches
+        // Slab thickness based on ACI 318-19
+        let beta = Ly / Lx;
+        let ln = Ly * 12; // Convert to inches
+        let thicknessFactor = (Mx === 0.062 && My === 0.062) ? 36 : (Mx === 0.100 || My === 0.100) ? 20 : 28;
+        let minThickness = ln / thicknessFactor;
+        let totalThickness = Math.max(5, Math.ceil(minThickness / 0.5) * 0.5);
 
-        // Minimum slab thickness (ACI 318-19 Table 8.3.1.1)
-        let longerSpan = Math.max(Lx_in, Ly_in);
-        let minThickness = longerSpan / 30; // Conservative estimate for two-way flat plate
-        let totalThickness = Math.ceil(minThickness / 0.5) * 0.5; // Round to nearest 0.5 inch
+        // Calculate loads
+        let slabDL = (totalThickness / 12) * 150; // psf, based on thickness
+        let liveLoad = 45; // Fixed live load in psf
+        let factoredLoad = (slabDL * 1.2) + (liveLoad * 1.6); // psf
 
-        // Effective depth (assume 1" cover and #5 bars)
-        let d = totalThickness - 1.5; 
+        // Effective depth
+        let d = totalThickness - 1.25;
 
-        // Moment calculations (kip-ft/ft)
-        let M_x = Mx * factoredLoad * Lx * Lx / 1000; // Convert to kip-ft/ft
-        let M_y = My * factoredLoad * Ly * Ly / 1000;
+        // Moment calculation
+        let r = Lx / Ly; // Aspect ratio (short/long)
+        let wu = factoredLoad / 1000; // Convert to ksf
+
+        // Moments per ACI direct design method (simplified)
+        let M_x = wu * Lx * Ly * Ly * Mx * (1 / (1 + r * r)); // Short direction
+        let M_y = wu * Lx * Ly * Ly * My * (r * r / (1 + r * r)); // Long direction
 
         // Reinforcement calculation
-        let phi = 0.9; // Strength reduction factor
-        let b = 12; // 1 ft strip in inches
-        
-        // Calculate required As (in²/ft)
+        let phi = 0.9;
+        let b = 12;
+
         function calcAs(Mu, d) {
-            let Rn = (Mu * 12 * 1000) / (phi * b * d * d); // psi
-            let rho = (0.85 * fc / fy) * (1 - Math.sqrt(1 - (2 * Rn) / (0.85 * fc)));
-            let As = rho * b * d;
-            return Math.max(As, 0.0018 * b * totalThickness); // Minimum reinforcement
+            let Mu_in = Mu * 12000; // kip-ft/ft to lb-in/ft
+            let a = Math.sqrt(2 * Mu_in / (0.85 * phi * fc * b));
+            if (a > d) a = d * 0.85; // Limit compression block
+            let As = Mu_in / (phi * fy * (d - a/2));
+            let As_min = Math.max(0.0018 * b * totalThickness, 3 * Math.sqrt(fc) * b * d / fy);
+            return Math.max(As, As_min);
         }
 
         let As_x = calcAs(M_x, d);
         let As_y = calcAs(M_y, d);
 
-        // Bar selection
-        let barOptions = [
-            { size: "#3", area: 0.11 },
-            { size: "#4", area: 0.20 },
-            { size: "#5", area: 0.31 },
-            { size: "#6", area: 0.44 }
-        ];
-
-        function findBarSizeAndSpacing(As) {
+        // Bar spacing with strict limit to #3 and #4
+        function findBarSizeAndSpacing(As, spanType) {
+            let barOptions = [
+                { size: "#3", area: 0.11, diam: 0.375 },
+                { size: "#4", area: 0.20, diam: 0.500 }
+            ];
+            
             for (let bar of barOptions) {
-                let spacing = Math.floor((bar.area * 12 / As) * 10) * 10; // Round to nearest 10mm
-                if (spacing >= 100 && spacing <= 300) {
+                let spacing = Math.round((bar.area / As) * 12 * 25.4);
+                let maxSpacing = Math.min(3 * totalThickness * 25.4, 450);
+                let minSpacing = spanType === "short" ? 50 : 75;
+                if (spacing >= minSpacing && spacing <= maxSpacing) {
                     return `${bar.size} @ ${spacing}mm`;
                 }
             }
-            return "#5 @ 200mm"; // Default
+            // If no fit, use #4 with adjusted spacing
+            let defaultBar = barOptions[1]; // #4
+            let defaultSpacing = Math.round((defaultBar.area / As) * 12 * 25.4);
+            defaultSpacing = Math.max(minSpacing, Math.min(defaultSpacing, maxSpacing));
+            return `${defaultBar.size} @ ${defaultSpacing}mm`;
         }
 
-        let bar_x = findBarSizeAndSpacing(As_x);
-        let bar_y = findBarSizeAndSpacing(As_y);
+        let bar_x = findBarSizeAndSpacing(As_x, "short");
+        let bar_y = findBarSizeAndSpacing(As_y, "long");
 
-        // Output results
+        // Output
         document.getElementById("output").innerHTML =
-            `<strong>Factored Load:</strong> ${factoredLoad.toFixed(2)} psf <br>
+            `<strong>Total Factored Load:</strong> ${factoredLoad.toFixed(2)} psf <br>
              <strong>Moment (Mx):</strong> ${M_x.toFixed(2)} kip-ft/ft <br>
              <strong>Moment (My):</strong> ${M_y.toFixed(2)} kip-ft/ft <br>
              <strong>Slab Thickness:</strong> ${totalThickness.toFixed(1)} inches <br>
