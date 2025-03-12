@@ -10,13 +10,13 @@
         canvas { width: 100%; height: 100%; }
         button { padding: 10px 20px; margin: 10px; font-size: 16px; cursor: pointer; border: none; }
         #trackBtn { background: green; color: white; }
-        #finishBtn { background: red; color: white; }
+        #finishBtn { background: red; color: white; font-size: 18px; }
     </style>
 </head>
 <body>
     <h2>GPS Tracking</h2>
     <button id="trackBtn" onclick="trackLocation()">Track</button>
-    <button id="finishBtn" onclick="finishTracking()">Finish</button>
+    <button id="finishBtn" onclick="finishTracking()">❌ Finish</button>
     <p id="status">Click "Track" to save your location.</p>
 
     <div id="mapContainer">
@@ -30,37 +30,60 @@
         function trackLocation() {
             if ("geolocation" in navigator) {
                 trackBtn.innerText = "Tracking...";
-                trackBtn.style.background = "orange"; // Change color while tracking
-                
+                trackBtn.style.background = "orange";
+
                 navigator.geolocation.getCurrentPosition(position => {
                     let lat = position.coords.latitude;
                     let lon = position.coords.longitude;
                     trackedPoints.push({ lat, lon });
 
-                    // Update button text and color
                     trackBtn.innerText = "Tracked!";
                     trackBtn.style.background = "green";
                     setTimeout(() => {
                         trackBtn.innerText = "Track";
-                        trackBtn.style.background = "green";
-                    }, 1500); // Reset button after 1.5 sec
+                    }, 1500);
 
                     document.getElementById("status").innerText = `Tracked ${trackedPoints.length} point(s)`;
+
                 }, error => {
-                    trackBtn.innerText = "Error!";
-                    trackBtn.style.background = "red";
-                    setTimeout(() => {
-                        trackBtn.innerText = "Track";
-                        trackBtn.style.background = "green";
-                    }, 1500);
-                    console.error(error);
-                }, { enableHighAccuracy: true });
+                    handleError(error);
+                }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
             } else {
                 alert("Geolocation is not supported by your browser.");
             }
         }
 
+        function handleError(error) {
+            let errorMsg = "Unknown error occurred.";
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMsg = "Permission denied! Please allow location access.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMsg = "Location unavailable! Try again later.";
+                    break;
+                case error.TIMEOUT:
+                    errorMsg = "GPS took too long! Move to an open area.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    errorMsg = "An unknown GPS error occurred.";
+                    break;
+            }
+            alert(errorMsg);
+            trackBtn.innerText = "Error!";
+            trackBtn.style.background = "red";
+            setTimeout(() => {
+                trackBtn.innerText = "Track";
+                trackBtn.style.background = "green";
+            }, 2000);
+        }
+
         function finishTracking() {
+            if (trackedPoints.length === 0) {
+                alert("No points tracked!");
+                return;
+            }
+
             document.body.innerHTML = '<div id="mapContainer"><canvas id="mapCanvas"></canvas></div>';
             drawTrackedPoints();
         }
@@ -72,11 +95,6 @@
             canvas.height = window.innerHeight;
 
             ctx.fillStyle = "black";
-
-            if (trackedPoints.length === 0) {
-                alert("No points tracked!");
-                return;
-            }
 
             let minLat = Math.min(...trackedPoints.map(p => p.lat));
             let maxLat = Math.max(...trackedPoints.map(p => p.lat));
@@ -91,7 +109,7 @@
                 let y = canvas.height - ((point.lat - minLat) / (maxLat - minLat)) * canvas.height * 0.8 - canvas.height * 0.1;
                 
                 ctx.beginPath();
-                ctx.arc(x, y, 3, 0, 2 * Math.PI); 
+                ctx.arc(x, y, 3, 0, 2 * Math.PI);
                 ctx.fill();
             });
         }
