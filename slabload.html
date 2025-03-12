@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Two-Way Slab Load Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input, select {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #218838;
+    }
+
+    .results {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e9ecef;
+      border-radius: 4px;
+      display: none; /* Hidden by default */
+    }
+
+    .results h2 {
+      margin-bottom: 10px;
+    }
+
+    .results p {
+      margin: 5px 0;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Two-Way Slab Load Calculator</h1>
+    <form id="loadForm">
+      <!-- Input Fields -->
+      <label for="lx">Short Span (L<sub>x</sub>) in feet:</label>
+      <input type="number" id="lx" step="0.01" required>
+
+      <label for="ly">Long Span (L<sub>y</sub>) in feet:</label>
+      <input type="number" id="ly" step="0.01" required>
+
+      <label for="thickness">Slab Thickness (h) in inches:</label>
+      <input type="number" id="thickness" step="0.1" required>
+
+      <!-- Live Load Input -->
+      <label for="liveLoad">Live Load (LL) in psf:</label>
+      <input type="number" id="liveLoad" step="0.1" required>
+
+      <!-- Floor Finish Load Input -->
+      <label for="floorFinish">Floor Finish Load in psf:</label>
+      <input type="number" id="floorFinish" step="0.1" required>
+
+      <!-- Load Combination Selection -->
+      <label for="loadCombination">Load Combination:</label>
+      <select id="loadCombination" required>
+        <option value="1.2DL_1.6LL">1.2DL + 1.6LL</option>
+        <option value="1.4DL_1.7LL">1.4DL + 1.7LL</option>
+      </select>
+
+      <button type="submit">Calculate</button>
+    </form>
+
+    <!-- Results Section -->
+    <div id="results" class="results">
+      <h2>Design Results</h2>
+      <p><strong>Dead Load (DL):</strong> <span id="dlResult"></span> kip/ft²</p>
+      <p><strong>Factored Load (w<sub>u</sub>):</strong> <span id="wuResult"></span> kip/ft²</p>
+      <p><strong>Total Area:</strong> <span id="totalArea"></span> ft²</p>
+      <p><strong>Total Factored Load:</strong> <span id="totalFactoredLoad"></span> kip</p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('loadForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      // Input values
+      const lx = parseFloat(document.getElementById('lx').value);
+      const ly = parseFloat(document.getElementById('ly').value);
+      const thickness = parseFloat(document.getElementById('thickness').value);
+      const liveLoad = parseFloat(document.getElementById('liveLoad').value);
+      const floorFinish = parseFloat(document.getElementById('floorFinish').value);
+      const loadCombination = document.getElementById('loadCombination').value;
+
+      // Constants
+      const concreteDensity = 150; // Concrete density in pcf
+
+      // Step 1: Calculate Dead Load (DL)
+      const slabDL = (thickness / 12) * concreteDensity; // Slab dead load in psf
+      const totalDL = slabDL + floorFinish; // Total dead load in psf
+
+      // Step 2: Calculate Factored Load (w_u)
+      let wu;
+      if (loadCombination === "1.2DL_1.6LL") {
+        wu = (1.2 * totalDL) + (1.6 * liveLoad); // 1.2DL + 1.6LL
+      } else if (loadCombination === "1.4DL_1.7LL") {
+        wu = (1.4 * totalDL) + (1.7 * liveLoad); // 1.4DL + 1.7LL
+      }
+
+      // Convert wu from psf to kip/ft²
+      const wu_kip = wu / 1000; // 1 kip = 1000 lb
+
+      // Step 3: Calculate Total Area
+      const totalArea = lx * ly; // Total area in ft²
+
+      // Step 4: Calculate Total Factored Load
+      const totalFactoredLoad = totalArea * wu_kip; // Total factored load in kip
+
+      // Display Results
+      document.getElementById('dlResult').textContent = (totalDL / 1000).toFixed(4);
+      document.getElementById('wuResult').textContent = wu_kip.toFixed(4);
+      document.getElementById('totalArea').textContent = totalArea.toFixed(2);
+      document.getElementById('totalFactoredLoad').textContent = totalFactoredLoad.toFixed(2);
+      document.getElementById('results').style.display = 'block';
+    });
+  </script>
+</body>
+</html>
