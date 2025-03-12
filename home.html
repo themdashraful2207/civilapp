@@ -144,7 +144,16 @@
         <div>© 2025 Hybrid Civil Engineering</div>
         <a href="#" class="logout-link" onclick="logout()">Logout</a>
     </footer>
-
-
-</body>
-</html>
+<script>
+         // Check if user is logged in
+         if (localStorage.getItem("isLoggedIn") !== "true") {
+             window.location.href = "https://themdashraful2207.github.io/civilapp/menu.html";
+         }
+ 
+         function logout() {
+             localStorage.removeItem("isLoggedIn");
+             window.location.href = "https://themdashraful2207.github.io/civilapp/menu.html";
+         }
+     </script>
+ </body>
+ </html>
