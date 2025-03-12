@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slab Thickness Calculator (BNBC)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input, select {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #218838;
+    }
+
+    .results {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e9ecef;
+      border-radius: 4px;
+      display: none; /* Hidden by default */
+    }
+
+    .results h2 {
+      margin-bottom: 10px;
+    }
+
+    .results p {
+      margin: 5px 0;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Slab Thickness Calculator (BNBC)</h1>
+    <form id="thicknessForm">
+      <!-- Input Fields -->
+      <label for="lx">Shorter Span (L<sub>x</sub>) in feet:</label>
+      <input type="number" id="lx" step="0.01" required>
+
+      <!-- Boundary Condition Input -->
+      <label for="boundary">Boundary Condition:</label>
+      <select id="boundary" required>
+        <option value="all_continuous">All Edges Continuous</option>
+        <option value="one_long_discontinuous">One Long Edge Discontinuous</option>
+        <option value="two_adjacent_discontinuous">Two Adjacent Edges Discontinuous</option>
+        <option value="all_discontinuous">All Edges Discontinuous</option>
+      </select>
+
+      <button type="submit">Calculate</button>
+    </form>
+
+    <!-- Results Section -->
+    <div id="results" class="results">
+      <h2>Design Results</h2>
+      <p><strong>Minimum Slab Thickness (h):</strong> <span id="thicknessResult"></span> inches</p>
+    </div>
+  </div>
+
+  <script>
+    // BNBC Factors for Thickness Calculation
+    const thicknessFactors = {
+      all_continuous: 36,
+      one_long_discontinuous: 32,
+      two_adjacent_discontinuous: 28,
+      all_discontinuous: 24,
+    };
+
+    document.getElementById('thicknessForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      // Input values
+      const lx = parseFloat(document.getElementById('lx').value);
+      const boundary = document.getElementById('boundary').value;
+
+      // Get factor based on boundary condition
+      const factor = thicknessFactors[boundary];
+
+      // Calculate minimum thickness
+      const thickness = (lx * 12) / factor; // Convert feet to inches
+
+      // Display Results
+      document.getElementById('thicknessResult').textContent = thickness.toFixed(2);
+      document.getElementById('results').style.display = 'block';
+    });
+  </script>
+</body>
+</html>
