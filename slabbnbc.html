@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slab Reinforcement Spacing Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input, select {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #218838;
+    }
+
+    .results {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e9ecef;
+      border-radius: 4px;
+      display: none; /* Hidden by default */
+    }
+
+    .results h2 {
+      margin-bottom: 10px;
+    }
+
+    .results p {
+      margin: 5px 0;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Slab Reinforcement Spacing Calculator</h1>
+    <form id="spacingForm">
+      <!-- Input Fields -->
+      <label for="lx">Short Span (L<sub>x</sub>) in feet:</label>
+      <input type="number" id="lx" step="0.01" required>
+
+      <label for="ly">Long Span (L<sub>y</sub>) in feet:</label>
+      <input type="number" id="ly" step="0.01" required>
+
+      <label for="wu">Factored Load (w<sub>u</sub>) in kip/ft²:</label>
+      <input type="number" id="wu" step="0.01" required>
+
+      <!-- Positive Moment Coefficients -->
+      <label for="cx">Positive Moment Coefficient for Short Span (C<sub>x</sub>):</label>
+      <input type="number" id="cx" step="0.001" required>
+
+      <label for="cy">Positive Moment Coefficient for Long Span (C<sub>y</sub>):</label>
+      <input type="number" id="cy" step="0.001" required>
+
+      <!-- Negative Moment Coefficients -->
+      <label for="cx_neg">Negative Moment Coefficient for Short Span (C<sub>x-neg</sub>):</label>
+      <input type="number" id="cx_neg" step="0.001" required>
+
+      <label for="cy_neg">Negative Moment Coefficient for Long Span (C<sub>y-neg</sub>):</label>
+      <input type="number" id="cy_neg" step="0.001" required>
+
+      <label for="thickness">Slab Thickness (h) in inches:</label>
+      <input type="number" id="thickness" step="0.1" required>
+
+      <label for="barSize">Select Bar Size:</label>
+      <select id="barSize" required>
+        <option value="0.11">#3 (0.11 in²)</option>
+        <option value="0.20">#4 (0.20 in²)</option>
+        <option value="0.31">#5 (0.31 in²)</option>
+        <option value="0.44">#6 (0.44 in²)</option>
+        <option value="0.60">#7 (0.60 in²)</option>
+        <option value="0.79">#8 (0.79 in²)</option>
+      </select>
+
+      <button type="submit">Calculate</button>
+    </form>
+
+    <!-- Results Section -->
+    <div id="results" class="results">
+      <h2>Design Results</h2>
+      <p><strong>Required Steel Area in Short Span (A<sub>sx</sub>):</strong> <span id="asxResult"></span> in²/ft</p>
+      <p><strong>Required Steel Area in Long Span (A<sub>sy</sub>):</strong> <span id="asyResult"></span> in²/ft</p>
+      <p><strong>Spacing in Short Direction:</strong> <span id="spacingX"></span> inches c/c</p>
+      <p><strong>Spacing in Long Direction:</strong> <span id="spacingY"></span> inches c/c</p>
+      <p><strong>Required Steel Area for Negative Moment in Short Span (A<sub>sx-neg</sub>):</strong> <span id="asxNegResult"></span> in²/ft</p>
+      <p><strong>Required Steel Area for Negative Moment in Long Span (A<sub>sy-neg</sub>):</strong> <span id="asyNegResult"></span> in²/ft</p>
+      <p><strong>Spacing for Negative Moment in Short Direction:</strong> <span id="spacingXNeg"></span> inches c/c</p>
+      <p><strong>Spacing for Negative Moment in Long Direction:</strong> <span id="spacingYNeg"></span> inches c/c</p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('spacingForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      // Input values
+      const lx = parseFloat(document.getElementById('lx').value);
+      const ly = parseFloat(document.getElementById('ly').value);
+      const wu = parseFloat(document.getElementById('wu').value);
+      const cx = parseFloat(document.getElementById('cx').value);
+      const cy = parseFloat(document.getElementById('cy').value);
+      const cx_neg = parseFloat(document.getElementById('cx_neg').value);
+      const cy_neg = parseFloat(document.getElementById('cy_neg').value);
+      const thickness = parseFloat(document.getElementById('thickness').value);
+      const barSize = parseFloat(document.getElementById('barSize').value);
+
+      // Constants
+      const phi = 0.9; // Strength reduction factor
+      const j = 0.95; // Lever arm factor
+      const fy = 60000; // Steel yield strength in psi
+
+      // Step 1: Calculate Moments
+      const mx = cx * wu * Math.pow(lx, 2); // Positive moment in short span (kip-ft/ft)
+      const my = cy * wu * Math.pow(ly, 2); // Positive moment in long span (kip-ft/ft)
+      const mx_neg = cx_neg * wu * Math.pow(lx, 2); // Negative moment in short span (kip-ft/ft)
+      const my_neg = cy_neg * wu * Math.pow(ly, 2); // Negative moment in long span (kip-ft/ft)
+
+      // Step 2: Calculate Required Steel Area
+      const d = thickness - 1; // Effective depth (assume 1 inch cover)
+      const asx = (mx * 12) / (phi * fy * j * d); // Steel area in short span (in²/ft)
+      const asy = (my * 12) / (phi * fy * j * d); // Steel area in long span (in²/ft)
+      const asx_neg = (mx_neg * 12) / (phi * fy * j * d); // Steel area for negative moment in short span (in²/ft)
+      const asy_neg = (my_neg * 12) / (phi * fy * j * d); // Steel area for negative moment in long span (in²/ft)
+
+      // Step 3: Calculate Spacing
+      const spacingX = (barSize / asx) * 12; // Spacing in short direction (inches c/c)
+      const spacingY = (barSize / asy) * 12; // Spacing in long direction (inches c/c)
+      const spacingXNeg = (barSize / asx_neg) * 12; // Spacing for negative moment in short direction (inches c/c)
+      const spacingYNeg = (barSize / asy_neg) * 12; // Spacing for negative moment in long direction (inches c/c)
+
+      // Display Results
+      document.getElementById('asxResult').textContent = asx.toFixed(4);
+      document.getElementById('asyResult').textContent = asy.toFixed(4);
+      document.getElementById('spacingX').textContent = spacingX.toFixed(2);
+      document.getElementById('spacingY').textContent = spacingY.toFixed(2);
+      document.getElementById('asxNegResult').textContent = asx_neg.toFixed(4);
+      document.getElementById('asyNegResult').textContent = asy_neg.toFixed(4);
+      document.getElementById('spacingXNeg').textContent = spacingXNeg.toFixed(2);
+      document.getElementById('spacingYNeg').textContent = spacingYNeg.toFixed(2);
+      document.getElementById('results').style.display = 'block';
+    });
+  </script>
+</body>
+</html>
