@@ -79,22 +79,22 @@
     </select>
 
     <label>Short Span (Lx) in feet:</label>
-    <input type="number" id="Lx" value="18">
+    <input type="number" id="Lx" value="18" min="1" step="0.1">
 
     <label>Long Span (Ly) in feet:</label>
-    <input type="number" id="Ly" value="22">
+    <input type="number" id="Ly" value="22" min="1" step="0.1">
 
-    <label>1.2 DL (tons):</label>
-    <input type="number" id="DL" value="20">
+    <label>Dead Load (DL) in tons:</label>
+    <input type="number" id="DL" value="20" min="0" step="0.1">
 
-    <label>1.6 LL (tons):</label>
-    <input type="number" id="LL" value="25">
+    <label>Live Load (LL) in tons:</label>
+    <input type="number" id="LL" value="25" min="0" step="0.1">
 
     <label>Concrete Strength f'c (psi):</label>
-    <input type="number" id="fc" value="3000">
+    <input type="number" id="fc" value="3000" min="2000" max="8000" step="500">
 
     <label>Steel Strength fy (psi):</label>
-    <input type="number" id="fy" value="60000">
+    <input type="number" id="fy" value="60000" min="40000" max="80000" step="5000">
 
     <button onclick="calculateSlab()">Calculate</button>
 
@@ -103,6 +103,7 @@
 
 <script>
     function calculateSlab() {
+        // Get input values
         let Mx = parseFloat(document.getElementById("Mx").value);
         let My = parseFloat(document.getElementById("My").value);
         let Lx = parseFloat(document.getElementById("Lx").value);
@@ -112,44 +113,70 @@
         let fc = parseFloat(document.getElementById("fc").value);
         let fy = parseFloat(document.getElementById("fy").value);
 
-        let factoredLoad = (DL + LL) * 2 * 2000 / (Lx * Ly); // Convert tons to psf
-        let Lx_in = Lx * 12, Ly_in = Ly * 12; // Convert feet to inches
+        // Input validation
+        if (Lx <= 0 || Ly <= 0 || DL < 0 || LL < 0 || fc < 2000 || fy < 40000) {
+            document.getElementById("output").innerHTML = "Please enter valid input values.";
+            return;
+        }
 
-        let M_x = Mx * factoredLoad * Lx * Lx;
-        let M_y = My * factoredLoad * Ly * Ly;
+        // Calculate factored load in psf
+        let factoredLoad = (1.2 * DL + 1.6 * LL) * 2000 / (Lx * Ly); // tons to psf with load factors
+        let Lx_in = Lx * 12, Ly_in = Ly * 12; // Convert to inches
 
-        let d = (2 * (Lx_in + Ly_in)) / 180; // Corrected slab thickness formula
-        let totalThickness = Math.ceil(d); // Round up for construction
+        // Minimum slab thickness (ACI 318-19 Table 8.3.1.1)
+        let longerSpan = Math.max(Lx_in, Ly_in);
+        let minThickness = longerSpan / 30; // Conservative estimate for two-way flat plate
+        let totalThickness = Math.ceil(minThickness / 0.5) * 0.5; // Round to nearest 0.5 inch
 
-        let rho_min = 0.002; // ACI minimum reinforcement ratio
-        let As_x = rho_min * totalThickness * 12; // Reinforcement for short span
-        let As_y = rho_min * totalThickness * 12; // Reinforcement for long span
+        // Effective depth (assume 1" cover and #5 bars)
+        let d = totalThickness - 1.5; 
 
+        // Moment calculations (kip-ft/ft)
+        let M_x = Mx * factoredLoad * Lx * Lx / 1000; // Convert to kip-ft/ft
+        let M_y = My * factoredLoad * Ly * Ly / 1000;
+
+        // Reinforcement calculation
+        let phi = 0.9; // Strength reduction factor
+        let b = 12; // 1 ft strip in inches
+        
+        // Calculate required As (in²/ft)
+        function calcAs(Mu, d) {
+            let Rn = (Mu * 12 * 1000) / (phi * b * d * d); // psi
+            let rho = (0.85 * fc / fy) * (1 - Math.sqrt(1 - (2 * Rn) / (0.85 * fc)));
+            let As = rho * b * d;
+            return Math.max(As, 0.0018 * b * totalThickness); // Minimum reinforcement
+        }
+
+        let As_x = calcAs(M_x, d);
+        let As_y = calcAs(M_y, d);
+
+        // Bar selection
         let barOptions = [
             { size: "#3", area: 0.11 },
-            { size: "#4", area: 0.2 }
+            { size: "#4", area: 0.20 },
+            { size: "#5", area: 0.31 },
+            { size: "#6", area: 0.44 }
         ];
 
         function findBarSizeAndSpacing(As) {
-            let bestOption = null;
             for (let bar of barOptions) {
-                let spacing = Math.round((bar.area / As) * 1000); // Convert in²/ft to mm spacing
-                if (spacing >= 100 && spacing <= 300) { // Ensure practical spacing
-                    bestOption = `${bar.size} @ ${spacing}mm`;
-                    break;
+                let spacing = Math.floor((bar.area * 12 / As) * 10) * 10; // Round to nearest 10mm
+                if (spacing >= 100 && spacing <= 300) {
+                    return `${bar.size} @ ${spacing}mm`;
                 }
             }
-            return bestOption || "#4 @ 200mm"; // Default if no match
+            return "#5 @ 200mm"; // Default
         }
 
         let bar_x = findBarSizeAndSpacing(As_x);
         let bar_y = findBarSizeAndSpacing(As_y);
 
+        // Output results
         document.getElementById("output").innerHTML =
             `<strong>Factored Load:</strong> ${factoredLoad.toFixed(2)} psf <br>
-             <strong>Moment (Mx):</strong> ${M_x.toFixed(2)} ft-lb/ft <br>
-             <strong>Moment (My):</strong> ${M_y.toFixed(2)} ft-lb/ft <br>
-             <strong>Required Slab Thickness:</strong> ${totalThickness} inches <br>
+             <strong>Moment (Mx):</strong> ${M_x.toFixed(2)} kip-ft/ft <br>
+             <strong>Moment (My):</strong> ${M_y.toFixed(2)} kip-ft/ft <br>
+             <strong>Slab Thickness:</strong> ${totalThickness.toFixed(1)} inches <br>
              <strong>Steel As (Short Span):</strong> ${As_x.toFixed(2)} in²/ft → ${bar_x} <br>
              <strong>Steel As (Long Span):</strong> ${As_y.toFixed(2)} in²/ft → ${bar_y}`;
     }
