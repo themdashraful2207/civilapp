@@ -96,16 +96,13 @@
             text-decoration: underline;
         }
 
-        /* Responsive adjustments */
         @media (max-width: 600px) {
             .menu {
                 grid-template-columns: 1fr;
             }
-
             header {
                 font-size: 28px;
             }
-
             .menu-item {
                 font-size: 16px;
             }
@@ -142,18 +139,28 @@
     </div>
     <footer>
         <div>© 2025 Hybrid Civil Engineering</div>
-        <a href="#" class="logout-link" onclick="logout()">Logout</a>
+        <a href="#" class="logout-link" onclick="logout(event)">Logout</a>
     </footer>
-<script>
-         // Check if user is logged in
-         if (localStorage.getItem("isLoggedIn") !== "true") {
-             window.location.href = "https://themdashraful2207.github.io/civilapp/menu.html";
-         }
- 
-         function logout() {
-             localStorage.removeItem("isLoggedIn");
-             window.location.href = "https://themdashraful2207.github.io/civilapp/menu.html";
-         }
-     </script>
- </body>
- </html>
+    <script>
+        console.log("Dashboard page loaded");
+        console.log("Initial isLoggedIn:", localStorage.getItem("isLoggedIn"));
+
+        if (localStorage.getItem("isLoggedIn") !== "true") {
+            console.log("isLoggedIn is not 'true', redirecting to menu.html");
+            window.location.replace("./menu.html");
+        } else {
+            console.log("User is logged in, staying on dashboard");
+        }
+
+        function logout(event) {
+            event.preventDefault(); // Prevent default anchor behavior
+            console.log("Logout function called");
+            localStorage.removeItem("isLoggedIn");
+            localStorage.setItem("isLoggedIn", "false"); // Explicitly set to false
+            console.log("isLoggedIn after logout:", localStorage.getItem("isLoggedIn"));
+            console.log("Redirecting to menu.html");
+            window.location.replace("./menu.html");
+        }
+    </script>
+</body>
+</html>
