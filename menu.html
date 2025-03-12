@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
     <style>
-    <style>
         :root {
             --primary: #4f46e5;
             --primary-dark: #3730a3;
@@ -13,13 +12,7 @@
             --text-dark: #1f2937;
             --text-light: #6b7280;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', 'Arial', sans-serif;
             min-height: 100vh;
@@ -29,7 +22,6 @@
             align-items: center;
             padding: 1rem;
         }
-
         .login-container {
             background: white;
             padding: 2.5rem;
@@ -41,7 +33,6 @@
             position: relative;
             overflow: hidden;
         }
-
         .login-container::before {
             content: '';
             position: absolute;
@@ -51,7 +42,6 @@
             height: 4px;
             background: linear-gradient(to right, var(--primary), var(--secondary));
         }
-
         h2 {
             color: var(--text-dark);
             font-size: 1.75rem;
@@ -60,18 +50,15 @@
             margin-bottom: 2rem;
             animation: fadeIn 0.8s ease-in;
         }
-
         .form-group {
             margin-bottom: 2rem;
             position: relative;
             opacity: 0;
             animation: fadeInUp 0.5s ease-out forwards;
         }
-
         .form-group:nth-child(1) { animation-delay: 0.2s; }
         .form-group:nth-child(2) { animation-delay: 0.3s; }
         button { animation-delay: 0.4s; }
-
         label {
             position: absolute;
             left: 16px;
@@ -83,15 +70,12 @@
             pointer-events: none;
             transition: all 0.3s ease;
         }
-
-        input:focus + label,
-        input:not(:placeholder-shown) + label {
+        input:focus + label, input:not(:placeholder-shown) + label {
             top: 0;
             font-size: 0.75rem;
             color: var(--primary);
             transform: translateY(-100%);
         }
-
         input {
             width: 100%;
             padding: 14px 16px;
@@ -102,14 +86,12 @@
             background: #f9fafb;
             transition: all 0.3s ease;
         }
-
         input:focus {
             outline: none;
             border-color: var(--primary);
             background: white;
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
-
         button {
             width: 100%;
             padding: 14px;
@@ -119,26 +101,25 @@
             border-radius: 8px;
             font-size: 1rem;
             font-weight: 500;
-            cursor: pointer;
+            cursor: pointer !important;
+            pointer-events: auto;
             transition: all 0.2s ease;
             opacity: 0;
             animation: fadeInUp 0.5s ease-out forwards;
             position: relative;
             overflow: hidden;
+            z-index: 10;
         }
-
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
-
         button:active {
             transform: scale(0.95);
             background: linear-gradient(to right, var(--primary-dark), #6d28d9);
             box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);
             transition: all 0.1s ease;
         }
-
         button::after {
             content: '';
             position: absolute;
@@ -151,13 +132,15 @@
             transform: translate(-50%, -50%);
             transition: width 0.3s ease, height 0.3s ease;
         }
-
         button:active::after {
             width: 200px;
             height: 200px;
             transition: width 0s ease, height 0s ease;
         }
-
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
         .error-message {
             color: #dc2626;
             text-align: center;
@@ -166,61 +149,33 @@
             min-height: 1.5rem;
             animation: shake 0.5s ease-in-out;
         }
-
         .input-error {
             border-color: #dc2626;
             box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
         }
-
-        /* Animations */
         @keyframes slideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
-
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
         }
-
-        /* Media Queries */
         @media (max-width: 480px) {
-            .login-container {
-                padding: 1.5rem;
-            }
-            h2 {
-                font-size: 1.5rem;
-            }
-            input, button {
-                padding: 12px;
-            }
+            .login-container { padding: 1.5rem; }
+            h2 { font-size: 1.5rem; }
+            input, button { padding: 12px; }
         }
-
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-    </style>
     </style>
 </head>
 <body>
@@ -244,12 +199,14 @@
 
     <script>
         if (localStorage.getItem("isLoggedIn") === "true") {
+            console.log("Already logged in, redirecting to proxy.html");
             window.location.replace("./proxy.html");
         }
 
         async function validateForm(event) {
             event.preventDefault();
-            
+            console.log("Sign In button clicked, validating form");
+
             const username = document.getElementById("username");
             const password = document.getElementById("password");
             const usernameError = document.getElementById("username-error");
@@ -289,10 +246,14 @@
                 isValid = false;
             }
 
-            if (!isValid) return false;
+            if (!isValid) {
+                console.log("Validation failed");
+                return false;
+            }
 
             try {
                 const response = await fetch('credentials.json');
+                if (!response.ok) throw new Error("Credentials file not found");
                 const data = await response.json();
                 
                 const user = data.users.find(u => 
@@ -307,22 +268,27 @@
                     errorMessage.style.color = "#16a34a";
                     errorMessage.classList.remove('error');
                     
-                    setTimeout(() => {
+                    try {
                         console.log("Redirecting to proxy.html");
                         window.location.replace("./proxy.html");
-                    }, 1500);
+                    } catch (err) {
+                        console.error("Redirect failed:", err);
+                        errorMessage.textContent = "রিডাইরেক্টে সমস্যা";
+                        errorMessage.style.color = "#dc2626";
+                    }
                 } else {
                     errorMessage.textContent = "ভুল ইউজারনেম বা পাসওয়ার্ড";
                     errorMessage.style.color = "#dc2626";
                     errorMessage.classList.add('error', 'shake');
                     setTimeout(() => errorMessage.classList.remove('shake'), 500);
+                    console.log("Invalid credentials");
                 }
             } catch (error) {
                 errorMessage.textContent = "সার্ভারে সমস্যা, পরে চেষ্টা করুন";
                 errorMessage.style.color = "#dc2626";
                 errorMessage.classList.add('error', 'shake');
                 setTimeout(() => errorMessage.classList.remove('shake'), 500);
-                console.error(error);
+                console.error("Fetch error:", error);
             }
             return false;
         }
@@ -332,6 +298,10 @@
                 this.classList.remove('input-error');
                 document.getElementById(`${field}-error`).textContent = '';
             });
+        });
+
+        document.querySelector('button[type="submit"]').addEventListener('click', () => {
+            console.log("Sign In button clicked");
         });
     </script>
 </body>
