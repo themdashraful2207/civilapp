@@ -118,20 +118,38 @@
         let M_x = Mx * factoredLoad * Lx * Lx;
         let M_y = My * factoredLoad * Ly * Ly;
 
-        let d = Lx_in / 180; // Slab thickness as per ACI (Lx / 180)
-        let totalThickness = d + 1.5 + 0.5; // Add clear cover (1.5") and bar diameter (0.5")
+        let d = (2 * (Lx_in + Ly_in)) / 180; // Corrected slab thickness formula
+        let totalThickness = Math.ceil(d); // Round up for construction
 
-        let As_x = (M_x * 12) / (0.87 * fy * d);
-        let As_y = (M_y * 12) / (0.87 * fy * d);
+        let rho_min = 0.002; // ACI minimum reinforcement ratio
+        let As_x = rho_min * totalThickness * 12; // Reinforcement for short span
+        let As_y = rho_min * totalThickness * 12; // Reinforcement for long span
 
-        let bar_x = (As_x < 0.4) ? "#4 @ 150mm" : "#5 @ 200mm";
-        let bar_y = (As_y < 0.4) ? "#4 @ 200mm" : "#5 @ 250mm";
+        let barOptions = [
+            { size: "#3", area: 0.11 },
+            { size: "#4", area: 0.2 }
+        ];
+
+        function findBarSizeAndSpacing(As) {
+            let bestOption = null;
+            for (let bar of barOptions) {
+                let spacing = Math.round((bar.area / As) * 1000); // Convert in²/ft to mm spacing
+                if (spacing >= 100 && spacing <= 300) { // Ensure practical spacing
+                    bestOption = `${bar.size} @ ${spacing}mm`;
+                    break;
+                }
+            }
+            return bestOption || "#4 @ 200mm"; // Default if no match
+        }
+
+        let bar_x = findBarSizeAndSpacing(As_x);
+        let bar_y = findBarSizeAndSpacing(As_y);
 
         document.getElementById("output").innerHTML =
             `<strong>Factored Load:</strong> ${factoredLoad.toFixed(2)} psf <br>
              <strong>Moment (Mx):</strong> ${M_x.toFixed(2)} ft-lb/ft <br>
              <strong>Moment (My):</strong> ${M_y.toFixed(2)} ft-lb/ft <br>
-             <strong>Required Slab Thickness:</strong> ${totalThickness.toFixed(2)} inches <br>
+             <strong>Required Slab Thickness:</strong> ${totalThickness} inches <br>
              <strong>Steel As (Short Span):</strong> ${As_x.toFixed(2)} in²/ft → ${bar_x} <br>
              <strong>Steel As (Long Span):</strong> ${As_y.toFixed(2)} in²/ft → ${bar_y}`;
     }
