@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Way Slab Moment & Reinforcement Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: #f4f4f4;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            font-size: 16px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #output {
+            font-size: 18px;
+            color: #333;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Two-Way Slab Moment & Reinforcement Calculator</h2>
+    <label>**Select Support Condition for Short Span (Lx)**:</label>
+    <select id="Mx">
+        <option value="0.062">All Edges Fixed (0.062)</option>
+        <option value="0.078">Three Edges Fixed (0.078)</option>
+        <option value="0.087">Two Adjacent Edges Fixed (0.087)</option>
+        <option value="0.090">One Edge Fixed (0.090)</option>
+        <option value="0.100">Simply Supported (0.100)</option>
+    </select>
+
+    <label>**Select Support Condition for Long Span (Ly)**:</label>
+    <select id="My">
+        <option value="0.062">All Edges Fixed (0.062)</option>
+        <option value="0.078">Three Edges Fixed (0.078)</option>
+        <option value="0.087">Two Adjacent Edges Fixed (0.087)</option>
+        <option value="0.090">One Edge Fixed (0.090)</option>
+        <option value="0.100">Simply Supported (0.100)</option>
+    </select>
+
+    <label>Short Span (Lx) in feet:</label>
+    <input type="number" id="Lx" value="18">
+
+    <label>Long Span (Ly) in feet:</label>
+    <input type="number" id="Ly" value="22">
+
+    <label>1.2 DL (tons):</label>
+    <input type="number" id="DL" value="20">
+
+    <label>1.6 LL (tons):</label>
+    <input type="number" id="LL" value="25">
+
+    <label>Concrete Strength f'c (psi):</label>
+    <input type="number" id="fc" value="3000">
+
+    <label>Steel Strength fy (psi):</label>
+    <input type="number" id="fy" value="60000">
+
+    <button onclick="calculateSlab()">Calculate</button>
+
+    <div id="output"></div>
+</div>
+
+<script>
+    function calculateSlab() {
+        let Mx = parseFloat(document.getElementById("Mx").value);
+        let My = parseFloat(document.getElementById("My").value);
+        let Lx = parseFloat(document.getElementById("Lx").value);
+        let Ly = parseFloat(document.getElementById("Ly").value);
+        let DL = parseFloat(document.getElementById("DL").value);
+        let LL = parseFloat(document.getElementById("LL").value);
+        let fc = parseFloat(document.getElementById("fc").value);
+        let fy = parseFloat(document.getElementById("fy").value);
+
+        let factoredLoad = (DL + LL) * 2 * 2000 / (Lx * Ly); // Convert tons to psf
+        let Lx_in = Lx * 12, Ly_in = Ly * 12; // Convert to inches
+
+        let M_x = Mx * factoredLoad * Lx * Lx;
+        let M_y = My * factoredLoad * Ly * Ly;
+
+        let d = (Lx_in / 20); // Approx. effective depth (ACI thumb rule)
+        let As_x = (M_x * 12) / (0.87 * fy * d);
+        let As_y = (M_y * 12) / (0.87 * fy * d);
+
+        let bar_x = (As_x < 0.4) ? "#4 @ 150mm" : "#5 @ 200mm";
+        let bar_y = (As_y < 0.4) ? "#4 @ 200mm" : "#5 @ 250mm";
+
+        document.getElementById("output").innerHTML =
+            `✅ **Factored Load:** ${factoredLoad.toFixed(2)} psf <br>
+             ✅ **Moment (Mx):** ${M_x.toFixed(2)} ft-lb/ft <br>
+             ✅ **Moment (My):** ${M_y.toFixed(2)} ft-lb/ft <br>
+             ✅ **Steel As (Short span):** ${As_x.toFixed(2)} in²/ft → ${bar_x} <br>
+             ✅ **Steel As (Long span):** ${As_y.toFixed(2)} in²/ft → ${bar_y}`;
+    }
+</script>
+
+</body>
+</html>
