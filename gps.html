@@ -8,13 +8,15 @@
         body { text-align: center; font-family: Arial, sans-serif; }
         #mapContainer { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; }
         canvas { width: 100%; height: 100%; }
-        button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+        button { padding: 10px 20px; margin: 10px; font-size: 16px; cursor: pointer; border: none; }
+        #trackBtn { background: green; color: white; }
+        #finishBtn { background: red; color: white; }
     </style>
 </head>
 <body>
     <h2>GPS Tracking</h2>
-    <button onclick="trackLocation()">Track</button>
-    <button onclick="finishTracking()">Finish</button>
+    <button id="trackBtn" onclick="trackLocation()">Track</button>
+    <button id="finishBtn" onclick="finishTracking()">Finish</button>
     <p id="status">Click "Track" to save your location.</p>
 
     <div id="mapContainer">
@@ -23,15 +25,34 @@
 
     <script>
         let trackedPoints = [];
+        let trackBtn = document.getElementById("trackBtn");
 
         function trackLocation() {
             if ("geolocation" in navigator) {
+                trackBtn.innerText = "Tracking...";
+                trackBtn.style.background = "orange"; // Change color while tracking
+                
                 navigator.geolocation.getCurrentPosition(position => {
                     let lat = position.coords.latitude;
                     let lon = position.coords.longitude;
                     trackedPoints.push({ lat, lon });
-                    document.getElementById("status").innerText = `Tracked ${trackedPoints.length} points`;
+
+                    // Update button text and color
+                    trackBtn.innerText = "Tracked!";
+                    trackBtn.style.background = "green";
+                    setTimeout(() => {
+                        trackBtn.innerText = "Track";
+                        trackBtn.style.background = "green";
+                    }, 1500); // Reset button after 1.5 sec
+
+                    document.getElementById("status").innerText = `Tracked ${trackedPoints.length} point(s)`;
                 }, error => {
+                    trackBtn.innerText = "Error!";
+                    trackBtn.style.background = "red";
+                    setTimeout(() => {
+                        trackBtn.innerText = "Track";
+                        trackBtn.style.background = "green";
+                    }, 1500);
                     console.error(error);
                 }, { enableHighAccuracy: true });
             } else {
@@ -49,24 +70,30 @@
             const ctx = canvas.getContext("2d");
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            
+
             ctx.fillStyle = "black";
 
-            // Normalize points to fit canvas
-            if (trackedPoints.length > 1) {
-                const minLat = Math.min(...trackedPoints.map(p => p.lat));
-                const maxLat = Math.max(...trackedPoints.map(p => p.lat));
-                const minLon = Math.min(...trackedPoints.map(p => p.lon));
-                const maxLon = Math.max(...trackedPoints.map(p => p.lon));
-
-                trackedPoints.forEach(point => {
-                    let x = ((point.lon - minLon) / (maxLon - minLon)) * canvas.width * 0.9 + canvas.width * 0.05;
-                    let y = canvas.height - ((point.lat - minLat) / (maxLat - minLat)) * canvas.height * 0.9 - canvas.height * 0.05;
-                    ctx.beginPath();
-                    ctx.arc(x, y, 5, 0, 2 * Math.PI);
-                    ctx.fill();
-                });
+            if (trackedPoints.length === 0) {
+                alert("No points tracked!");
+                return;
             }
+
+            let minLat = Math.min(...trackedPoints.map(p => p.lat));
+            let maxLat = Math.max(...trackedPoints.map(p => p.lat));
+            let minLon = Math.min(...trackedPoints.map(p => p.lon));
+            let maxLon = Math.max(...trackedPoints.map(p => p.lon));
+
+            if (minLat === maxLat) maxLat += 0.0001;
+            if (minLon === maxLon) maxLon += 0.0001;
+
+            trackedPoints.forEach(point => {
+                let x = ((point.lon - minLon) / (maxLon - minLon)) * canvas.width * 0.8 + canvas.width * 0.1;
+                let y = canvas.height - ((point.lat - minLat) / (maxLat - minLat)) * canvas.height * 0.8 - canvas.height * 0.1;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, 2 * Math.PI); 
+                ctx.fill();
+            });
         }
     </script>
 </body>
