@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Two-Way Slab Moment & Reinforcement Calculator</title>
+    <title>Two-Way Slab Calculator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,22 +11,30 @@
             padding: 10px;
             background-color: #f4f4f4;
         }
-        input, select, button {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            font-size: 16px;
-        }
-        h2 {
-            text-align: center;
-            color: #333;
-        }
         .container {
             max-width: 500px;
             margin: auto;
             background-color: #fff;
             padding: 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
         }
         button {
             background-color: #4CAF50;
@@ -38,32 +46,36 @@
             background-color: #45a049;
         }
         #output {
-            font-size: 18px;
-            color: #333;
-            text-align: left;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-left: 5px solid #4CAF50;
+            border-radius: 5px;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Two-Way Slab Moment & Reinforcement Calculator</h2>
-    <label>**Select Support Condition for Short Span (Lx)**:</label>
+    <h2>Two-Way Slab Calculator</h2>
+
+    <label>Support Condition (Short Span - Lx):</label>
     <select id="Mx">
-        <option value="0.062">All Edges Fixed (0.062)</option>
-        <option value="0.078">Three Edges Fixed (0.078)</option>
-        <option value="0.087">Two Adjacent Edges Fixed (0.087)</option>
-        <option value="0.090">One Edge Fixed (0.090)</option>
-        <option value="0.100">Simply Supported (0.100)</option>
+        <option value="0.062">All Edges Fixed</option>
+        <option value="0.078">Three Edges Fixed</option>
+        <option value="0.087">Two Adjacent Edges Fixed</option>
+        <option value="0.090">One Edge Fixed</option>
+        <option value="0.100">Simply Supported</option>
     </select>
 
-    <label>**Select Support Condition for Long Span (Ly)**:</label>
+    <label>Support Condition (Long Span - Ly):</label>
     <select id="My">
-        <option value="0.062">All Edges Fixed (0.062)</option>
-        <option value="0.078">Three Edges Fixed (0.078)</option>
-        <option value="0.087">Two Adjacent Edges Fixed (0.087)</option>
-        <option value="0.090">One Edge Fixed (0.090)</option>
-        <option value="0.100">Simply Supported (0.100)</option>
+        <option value="0.062">All Edges Fixed</option>
+        <option value="0.078">Three Edges Fixed</option>
+        <option value="0.087">Two Adjacent Edges Fixed</option>
+        <option value="0.090">One Edge Fixed</option>
+        <option value="0.100">Simply Supported</option>
     </select>
 
     <label>Short Span (Lx) in feet:</label>
@@ -101,12 +113,14 @@
         let fy = parseFloat(document.getElementById("fy").value);
 
         let factoredLoad = (DL + LL) * 2 * 2000 / (Lx * Ly); // Convert tons to psf
-        let Lx_in = Lx * 12, Ly_in = Ly * 12; // Convert to inches
+        let Lx_in = Lx * 12, Ly_in = Ly * 12; // Convert feet to inches
 
         let M_x = Mx * factoredLoad * Lx * Lx;
         let M_y = My * factoredLoad * Ly * Ly;
 
-        let d = (Lx_in / 20); // Approx. effective depth (ACI thumb rule)
+        let d = Lx_in / 180; // Slab thickness as per ACI (Lx / 180)
+        let totalThickness = d + 1.5 + 0.5; // Add clear cover (1.5") and bar diameter (0.5")
+
         let As_x = (M_x * 12) / (0.87 * fy * d);
         let As_y = (M_y * 12) / (0.87 * fy * d);
 
@@ -114,11 +128,12 @@
         let bar_y = (As_y < 0.4) ? "#4 @ 200mm" : "#5 @ 250mm";
 
         document.getElementById("output").innerHTML =
-            `✅ **Factored Load:** ${factoredLoad.toFixed(2)} psf <br>
-             ✅ **Moment (Mx):** ${M_x.toFixed(2)} ft-lb/ft <br>
-             ✅ **Moment (My):** ${M_y.toFixed(2)} ft-lb/ft <br>
-             ✅ **Steel As (Short span):** ${As_x.toFixed(2)} in²/ft → ${bar_x} <br>
-             ✅ **Steel As (Long span):** ${As_y.toFixed(2)} in²/ft → ${bar_y}`;
+            `<strong>Factored Load:</strong> ${factoredLoad.toFixed(2)} psf <br>
+             <strong>Moment (Mx):</strong> ${M_x.toFixed(2)} ft-lb/ft <br>
+             <strong>Moment (My):</strong> ${M_y.toFixed(2)} ft-lb/ft <br>
+             <strong>Required Slab Thickness:</strong> ${totalThickness.toFixed(2)} inches <br>
+             <strong>Steel As (Short Span):</strong> ${As_x.toFixed(2)} in²/ft → ${bar_x} <br>
+             <strong>Steel As (Long Span):</strong> ${As_y.toFixed(2)} in²/ft → ${bar_y}`;
     }
 </script>
 
