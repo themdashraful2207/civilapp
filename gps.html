@@ -16,7 +16,7 @@
 <body>
     <h2>GPS Tracking</h2>
     <button id="trackBtn" onclick="trackLocation()">Track</button>
-    <button id="finishBtn" onclick="finishTracking()">❌ Finish</button>
+    <button id="finishBtn" onclick="finishTracking()">Finish</button>
     <p id="status">Click "Track" to save your location.</p>
 
     <div id="mapContainer">
@@ -104,12 +104,19 @@
             if (minLat === maxLat) maxLat += 0.0001;
             if (minLon === maxLon) maxLon += 0.0001;
 
-            trackedPoints.forEach(point => {
+            trackedPoints.forEach((point, index) => {
                 let x = ((point.lon - minLon) / (maxLon - minLon)) * canvas.width * 0.8 + canvas.width * 0.1;
                 let y = canvas.height - ((point.lat - minLat) / (maxLat - minLat)) * canvas.height * 0.8 - canvas.height * 0.1;
-                
+
                 ctx.beginPath();
-                ctx.arc(x, y, 3, 0, 2 * Math.PI);
+                if (index === 0) {
+                    ctx.fillStyle = "green"; // First point = GREEN FLAG
+                } else if (index === trackedPoints.length - 1) {
+                    ctx.fillStyle = "red"; // Last point = RED CROSS
+                } else {
+                    ctx.fillStyle = "black"; // Middle points = BLACK DOT
+                }
+                ctx.arc(x, y, 6, 0, 2 * Math.PI); // Adjust dot size
                 ctx.fill();
             });
         }
