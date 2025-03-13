@@ -34,6 +34,20 @@
                 navigator.geolocation.getCurrentPosition(position => {
                     let lat = position.coords.latitude;
                     let lon = position.coords.longitude;
+
+                    // Ignore small movements (less than 0.00001°)
+                    if (trackedPoints.length > 0) {
+                        let lastPoint = trackedPoints[trackedPoints.length - 1];
+                        let latDiff = Math.abs(lastPoint.lat - lat);
+                        let lonDiff = Math.abs(lastPoint.lon - lon);
+
+                        if (latDiff < 0.00001 && lonDiff < 0.00001) {
+                            document.getElementById("trackBtn").innerText = "No Movement!";
+                            setTimeout(() => document.getElementById("trackBtn").innerText = "Track", 1500);
+                            return;
+                        }
+                    }
+
                     trackedPoints.push({ lat, lon });
 
                     document.getElementById("trackBtn").innerText = "Tracked!";
