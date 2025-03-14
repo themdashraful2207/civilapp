@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Footing Design Calculator</title>
+  <title>Footing Design Calculation</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -110,25 +110,29 @@
       const b = parseFloat(document.getElementById('columnWidth').value); // inches
       const d = parseFloat(document.getElementById('columnDepth').value); // inches
 
-      // Validate inputs
+      // Input validation
       if (isNaN(P) || isNaN(qa) || isNaN(fck) || isNaN(fy) || isNaN(b) || isNaN(d)) {
         alert("Please enter valid numbers for all fields.");
+        return;
+      }
+      if (P <= 0 || qa <= 0 || fck <= 0 || fy <= 0 || b <= 0 || d <= 0) {
+        alert("All inputs must be positive numbers.");
         return;
       }
 
       // Constants
       const selfWeightFactor = 0.05; // 5% self-weight
-      const clearCover = 3; // inches (typically 3 inches for footings)
+      const clearCover = 3; // inches
       const phi = 0.75; // Strength reduction factor
+      const maxIterations = 100; // Prevent infinite loop
 
-      // Initialize result HTML
       let resultHTML = "<h3>Design Steps:</h3>";
 
       // Step 1: Determine Footing Dimensions
       const Ptotal = P * (1 + selfWeightFactor); // kips
       const A = Ptotal / qa; // ft²
-      const B = Math.sqrt(A); // ft
-      const L = B; // ft
+      const B = Math.sqrt(A); // ft (square footing, B = L)
+      const L = B;
 
       resultHTML += `
         <div class="step">
@@ -143,75 +147,78 @@
       `;
 
       // Step 2: Calculate Soil Pressure
-      const q = P / (B * L); // ksf
-
+      const q = Ptotal / (B * L); // ksf (use Ptotal for consistency)
       resultHTML += `
         <div class="step">
           <h3>Step 2: Calculate Soil Pressure</h3>
           <p><strong>Soil Pressure (q):</strong></p>
-          <p class="math">q = P / (B × L) = ${P} / (${B.toFixed(2)} × ${L.toFixed(2)}) = ${q.toFixed(2)} ksf</p>
+          <p class="math">q = P<sub>total</sub> / (B × L) = ${Ptotal.toFixed(2)} / (${B.toFixed(2)} × ${L.toFixed(2)}) = ${q.toFixed(2)} ksf</p>
         </div>
       `;
 
       // Step 3: Determine Footing Thickness
-      let h = 12; // Initial assumption for effective depth (inches)
+      let h = 12; // Initial effective depth (inches)
       let Vp, phiVc, V, phiVcBeam;
+      let iteration = 0;
 
       do {
-        // Punching Shear Check
-        const u = 2 * (b + h) + 4 * h; // inches
-        Vp = P - q * Math.pow((b + h) / 12, 2); // kips
-        phiVc = phi * 0.33 * Math.sqrt(fck) * (u / 12) * (h / 12); // kips
+        // Punching Shear Check (ACI 318 simplified: 4√f'c)
+        const bo = 2 * (b + h) + 2 * (d + h); // Perimeter (inches)
+        Vp = Ptotal - q * ((b + h) / 12) * ((d + h) / 12); // kips
+        phiVc = phi * 4 * Math.sqrt(fck) * (bo / 12) * (h / 12) / 1000; // kips
 
-        // Beam Shear Check
-        V = q * B * ((L / 2 - b / 24 - h / 12)); // kips
-        phiVcBeam = phi * 0.17 * Math.sqrt(fck) * B * (h / 12); // kips
+        // Beam Shear Check (ACI 318 simplified: 2√f'c)
+        V = q * B * ((L / 2 - d / 24 - h / 12)); // kips (using d for critical section)
+        phiVcBeam = phi * 2 * Math.sqrt(fck) * B * (h / 12) / 1000; // kips
 
-        if (Vp > phiVc || V > phiVcBeam) {
-          h += 1; // Increase depth by 1 inch
+        iteration++;
+        if (Vp > phiVc || V > phiVcBeam) h += 1;
+        if (iteration > maxIterations) {
+          alert("Shear check failed to converge. Check inputs or increase initial depth.");
+          return;
         }
       } while (Vp > phiVc || V > phiVcBeam);
 
       const totalThickness = h + clearCover; // inches
-
       resultHTML += `
         <div class="step">
           <h3>Step 3: Determine Footing Thickness</h3>
-          <p><strong>Assumed Effective Depth (h):</strong> ${h} inches</p>
           <p><strong>Punching Shear Check:</strong></p>
-          <p class="math">V<sub>p</sub> = P - q × (b + h)² = ${P} - ${q.toFixed(2)} × (${b} + ${h})² = ${Vp.toFixed(2)} kips</p>
-          <p class="math">ϕV<sub>c</sub> = 0.75 × 0.33 × √f'<sub>c</sub> × u × h = 0.75 × 0.33 × √${fck} × ${(u / 12).toFixed(2)} × ${(h / 12).toFixed(2)} = ${phiVc.toFixed(2)} kips</p>
+          <p class="math">Bo = 2(b + h) + 2(d + h) = 2(${b} + ${h}) + 2(${d} + ${h}) = ${bo.toFixed(2)} in</p>
+          <p class="math">V<sub>p</sub> = P<sub>total</sub> - q × ((b + h)/12) × ((d + h)/12) = ${Ptotal.toFixed(2)} - ${q.toFixed(2)} × (${(b + h) / 12}) × (${(d + h) / 12}) = ${Vp.toFixed(2)} kips</p>
+          <p class="math">φV<sub>c</sub> = φ × 4 × √f'c × Bo × h / 1000 = ${phi} × 4 × √${fck} × ${(bo / 12).toFixed(2)} × ${(h / 12).toFixed(2)} / 1000 = ${phiVc.toFixed(2)} kips</p>
           <p><strong>Beam Shear Check:</strong></p>
-          <p class="math">V = q × B × (L/2 - b/2 - h) = ${q.toFixed(2)} × ${B.toFixed(2)} × (${L.toFixed(2)}/2 - ${b}/24 - ${h}/12) = ${V.toFixed(2)} kips</p>
-          <p class="math">ϕV<sub>c</sub> = 0.75 × 0.17 × √f'<sub>c</sub> × B × h = 0.75 × 0.17 × √${fck} × ${B.toFixed(2)} × ${(h / 12).toFixed(2)} = ${phiVcBeam.toFixed(2)} kips</p>
+          <p class="math">V = q × B × (L/2 - d/24 - h/12) = ${q.toFixed(2)} × ${B.toFixed(2)} × (${L.toFixed(2)}/2 - ${d}/24 - ${h}/12) = ${V.toFixed(2)} kips</p>
+          <p class="math">φV<sub>c</sub> = φ × 2 × √f'c × B × h / 1000 = ${phi} × 2 × √${fck} × ${B.toFixed(2)} × ${(h / 12).toFixed(2)} / 1000 = ${phiVcBeam.toFixed(2)} kips</p>
           <p><strong>Total Thickness:</strong> h<sub>total</sub> = h + Clear Cover = ${h} + ${clearCover} = ${totalThickness} inches</p>
         </div>
       `;
 
       // Step 4: Reinforcement Design
-      const Mu = q * Math.pow((L / 2 - b / 24), 2) / 2 * 12; // kip-in/ft
-      const As = (Mu * 1000) / (0.9 * fy * (h - 2)); // in²/ft
-      const AsMin = 0.0018 * 12 * totalThickness; // in²/ft
+      const Mu = q * B * Math.pow((L / 2 - b / 24), 2) / 2; // kip-ft/ft (moment per unit width)
+      const MuIn = Mu * 12 * 1000; // lb-in/ft (convert to lb-in for reinforcement calc)
+      const dEffective = h - 2; // inches (assume 2" from top to centroid of steel)
+      const As = MuIn / (phi * fy * dEffective); // in²/ft
+      const AsMin = 0.0018 * 12 * totalThickness; // in²/ft (ACI minimum)
       const AsFinal = Math.max(As, AsMin);
 
-      // Reinforcement Bars
-      const barDiameter = 0.5; // inches (e.g., #4 bar)
-      const areaOfOneBar = (Math.PI * Math.pow(barDiameter, 2)) / 4; // in²
-      const spacing = (areaOfOneBar * 12) / AsFinal; // inches
+      const barDiameter = 0.5; // #4 bar (inches)
+      const areaOfOneBar = (Math.PI * barDiameter * barDiameter) / 4; // in²
+      const spacing = Math.min((areaOfOneBar * 12) / AsFinal, 12); // inches, max 12" per ACI
 
       resultHTML += `
         <div class="step">
           <h3>Step 4: Reinforcement Design</h3>
           <p><strong>Bending Moment (M<sub>u</sub>):</strong></p>
-          <p class="math">M<sub>u</sub> = q × (L/2 - b/2)² / 2 = ${q.toFixed(2)} × (${L.toFixed(2)}/2 - ${b}/24)² / 2 = ${Mu.toFixed(2)} kip-in/ft</p>
+          <p class="math">M<sub>u</sub> = q × B × (L/2 - b/24)² / 2 = ${q.toFixed(2)} × ${B.toFixed(2)} × (${L.toFixed(2)}/2 - ${b}/24)² / 2 = ${Mu.toFixed(2)} kip-ft/ft</p>
           <p><strong>Steel Area (A<sub>s</sub>):</strong></p>
-          <p class="math">A<sub>s</sub> = (M<sub>u</sub> × 1000) / (0.9 × f<sub>y</sub> × (h - 2)) = (${Mu.toFixed(2)} × 1000) / (0.9 × ${fy} × (${h} - 2)) = ${As.toFixed(2)} in²/ft</p>
+          <p class="math">A<sub>s</sub> = (M<sub>u</sub> × 12 × 1000) / (φ × f<sub>y</sub> × d) = (${Mu.toFixed(2)} × 12 × 1000) / (${phi} × ${fy} × ${dEffective}) = ${As.toFixed(2)} in²/ft</p>
           <p><strong>Minimum Steel Area (A<sub>s,min</sub>):</strong></p>
           <p class="math">A<sub>s,min</sub> = 0.0018 × 12 × h<sub>total</sub> = 0.0018 × 12 × ${totalThickness} = ${AsMin.toFixed(2)} in²/ft</p>
           <p><strong>Final Steel Area (A<sub>s,final</sub>):</strong></p>
           <p class="math">A<sub>s,final</sub> = max(A<sub>s</sub>, A<sub>s,min</sub>) = max(${As.toFixed(2)}, ${AsMin.toFixed(2)}) = ${AsFinal.toFixed(2)} in²/ft</p>
-          <p><strong>Reinforcement Bars:</strong></p>
-          <p class="math">Use ${barDiameter} inch bars @ ${spacing.toFixed(2)} inches c/c</p>
+          <p><strong>Reinforcement:</strong></p>
+          <p class="math">Use #4 bars (${barDiameter} in) @ ${spacing.toFixed(2)} inches c/c</p>
         </div>
       `;
 
@@ -224,14 +231,12 @@
           <p>Length (L) = ${L.toFixed(2)} ft</p>
           <p>Total Thickness (h<sub>total</sub>) = ${totalThickness} inches</p>
           <p><strong>Reinforcement:</strong></p>
-          <p>Steel Area (A<sub>s,final</sub>) = ${AsFinal.toFixed(2)} in²/ft</p>
-          <p>Use ${barDiameter} inch bars @ ${spacing.toFixed(2)} inches c/c</p>
+          <p>Use #4 bars @ ${spacing.toFixed(2)} inches c/c in both directions</p>
         </div>
       `;
 
       // Display Results
-      const resultDiv = document.getElementById('result');
-      resultDiv.innerHTML = resultHTML;
+      document.getElementById('result').innerHTML = resultHTML;
     }
   </script>
 </body>
