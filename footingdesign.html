@@ -20,7 +20,7 @@
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      width: 400px;
+      width: 600px;
     }
     h2 {
       text-align: center;
@@ -55,6 +55,15 @@
       padding: 10px;
       background-color: #e9ecef;
       border-radius: 5px;
+    }
+    .step {
+      margin-bottom: 20px;
+    }
+    .step h3 {
+      margin-bottom: 10px;
+    }
+    .step p {
+      margin: 5px 0;
     }
   </style>
 </head>
@@ -101,14 +110,33 @@
       const clearCover = 75; // mm
       const phi = 0.75; // Strength reduction factor
 
+      // Initialize result HTML
+      let resultHTML = "<h3>Design Steps:</h3>";
+
       // Step 1: Determine Footing Dimensions
       const Ptotal = P * (1 + selfWeightFactor);
       const A = Ptotal / qa;
       const B = Math.sqrt(A);
       const L = B;
 
+      resultHTML += `
+        <div class="step">
+          <h3>Step 1: Determine Footing Dimensions</h3>
+          <p><strong>Total Load (P_total):</strong> P_total = P × (1 + Self-Weight Factor) = ${P} × (1 + ${selfWeightFactor}) = ${Ptotal.toFixed(2)} kN</p>
+          <p><strong>Required Area (A):</strong> A = P_total / qₐ = ${Ptotal.toFixed(2)} / ${qa} = ${A.toFixed(2)} m²</p>
+          <p><strong>Footing Size (B × L):</strong> B = L = √A = √${A.toFixed(2)} = ${B.toFixed(2)} m</p>
+        </div>
+      `;
+
       // Step 2: Calculate Soil Pressure
       const q = P / (B * L);
+
+      resultHTML += `
+        <div class="step">
+          <h3>Step 2: Calculate Soil Pressure</h3>
+          <p><strong>Soil Pressure (q):</strong> q = P / (B × L) = ${P} / (${B.toFixed(2)} × ${L.toFixed(2)}) = ${q.toFixed(2)} kPa</p>
+        </div>
+      `;
 
       // Step 3: Determine Footing Thickness
       let h = 300; // Initial assumption for effective depth (mm)
@@ -131,6 +159,20 @@
 
       const totalThickness = h + clearCover;
 
+      resultHTML += `
+        <div class="step">
+          <h3>Step 3: Determine Footing Thickness</h3>
+          <p><strong>Assumed Effective Depth (h):</strong> ${h} mm</p>
+          <p><strong>Punching Shear Check:</strong></p>
+          <p>V_p = P - q × (b + h)² = ${P} - ${q.toFixed(2)} × (${b} + ${h})² = ${Vp.toFixed(2)} kN</p>
+          <p>ϕV_c = 0.75 × 0.33 × √f'c × u × h = 0.75 × 0.33 × √${fck} × ${(2 * (b + h) + 4 * h).toFixed(2)} × ${h} = ${phiVc.toFixed(2)} kN</p>
+          <p><strong>Beam Shear Check:</strong></p>
+          <p>V = q × B × (L/2 - b/2 - h) = ${q.toFixed(2)} × ${B.toFixed(2)} × (${L.toFixed(2)}/2 - ${b}/2 - ${h}) = ${V.toFixed(2)} kN</p>
+          <p>ϕV_c = 0.75 × 0.17 × √f'c × B × h = 0.75 × 0.17 × √${fck} × ${B.toFixed(2)} × ${h} = ${phiVcBeam.toFixed(2)} kN</p>
+          <p><strong>Total Thickness:</strong> h_total = h + Clear Cover = ${h} + ${clearCover} = ${totalThickness} mm</p>
+        </div>
+      `;
+
       // Step 4: Reinforcement Design
       const Mu = q * Math.pow((L / 2 - b / 2000), 2) / 2 * 1000; // kNm/m
       const As = (Mu * 1e6) / (0.9 * fy * (h - 20)); // mm²/m
@@ -142,18 +184,34 @@
       const areaOfOneBar = (Math.PI * Math.pow(barDiameter, 2)) / 4; // mm²
       const spacing = (areaOfOneBar * 1000) / AsFinal; // mm
 
+      resultHTML += `
+        <div class="step">
+          <h3>Step 4: Reinforcement Design</h3>
+          <p><strong>Bending Moment (M_u):</strong> M_u = q × (L/2 - b/2)² / 2 = ${q.toFixed(2)} × (${L.toFixed(2)}/2 - ${b}/2)² / 2 = ${Mu.toFixed(2)} kNm/m</p>
+          <p><strong>Steel Area (A_s):</strong> A_s = (M_u × 10⁶) / (0.9 × f_y × (h - 20)) = (${Mu.toFixed(2)} × 10⁶) / (0.9 × ${fy} × (${h} - 20)) = ${As.toFixed(2)} mm²/m</p>
+          <p><strong>Minimum Steel Area (A_s_min):</strong> A_s_min = 0.0018 × B × h_total = 0.0018 × ${B.toFixed(2)} × ${totalThickness} = ${AsMin.toFixed(2)} mm²/m</p>
+          <p><strong>Final Steel Area (A_s_final):</strong> max(A_s, A_s_min) = max(${As.toFixed(2)}, ${AsMin.toFixed(2)}) = ${AsFinal.toFixed(2)} mm²/m</p>
+          <p><strong>Reinforcement Bars:</strong> Use ${barDiameter} mm bars @ ${spacing.toFixed(2)} mm c/c</p>
+        </div>
+      `;
+
+      // Step 5: Final Design
+      resultHTML += `
+        <div class="step">
+          <h3>Step 5: Final Design</h3>
+          <p><strong>Footing Dimensions:</strong></p>
+          <p>Width (B) = ${B.toFixed(2)} m</p>
+          <p>Length (L) = ${L.toFixed(2)} m</p>
+          <p>Total Thickness (h_total) = ${totalThickness} mm</p>
+          <p><strong>Reinforcement:</strong></p>
+          <p>Steel Area (A_s_final) = ${AsFinal.toFixed(2)} mm²/m</p>
+          <p>Use ${barDiameter} mm bars @ ${spacing.toFixed(2)} mm c/c</p>
+        </div>
+      `;
+
       // Display Results
       const resultDiv = document.getElementById('result');
-      resultDiv.innerHTML = `
-        <h3>Results:</h3>
-        <p><strong>Footing Dimensions:</strong></p>
-        <p>Width (B) = ${B.toFixed(2)} m</p>
-        <p>Length (L) = ${L.toFixed(2)} m</p>
-        <p>Total Thickness (h) = ${totalThickness} mm</p>
-        <p><strong>Reinforcement:</strong></p>
-        <p>Steel Area (Aₛ) = ${AsFinal.toFixed(2)} mm²/m</p>
-        <p>Use ${barDiameter} mm bars @ ${spacing.toFixed(2)} mm c/c</p>
-      `;
+      resultDiv.innerHTML = resultHTML;
     }
   </script>
 </body>
