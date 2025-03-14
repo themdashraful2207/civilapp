@@ -110,6 +110,12 @@
       const b = parseFloat(document.getElementById('columnWidth').value); // inches
       const d = parseFloat(document.getElementById('columnDepth').value); // inches
 
+      // Validate inputs
+      if (isNaN(P) || isNaN(qa) || isNaN(fck) || isNaN(fy) || isNaN(b) || isNaN(d)) {
+        alert("Please enter valid numbers for all fields.");
+        return;
+      }
+
       // Constants
       const selfWeightFactor = 0.05; // 5% self-weight
       const clearCover = 3; // inches (typically 3 inches for footings)
