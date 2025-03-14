@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/civilapp/manifest.json">
     <title>Login Page</title>
     <style>
         :root {
@@ -303,6 +304,12 @@
         document.querySelector('button[type="submit"]').addEventListener('click', () => {
             console.log("Sign In button clicked");
         });
+                // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/civilapp/sw.js')
+                .then(() => console.log('Service Worker Registered'))
+                .catch(err => console.error('Service Worker Error:', err));
+        }
     </script>
 </body>
 </html>
