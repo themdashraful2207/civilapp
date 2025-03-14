@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Footing Design Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .calculator {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 400px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #e9ecef;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <h2>Footing Design Calculator</h2>
+    <label for="load">Vertical Load (P, kN):</label>
+    <input type="number" id="load" placeholder="Enter vertical load">
+
+    <label for="bearingCapacity">Allowable Bearing Capacity (qₐ, kPa):</label>
+    <input type="number" id="bearingCapacity" placeholder="Enter bearing capacity">
+
+    <label for="fck">Concrete Strength (f'c, MPa):</label>
+    <input type="number" id="fck" placeholder="Enter concrete strength">
+
+    <label for="fy">Steel Yield Strength (fy, MPa):</label>
+    <input type="number" id="fy" placeholder="Enter steel yield strength">
+
+    <label for="columnWidth">Column Width (b, mm):</label>
+    <input type="number" id="columnWidth" placeholder="Enter column width">
+
+    <label for="columnDepth">Column Depth (d, mm):</label>
+    <input type="number" id="columnDepth" placeholder="Enter column depth">
+
+    <button onclick="calculateFooting()">Calculate</button>
+
+    <div class="result" id="result">
+      <!-- Results will be displayed here -->
+    </div>
+  </div>
+
+  <script>
+    function calculateFooting() {
+      // Input values
+      const P = parseFloat(document.getElementById('load').value);
+      const qa = parseFloat(document.getElementById('bearingCapacity').value);
+      const fck = parseFloat(document.getElementById('fck').value);
+      const fy = parseFloat(document.getElementById('fy').value);
+      const b = parseFloat(document.getElementById('columnWidth').value);
+      const d = parseFloat(document.getElementById('columnDepth').value);
+
+      // Constants
+      const selfWeightFactor = 0.05; // 5% self-weight
+      const clearCover = 75; // mm
+      const phi = 0.75; // Strength reduction factor
+
+      // Step 1: Determine Footing Dimensions
+      const Ptotal = P * (1 + selfWeightFactor);
+      const A = Ptotal / qa;
+      const B = Math.sqrt(A);
+      const L = B;
+
+      // Step 2: Calculate Soil Pressure
+      const q = P / (B * L);
+
+      // Step 3: Determine Footing Thickness
+      let h = 300; // Initial assumption for effective depth (mm)
+      let Vp, phiVc, V, phiVcBeam;
+
+      do {
+        // Punching Shear Check
+        const u = 2 * (b + h) + 4 * h;
+        Vp = P - q * Math.pow((b + h) / 1000, 2) * 1000; // kN
+        phiVc = phi * 0.33 * Math.sqrt(fck) * u * h / 1000; // kN
+
+        // Beam Shear Check
+        V = q * B * ((L / 2 - b / 2000 - h / 1000)) * 1000; // kN
+        phiVcBeam = phi * 0.17 * Math.sqrt(fck) * B * h / 1000; // kN
+
+        if (Vp > phiVc || V > phiVcBeam) {
+          h += 25; // Increase depth by 25 mm
+        }
+      } while (Vp > phiVc || V > phiVcBeam);
+
+      const totalThickness = h + clearCover;
+
+      // Step 4: Reinforcement Design
+      const Mu = q * Math.pow((L / 2 - b / 2000), 2) / 2 * 1000; // kNm/m
+      const As = (Mu * 1e6) / (0.9 * fy * (h - 20)); // mm²/m
+      const AsMin = 0.0018 * B * totalThickness; // mm²/m
+      const AsFinal = Math.max(As, AsMin);
+
+      // Reinforcement Bars
+      const barDiameter = 12; // mm
+      const areaOfOneBar = (Math.PI * Math.pow(barDiameter, 2)) / 4; // mm²
+      const spacing = (areaOfOneBar * 1000) / AsFinal; // mm
+
+      // Display Results
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = `
+        <h3>Results:</h3>
+        <p><strong>Footing Dimensions:</strong></p>
+        <p>Width (B) = ${B.toFixed(2)} m</p>
+        <p>Length (L) = ${L.toFixed(2)} m</p>
+        <p>Total Thickness (h) = ${totalThickness} mm</p>
+        <p><strong>Reinforcement:</strong></p>
+        <p>Steel Area (Aₛ) = ${AsFinal.toFixed(2)} mm²/m</p>
+        <p>Use ${barDiameter} mm bars @ ${spacing.toFixed(2)} mm c/c</p>
+      `;
+    }
+  </script>
+</body>
+</html>
