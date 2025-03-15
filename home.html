@@ -144,6 +144,11 @@
         } else {
             console.log("User is logged in, staying on home page");
         }
+
+                // Auto-reload the page every 1 minute (60,000 milliseconds)
+        setTimeout(function() {
+            window.location.reload();
+        }, 60000); // 60,000 milliseconds = 1 minute
     </script>
 </body>
 </html>
