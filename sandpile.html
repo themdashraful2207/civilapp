@@ -1,125 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sand Pile Cost Calculator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    .container {
-      max-width: 400px;
-      margin: auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      background-color: #f9f9f9;
-    }
-    input {
-      width: 100%;
-      padding: 8px;
-      margin: 5px 0 15px 0;
-      box-sizing: border-box;
-    }
-    button {
-      width: 100%;
-      padding: 10px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #218838;
-    }
-    .output {
-      margin-top: 20px;
-      padding: 10px;
-      background-color: #e9ecef;
-      border-radius: 5px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sand Pile Cost Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #007BFF;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .result strong {
+            color: #007BFF;
+            font-weight: 600;
+        }
+
+        .highlight {
+            color: #dc3545; /* Red color for highlighted values */
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            input, button {
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Sand Pile Cost Calculator</h2>
-    <label for="landArea">Land Area (square feet):</label>
-    <input type="number" id="landArea" placeholder="Enter land area in sqft">
+    <div class="container">
+        <h2>Sand Pile Cost Calculator</h2>
+        
+        <label for="landArea">Land Area (square feet):</label>
+        <input type="number" id="landArea" placeholder="Enter land area in sqft" min="0">
 
-    <label for="pileDiameter">Diameter of Pile (inches):</label>
-    <input type="number" id="pileDiameter" placeholder="Enter diameter in inches">
+        <label for="pileDiameter">Diameter of Pile (inches):</label>
+        <input type="number" id="pileDiameter" placeholder="Enter diameter in inches" min="0">
 
-      <label for="pileSpacing">Spacing of Pile (inches):</label>
-    <input type="number" id="pileSpacing" placeholder="Enter spacing in inches">
+        <label for="pileSpacing">Spacing of Pile (inches):</label>
+        <input type="number" id="pileSpacing" placeholder="Enter spacing in inches" min="0">
 
-    <label for="pileLength">Length of Pile (feet):</label>
-    <input type="number" id="pileLength" placeholder="Enter length in feet">
+        <label for="pileLength">Length of Pile (feet):</label>
+        <input type="number" id="pileLength" placeholder="Enter length in feet" min="0">
 
-    <label for="costPerFoot">Cost per Running Foot of Pile (TK):</label>
-    <input type="number" id="costPerFoot" placeholder="Enter cost per running foot">
+        <label for="costPerFoot">Cost per Running Foot of Pile (TK):</label>
+        <input type="number" id="costPerFoot" placeholder="Enter cost per running foot" min="0">
 
-    <label for="costPerCft">Cost per Cubic Foot of Sand (TK):</label>
-    <input type="number" id="costPerCft" placeholder="Enter cost per cubic foot">
+        <label for="costPerCft">Cost per Cubic Foot of Sand (TK):</label>
+        <input type="number" id="costPerCft" placeholder="Enter cost per cubic foot" min="0">
 
-    <button onclick="calculate()">Calculate</button>
+        <button onclick="calculate()">Calculate</button>
 
-    <div class="output" id="output">
-      <h3>Results:</h3>
-      <p id="numPiles"></p>
-      <p id="totalVolume"></p>
-      <p id="totalSandCost"></p>
-      <p id="totalPileCost"></p>
-      <p id="totalCost"></p>
+        <div class="result" id="output">
+            Enter values and click calculate to see results.
+        </div>
     </div>
-  </div>
 
-  <script>
-    function calculate() {
-      // Get input values
-      const landArea = parseFloat(document.getElementById("landArea").value);
-      const pileDiameter = parseFloat(document.getElementById("pileDiameter").value);
-      const pileSpacing = parseFloat(document.getElementById("pileSpacing").value);
-      const pileLength = parseFloat(document.getElementById("pileLength").value);
-      const costPerFoot = parseFloat(document.getElementById("costPerFoot").value);
-      const costPerCft = parseFloat(document.getElementById("costPerCft").value);
+    <script>
+        function calculate() {
+            // Get input values
+            const landArea = parseFloat(document.getElementById("landArea").value);
+            const pileDiameter = parseFloat(document.getElementById("pileDiameter").value);
+            const pileSpacing = parseFloat(document.getElementById("pileSpacing").value);
+            const pileLength = parseFloat(document.getElementById("pileLength").value);
+            const costPerFoot = parseFloat(document.getElementById("costPerFoot").value);
+            const costPerCft = parseFloat(document.getElementById("costPerCft").value);
+            const output = document.getElementById("output");
 
-      // Validate inputs
-      if (isNaN(landArea) || isNaN(pileDiameter) || isNaN(pileSpacing) || isNaN(pileLength) || isNaN(costPerFoot) || isNaN(costPerCft)) {
-        alert("Please fill all fields with valid numbers.");
-        return;
-      }
+            // Validate inputs
+            if (isNaN(landArea) || isNaN(pileDiameter) || isNaN(pileSpacing) || isNaN(pileLength) || isNaN(costPerFoot) || isNaN(costPerCft) || landArea <= 0 || pileDiameter <= 0 || pileSpacing <= 0 || pileLength <= 0 || costPerFoot <= 0 || costPerCft <= 0) {
+                output.innerHTML = "Please enter valid positive values for all fields.";
+                output.style.color = "#dc3545";
+                return;
+            }
 
-      // Calculate number of piles
-      const spacing = pileSpacing/12; // 18 inches = 1.5 feet (center-to-center spacing)
-      const areaPerPile = spacing * spacing; // Each pile occupies 2.25 sqft
-      const numPiles = Math.ceil(landArea / areaPerPile); // Round up to the nearest whole number
+            output.style.color = "#333";
 
-      // Calculate volume of one pile
-      const radius = (pileDiameter / 12) / 2; // Convert diameter to feet and get radius
-      const volumePerPile = Math.PI * Math.pow(radius, 2) * pileLength;
+            // Calculate number of piles
+            const spacing = pileSpacing / 12; // Convert inches to feet (center-to-center spacing)
+            const areaPerPile = spacing * spacing; // Area per pile in sq ft
+            const numPiles = Math.ceil(landArea / areaPerPile); // Round up to nearest whole number
 
-      // Total volume of sand
-      const totalVolume = volumePerPile * numPiles;
+            // Calculate volume of one pile
+            const radius = (pileDiameter / 12) / 2; // Convert diameter to feet and get radius
+            const volumePerPile = Math.PI * Math.pow(radius, 2) * pileLength;
 
-      // Total cost of sand
-      const totalSandCost = totalVolume * costPerCft;
+            // Total volume of sand
+            const totalVolume = volumePerPile * numPiles;
 
-      // Total cost of piles
-      const totalPileCost = numPiles * pileLength * costPerFoot;
+            // Total cost of sand
+            const totalSandCost = totalVolume * costPerCft;
 
-      // Total combined cost
-      const totalCost = totalSandCost + totalPileCost;
+            // Total cost of piles
+            const totalPileCost = numPiles * pileLength * costPerFoot;
 
-      // Display results
-      document.getElementById("numPiles").innerHTML = `Number of Piles: <strong>${numPiles}</strong>`;
-      document.getElementById("totalVolume").innerHTML = `Total Volume of Sand: <strong>${totalVolume.toFixed(2)} feet&sup3</strong>`;
-      document.getElementById("totalSandCost").innerHTML = `Total Cost of Sand: <strong>${totalSandCost.toFixed(2)} TK</strong>`;
-      document.getElementById("totalPileCost").innerHTML = `Total Cost of Piles: <strong>${totalPileCost.toFixed(2)} TK</strong>`;
-      document.getElementById("totalCost").innerHTML = `Total Combined Cost: <strong>${totalCost.toFixed(2)} TK</strong>`;
-    }
-  </script>
+            // Total combined cost
+            const totalCost = totalSandCost + totalPileCost;
+
+            // Display results
+            output.innerHTML = `
+                <strong>Pile Details</strong><br>
+                Number of Piles: ${numPiles}<br>
+                Total Volume of Sand: ${totalVolume.toFixed(2)} ft³<br>
+                <br><strong>Cost Breakdown</strong><br>
+                Cost of Sand: ${totalSandCost.toFixed(2)} TK<br>
+                Cost of Piles: ${totalPileCost.toFixed(2)} TK<br>
+                Total Combined Cost: <span class="highlight">${totalCost.toFixed(2)} TK</span><br>
+                <small>Based on ${pileSpacing}-inch spacing and ${pileLength}-ft pile length</small>
+            `;
+        }
+    </script>
 </body>
 </html>
