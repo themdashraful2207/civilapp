@@ -91,6 +91,11 @@
             font-weight: 600;
         }
 
+        .unused-percentage {
+            color: #dc3545; /* Red color for unused percentage */
+            font-weight: bold;
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 20px;
@@ -189,6 +194,7 @@
             // Calculate areas
             const usableAreaSqFt = usableLengthFeet * usableWidthFeet;
             const setbackAreaSqFt = totalAreaSqFt - usableAreaSqFt;
+            const unusedPercentage = (setbackAreaSqFt / totalAreaSqFt) * 100;
 
             // Convert front setback to feet and inches
             const totalFeet = Math.floor(front * 3.28084);
@@ -203,6 +209,7 @@
                 Total Area: ${totalAreaSqFt.toFixed(2)} sq ft<br>
                 Setback Area: ${setbackAreaSqFt.toFixed(2)} sq ft<br>
                 Usable Area: ${usableAreaSqFt.toFixed(2)} sq ft<br>
+                <span class="unused-percentage">% of Land Unused (Setback): ${unusedPercentage.toFixed(2)}%</span><br>
                 <small>Based on ${khatha.toFixed(2)} khatha and ${roadWidthFeet.toFixed(1)} ft road width</small>
             `;
         }
