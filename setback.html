@@ -111,58 +111,80 @@
         <h2>Setback Calculator</h2>
         <label for="decimal">Enter Land Area (in Decimal):</label>
         <input type="number" id="decimal" step="0.01" placeholder="e.g., 5.25" min="0">
+        <label for="roadWidth">Enter Road Width (in Feet):</label>
+        <input type="number" id="roadWidth" step="0.1" placeholder="e.g., 20" min="0">
         <button onclick="calculateSetback()">Calculate Setback</button>
         <div class="result" id="output">
-            Enter a value and click calculate to see results.
+            Enter values and click calculate to see results.
         </div>
     </div>
 
     <script>
         function calculateSetback() {
             const decimal = parseFloat(document.getElementById("decimal").value);
+            const roadWidthFeet = parseFloat(document.getElementById("roadWidth").value);
             const output = document.getElementById("output");
 
-            if (isNaN(decimal) || decimal <= 0) {
-                output.innerHTML = "Please enter a valid positive decimal value.";
+            // Validation
+            if (isNaN(decimal) || decimal <= 0 || isNaN(roadWidthFeet) || roadWidthFeet <= 0) {
+                output.innerHTML = "Please enter valid positive values for both land area and road width.";
                 output.style.color = "#dc3545";
                 return;
             }
 
             output.style.color = "#333";
-            const khatha = (decimal * 435.6) / 720;
-            let front, back, side;
 
+            // Convert road width to meters
+            const roadWidthMeters = roadWidthFeet * 0.3048;
+            const halfRoadWidthMeters = roadWidthMeters / 2;
+
+            // Setback from road center: half road width + 4.5m into land
+            const setbackFromCenterMeters = halfRoadWidthMeters + 4.5;
+            // Setback from road edge: 4.5m (14.76 ft)
+            const setbackFromEdgeMeters = 4.5;
+            // Minimum setback: 1.5m
+            const minSetbackMeters = 1.5;
+
+            // Front setback: compare setback from edge (4.5m) with min (1.5m)
+            let frontFromEdge = Math.max(minSetbackMeters, setbackFromEdgeMeters - halfRoadWidthMeters);
+            if (frontFromEdge < minSetbackMeters) frontFromEdge = minSetbackMeters;
+
+            // Final front setback: larger of calculated edge setback or minimum
+            const front = Math.max(minSetbackMeters, frontFromEdge);
+
+            // Back and side setbacks based on khatha
+            const khatha = (decimal * 435.6) / 720;
+            let back, side;
             if (khatha < 2) {
-                front = 1.5;
                 back = 1;
                 side = 0.8;
             } else if (khatha < 3) {
-                front = 1.5;
                 back = 1;
                 side = 1;
             } else if (khatha < 4) {
-                front = 1.5;
                 back = 1.5;
                 side = 1;
             } else {
-                front = 1.5;
                 back = 2;
                 side = 1.25;
             }
 
-            const roadSetback = 4.5;
-            front = Math.max(front, roadSetback);
-
+            // Convert to feet for display
             const frontFeet = (front * 3.28084).toFixed(2);
             const backFeet = (back * 3.28084).toFixed(2);
             const sideFeet = (side * 3.28084).toFixed(2);
+            const roadWidthDisplayFeet = roadWidthFeet.toFixed(1);
+
+            // Convert front setback to feet and inches for additional display
+            const totalFeet = Math.floor(front * 3.28084);
+            const inches = Math.round((front * 3.28084 - totalFeet) * 12);
 
             output.innerHTML = `
                 <strong>Setback Distances</strong><br>
-                Front: ${front} m (${frontFeet} ft)<br>
+                Front: ${front.toFixed(2)} m (${frontFeet} ft or ${totalFeet} ft ${inches} in)<br>
                 Back: ${back} m (${backFeet} ft)<br>
                 Side: ${side} m (${sideFeet} ft)<br>
-                <small>Based on ${khatha.toFixed(2)} khatha</small>
+                <small>Based on ${khatha.toFixed(2)} khatha and ${roadWidthDisplayFeet} ft road width</small>
             `;
         }
     </script>
