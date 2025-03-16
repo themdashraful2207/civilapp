@@ -27,7 +27,7 @@
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
         }
 
         h2 {
@@ -140,16 +140,14 @@
 
             // Setback from road center: half road width + 4.5m into land
             const setbackFromCenterMeters = halfRoadWidthMeters + 4.5;
-            // Setback from road edge: 4.5m (14.76 ft)
+            // Setback from road edge: 4.5m
             const setbackFromEdgeMeters = 4.5;
             // Minimum setback: 1.5m
             const minSetbackMeters = 1.5;
 
-            // Front setback: compare setback from edge (4.5m) with min (1.5m)
+            // Front setback: compare setback from edge with minimum
             let frontFromEdge = Math.max(minSetbackMeters, setbackFromEdgeMeters - halfRoadWidthMeters);
             if (frontFromEdge < minSetbackMeters) frontFromEdge = minSetbackMeters;
-
-            // Final front setback: larger of calculated edge setback or minimum
             const front = Math.max(minSetbackMeters, frontFromEdge);
 
             // Back and side setbacks based on khatha
@@ -169,22 +167,43 @@
                 side = 1.25;
             }
 
-            // Convert to feet for display
-            const frontFeet = (front * 3.28084).toFixed(2);
-            const backFeet = (back * 3.28084).toFixed(2);
-            const sideFeet = (side * 3.28084).toFixed(2);
-            const roadWidthDisplayFeet = roadWidthFeet.toFixed(1);
+            // Calculate total and usable area
+            const totalAreaSqFt = decimal * 435.6; // Total area in square feet
+            const sideLengthFeet = Math.sqrt(totalAreaSqFt); // Assuming square plot
+            const sideLengthMeters = sideLengthFeet * 0.3048;
 
-            // Convert front setback to feet and inches for additional display
+            // Usable dimensions after setbacks (convert setbacks to feet)
+            const frontFeet = front * 3.28084;
+            const backFeet = back * 3.28084;
+            const sideFeet = side * 3.28084;
+            const usableLengthFeet = sideLengthFeet - frontFeet - backFeet;
+            const usableWidthFeet = sideLengthFeet - 2 * sideFeet;
+
+            // Check if usable dimensions are positive
+            if (usableLengthFeet <= 0 || usableWidthFeet <= 0) {
+                output.innerHTML = "Setbacks exceed land dimensions. No usable area available.";
+                output.style.color = "#dc3545";
+                return;
+            }
+
+            // Calculate areas
+            const usableAreaSqFt = usableLengthFeet * usableWidthFeet;
+            const setbackAreaSqFt = totalAreaSqFt - usableAreaSqFt;
+
+            // Convert front setback to feet and inches
             const totalFeet = Math.floor(front * 3.28084);
             const inches = Math.round((front * 3.28084 - totalFeet) * 12);
 
             output.innerHTML = `
                 <strong>Setback Distances</strong><br>
-                Front: ${front.toFixed(2)} m (${frontFeet} ft or ${totalFeet} ft ${inches} in)<br>
-                Back: ${back} m (${backFeet} ft)<br>
-                Side: ${side} m (${sideFeet} ft)<br>
-                <small>Based on ${khatha.toFixed(2)} khatha and ${roadWidthDisplayFeet} ft road width</small>
+                Front: ${front.toFixed(2)} m (${totalFeet} ft ${inches} in)<br>
+                Back: ${back} m (${backFeet.toFixed(2)} ft)<br>
+                Side: ${side} m (${sideFeet.toFixed(2)} ft)<br>
+                <br><strong>Area Details</strong><br>
+                Total Area: ${totalAreaSqFt.toFixed(2)} sq ft<br>
+                Setback Area: ${setbackAreaSqFt.toFixed(2)} sq ft<br>
+                Usable Area: ${usableAreaSqFt.toFixed(2)} sq ft<br>
+                <small>Based on ${khatha.toFixed(2)} khatha and ${roadWidthFeet.toFixed(1)} ft road width</small>
             `;
         }
     </script>
