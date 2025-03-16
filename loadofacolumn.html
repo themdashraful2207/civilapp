@@ -281,76 +281,76 @@
         </div>
     </div>
 
-    <script>
-        function calculateWeight() {
-            const concreteDensity = 2400; // kg/m³
-            const lbToKg = 0.453592;
+   <script>
+    function calculateWeight() {
+        const concreteDensity = 2400; // kg/m³
+        const lbToKg = 0.453592;
 
-            const numStories = parseFloat(document.getElementById('numStories').value);
-            const colWidth = parseFloat(document.getElementById('colWidth').value) / 1000;
-            const colDepth = parseFloat(document.getElementById('colDepth').value) / 1000;
-            const colHeight = parseFloat(document.getElementById('colHeight').value);
-            const slabAreaSqft = parseFloat(document.getElementById('slabArea').value);
-            const slabThickness = parseFloat(document.getElementById('slabThickness').value) / 1000;
-            const beamWidth = parseFloat(document.getElementById('beamWidth').value) / 1000;
-            const beamDepth = parseFloat(document.getElementById('beamDepth').value) / 1000;
-            const floorFinish = parseFloat(document.getElementById('floorFinish').value);
-            const liveLoad = parseFloat(document.getElementById('liveLoad').value);
-            const deadFactor = parseFloat(document.getElementById('deadFactor').value);
-            const liveFactor = parseFloat(document.getElementById('liveFactor').value);
-            const brickWeight = parseFloat(document.getElementById('brickWeight').value);
-            const numBricks = parseFloat(document.getElementById('numBricks').value);
+        const numStories = parseFloat(document.getElementById('numStories').value);
+        const colWidth = parseFloat(document.getElementById('colWidth').value) / 1000;
+        const colDepth = parseFloat(document.getElementById('colDepth').value) / 1000;
+        const colHeight = parseFloat(document.getElementById('colHeight').value);
+        const slabAreaSqft = parseFloat(document.getElementById('slabArea').value);
+        const slabThickness = parseFloat(document.getElementById('slabThickness').value) / 1000;
+        const beamWidth = parseFloat(document.getElementById('beamWidth').value) / 1000;
+        const beamDepth = parseFloat(document.getElementById('beamDepth').value) / 1000;
+        const floorFinish = parseFloat(document.getElementById('floorFinish').value);
+        const liveLoad = parseFloat(document.getElementById('liveLoad').value);
+        const deadFactor = parseFloat(document.getElementById('deadFactor').value);
+        const liveFactor = parseFloat(document.getElementById('liveFactor').value);
+        const brickWeight = parseFloat(document.getElementById('brickWeight').value);
+        const numBricks = parseFloat(document.getElementById('numBricks').value);
 
-            // Validation
-            if ([numStories, colWidth, colDepth, colHeight, slabAreaSqft, slabThickness, beamWidth, beamDepth, 
-                 floorFinish, liveLoad, deadFactor, liveFactor, brickWeight, numBricks].some(isNaN) || 
-                numStories < 1 || colWidth <= 0 || colDepth <= 0 || colHeight <= 0 || slabAreaSqft <= 0 || 
-                slabThickness <= 0 || beamWidth <= 0 || beamDepth <= 0 || floorFinish < 0 || liveLoad < 0 || 
-                deadFactor <= 0 || liveFactor <= 0 || brickWeight <= 0 || numBricks < 0) {
-                document.getElementById('result').innerHTML = `
-                    <h3>Error</h3>
-                    <p>Please enter valid positive values for all fields.</p>
-                `;
-                return;
-            }
-
-            const slabAreaSqm = slabAreaSqft * 0.092903;
-            const beamLength = 2 * Math.sqrt(slabAreaSqft) * 0.3048;
-
-            const colVolume = colWidth * colDepth * colHeight;
-            const colWeight = (colVolume * concreteDensity / 1000) * numStories;
-            const slabVolume = slabAreaSqm * slabThickness;
-            const slabWeight = (slabVolume * concreteDensity / 1000) * numStories;
-            const beamVolume = beamWidth * beamDepth * beamLength;
-            const beamWeight = (beamVolume * concreteDensity / 1000) * numStories;
-
-            const structuralDead = colWeight + slabWeight + beamWeight;
-            const floorFinishDead = ((slabAreaSqft * floorFinish * lbToKg) / 1000) * numStories;
-            const brickLoadTon = (brickWeight * numBricks) / 1000;
-
-            const totalDead = structuralDead + floorFinishDead + brickLoadTon;
-            const factoredDead = totalDead * deadFactor;
-
-            const liveLoadTon = ((slabAreaSqft * liveLoad * lbToKg) / 1000) * numStories;
-            const factoredLive = liveLoadTon * liveFactor;
-
-            const totalFactored = factoredDead + factoredLive;
-
+        // Validation
+        if ([numStories, colWidth, colDepth, colHeight, slabAreaSqft, slabThickness, beamWidth, beamDepth, 
+             floorFinish, liveLoad, deadFactor, liveFactor, brickWeight, numBricks].some(isNaN) || 
+            numStories < 1 || colWidth <= 0 || colDepth <= 0 || colHeight <= 0 || slabAreaSqft <= 0 || 
+            slabThickness <= 0 || beamWidth <= 0 || beamDepth <= 0 || floorFinish < 0 || liveLoad < 0 || 
+            deadFactor <= 0 || liveFactor <= 0 || brickWeight <= 0 || numBricks < 0) {
             document.getElementById('result').innerHTML = `
-                <h3>Load Calculations:</h3>
-                <p>Structural Dead Load (Columns + Slab + Beams): <span id="structuralDead">${structuralDead.toFixed(2)}</span> tons</p>
-                <p>Floor Finish Dead Load: <span id="floorFinishDead">${floorFinishDead.toFixed(2)}</span> tons</p>
-                <p>Brick Load: <span id="brickLoad">${brickLoadTon.toFixed(2)}</span> tons</p>
-                <p>Total Dead Load: <span id="totalDead">${totalDead.toFixed(2)}</span> tons</p>
-                <p>Factored Dead Load (<strong>DL Factor</strong>): <span id="factoredDead">${factoredDead.toFixed(2)}</span> tons</p>
-                <p>Live Load: <span id="liveLoadResult">${liveLoadTon.toFixed(2)}</span> tons</p>
-                <p>Factored Live Load (<strong>LL Factor</strong>): <span id="factoredLive">${factoredLive.toFixed(2)}</span> tons</p>
-                <p><strong>Total Factored Load:</strong> <span class="highlight" id="totalFactored">${totalFactored.toFixed(2)}</span> tons</p>
+                <h3>Error</h3>
+                <p>Please enter valid positive values for all fields.</p>
             `;
+            return;
         }
 
-        // Initial calculation with default values
-        calculateWeight();
-    </script>
+        const slabAreaSqm = slabAreaSqft * 0.092903;
+        const beamLength = 2 * Math.sqrt(slabAreaSqft) * 0.3048;
+
+        const colVolume = colWidth * colDepth * colHeight;
+        const colWeight = (colVolume * concreteDensity / 1000) * numStories;
+        const slabVolume = slabAreaSqm * slabThickness;
+        const slabWeight = (slabVolume * concreteDensity / 1000) * numStories;
+        const beamVolume = beamWidth * beamDepth * beamLength;
+        const beamWeight = (beamVolume * concreteDensity / 1000) * numStories;
+
+        const structuralDead = colWeight + slabWeight + beamWeight;
+        const floorFinishDead = ((slabAreaSqft * floorFinish * lbToKg) / 1000) * numStories;
+        const brickLoadTon = (brickWeight * numBricks * numStories) / 1000; // Updated line
+
+        const totalDead = structuralDead + floorFinishDead + brickLoadTon;
+        const factoredDead = totalDead * deadFactor;
+
+        const liveLoadTon = ((slabAreaSqft * liveLoad * lbToKg) / 1000) * numStories;
+        const factoredLive = liveLoadTon * liveFactor;
+
+        const totalFactored = factoredDead + factoredLive;
+
+        document.getElementById('result').innerHTML = `
+            <h3>Load Calculations:</h3>
+            <p>Structural Dead Load (Columns + Slab + Beams): <span id="structuralDead">${structuralDead.toFixed(2)}</span> tons</p>
+            <p>Floor Finish Dead Load: <span id="floorFinishDead">${floorFinishDead.toFixed(2)}</span> tons</p>
+            <p>Brick Load: <span id="brickLoad">${brickLoadTon.toFixed(2)}</span> tons</p>
+            <p>Total Dead Load: <span id="totalDead">${totalDead.toFixed(2)}</span> tons</p>
+            <p>Factored Dead Load (<strong>DL Factor</strong>): <span id="factoredDead">${factoredDead.toFixed(2)}</span> tons</p>
+            <p>Live Load: <span id="liveLoadResult">${liveLoadTon.toFixed(2)}</span> tons</p>
+            <p>Factored Live Load (<strong>LL Factor</strong>): <span id="factoredLive">${factoredLive.toFixed(2)}</span> tons</p>
+            <p><strong>Total Factored Load:</strong> <span class="highlight" id="totalFactored">${totalFactored.toFixed(2)}</span> tons</p>
+        `;
+    }
+
+    // Initial calculation with default values
+    calculateWeight();
+</script>
 </body>
 </html>
