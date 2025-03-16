@@ -1,224 +1,261 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Situ Pile Construction Cost Calculator</title>
-  <style>
-    * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Situ Pile Construction Cost Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
 
-.calculator {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
-}
+        h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
 
-h2 {
-  text-align: center;
-  color: #333;
-}
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
 
-label {
-  display: block;
-  margin: 10px 0 5px;
-  color: #555;
-}
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
 
-input {
-  width: 100%;
-  max-width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
-}
+        input:focus, select:focus {
+            outline: none;
+            border-color: #007BFF;
+        }
 
-button {
-  width: 100%;
-  padding: 10px;
-  background-color: #28a745;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-}
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
 
-button:hover {
-  background-color: #218838;
-}
+        button:hover {
+            background-color: #0056b3;
+        }
 
-.output {
-  margin-top: 20px;
-  padding: 10px;
-  background-color: #e9ecef;
-  border-radius: 5px;
-}
+        .result {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+        }
 
-.output h3 {
-  margin: 0 0 10px;
-  color: #333;
-}
+        .result strong {
+            color: #007BFF;
+            font-weight: 600;
+        }
 
-.output p {
-  margin: 5px 0;
-  color: #555;
-}
+        .highlight {
+            color: #dc3545; /* Red color for highlighted values */
+            font-weight: bold;
+        }
 
-  </style>
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            input, select, button {
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="calculator">
-    <h2>Pile Construction Cost Calculator</h2>
-    <label for="pileNos">Number of Piles:</label>
-    <input type="number" id="pileNos" placeholder="Enter number of piles">
+    <div class="container">
+        <h2>Pile Construction Cost Calculator</h2>
 
-    <label for="pileLength">Pile Length (feet):</label>
-    <input type="number" id="pileLength" placeholder="Enter pile length">
+        <label for="pileNos">Number of Piles:</label>
+        <input type="number" id="pileNos" placeholder="Enter number of piles" min="1">
 
-    <label for="pileDiameter">Pile Diameter (inches):</label>
-    <input type="number" id="pileDiameter" placeholder="Enter pile diameter">
+        <label for="pileLength">Pile Length (feet):</label>
+        <input type="number" id="pileLength" placeholder="Enter pile length" min="0">
 
-    <label for="barSize">Bar Size (mm):</label>
-    <input type="number" id="barSize" placeholder="Enter bar size">
+        <label for="pileDiameter">Pile Diameter (inches):</label>
+        <input type="number" id="pileDiameter" placeholder="Enter pile diameter" min="0">
 
-    <label for="barNos">Number of Bars:</label>
-    <input type="number" id="barNos" placeholder="Enter number of bars">
+        <label for="barSize">Bar Size (mm):</label>
+        <input type="number" id="barSize" placeholder="Enter bar size" min="0">
 
-    <label for="spiralSpacing">Spiral Spacing (inches):</label>
-    <input type="number" id="spiralSpacing" placeholder="Enter spiral spacing">
+        <label for="barNos">Number of Bars:</label>
+        <input type="number" id="barNos" placeholder="Enter number of bars" min="0">
 
-    <label for="constructionCostPerFoot">Pile Construction Cost (TK per running foot):</label>
-    <input type="number" id="constructionCostPerFoot" placeholder="Enter construction cost per foot">
+        <label for="spiralSpacing">Spiral Spacing (inches):</label>
+        <input type="number" id="spiralSpacing" placeholder="Enter spiral spacing" min="0">
 
-    <label for="cementCost">Cement Cost (TK per bag):</label>
-    <input type="number" id="cementCost" placeholder="Enter cement cost">
+        <label for="mixRatio">Concrete Mix Ratio:</label>
+        <select id="mixRatio">
+            <option value="1:1.5:3">1:1.5:3</option>
+            <option value="1:2:4" selected>1:2:4</option>
+        </select>
 
-    <label for="sandCost">Sand Cost (TK per CFT):</label>
-    <input type="number" id="sandCost" placeholder="Enter sand cost">
+        <label for="constructionCostPerFoot">Pile Construction Cost (TK per running foot):</label>
+        <input type="number" id="constructionCostPerFoot" placeholder="Enter construction cost per foot" min="0">
 
-    <label for="aggregateCost">Aggregate Cost (TK per CFT):</label>
-    <input type="number" id="aggregateCost" placeholder="Enter aggregate cost">
+        <label for="cementCost">Cement Cost (TK per bag):</label>
+        <input type="number" id="cementCost" placeholder="Enter cement cost" min="0">
 
-    <label for="steelCost">Steel Cost (TK per kg):</label>
-    <input type="number" id="steelCost" placeholder="Enter steel cost">
+        <label for="sandCost">Sand Cost (TK per CFT):</label>
+        <input type="number" id="sandCost" placeholder="Enter sand cost" min="0">
 
-    <button onclick="calculateCost()">Calculate</button>
+        <label for="aggregateCost">Aggregate Cost (TK per CFT):</label>
+        <input type="number" id="aggregateCost" placeholder="Enter aggregate cost" min="0">
 
-    <div class="output" id="output">
-      <h3>Results:</h3>
-      <p id="constructionCost"></p>
-      <p id="cementCostResult"></p>
-      <p id="sandCostResult"></p>
-      <p id="aggregateCostResult"></p>
-      <p id="steelCostResult"></p>
-      <p id="totalCost"></p>
+        <label for="steelCost">Steel Cost (TK per kg):</label>
+        <input type="number" id="steelCost" placeholder="Enter steel cost" min="0">
+
+        <button onclick="calculateCost()">Calculate</button>
+
+        <div class="result" id="output">
+            Enter values and click calculate to see results.
+        </div>
     </div>
 
-    <div class="output" id="materialOutput">
-      <h3>Material Quantities:</h3>
-      <p id="wetVolume"></p>
-      <p id="dryVolume"></p>
-      <p id="cementBags"></p>
-      <p id="sandVolume"></p>
-      <p id="aggregateVolume"></p>
-      <p id="mainBarWeight"></p>
-      <p id="spiralWeight"></p>
-    </div>
-  </div>
+    <script>
+        function calculateCost() {
+            // Input values
+            const pileNos = parseFloat(document.getElementById('pileNos').value);
+            const pileLength = parseFloat(document.getElementById('pileLength').value);
+            const pileDiameter = parseFloat(document.getElementById('pileDiameter').value);
+            const barSize = parseFloat(document.getElementById('barSize').value);
+            const barNos = parseFloat(document.getElementById('barNos').value);
+            const spiralSpacing = parseFloat(document.getElementById('spiralSpacing').value);
+            const mixRatio = document.getElementById('mixRatio').value;
+            const constructionCostPerFoot = parseFloat(document.getElementById('constructionCostPerFoot').value);
+            const cementCost = parseFloat(document.getElementById('cementCost').value);
+            const sandCost = parseFloat(document.getElementById('sandCost').value);
+            const aggregateCost = parseFloat(document.getElementById('aggregateCost').value);
+            const steelCost = parseFloat(document.getElementById('steelCost').value);
+            const output = document.getElementById('output');
 
-<script>
-    function calculateCost() {
-      // Input values
-      const pileNos = parseFloat(document.getElementById('pileNos').value);
-      const pileLength = parseFloat(document.getElementById('pileLength').value);
-      const pileDiameter = parseFloat(document.getElementById('pileDiameter').value);
-      const barSize = parseFloat(document.getElementById('barSize').value);
-      const barNos = parseFloat(document.getElementById('barNos').value);
-      const spiralSpacing = parseFloat(document.getElementById('spiralSpacing').value);
-      const constructionCostPerFoot = parseFloat(document.getElementById('constructionCostPerFoot').value);
-      const cementCost = parseFloat(document.getElementById('cementCost').value);
-      const sandCost = parseFloat(document.getElementById('sandCost').value);
-      const aggregateCost = parseFloat(document.getElementById('aggregateCost').value);
-      const steelCost = parseFloat(document.getElementById('steelCost').value);
+            // Validation
+            if (isNaN(pileNos) || isNaN(pileLength) || isNaN(pileDiameter) || isNaN(barSize) || isNaN(barNos) || 
+                isNaN(spiralSpacing) || isNaN(constructionCostPerFoot) || isNaN(cementCost) || isNaN(sandCost) || 
+                isNaN(aggregateCost) || isNaN(steelCost) || pileNos < 1 || pileLength <= 0 || pileDiameter <= 0 || 
+                barSize <= 0 || barNos <= 0 || spiralSpacing <= 0 || constructionCostPerFoot <= 0 || cementCost <= 0 || 
+                sandCost <= 0 || aggregateCost <= 0 || steelCost <= 0) {
+                output.innerHTML = "Please enter valid positive values for all fields.";
+                output.style.color = "#dc3545";
+                return;
+            }
 
-      // Concrete calculations
-      const pileRadius = (pileDiameter / 2) / 12; // Convert inches to feet
-      const wetVolumePerPile = Math.PI * Math.pow(pileRadius, 2) * pileLength;
-      const dryVolumePerPile = wetVolumePerPile * 1.54;
+            output.style.color = "#333";
 
-      // Material calculations (1:2:4 mix ratio)
-      const mixTotal = 7; // 1+2+4
-      const cementVolumePerPile = (dryVolumePerPile / mixTotal) * 1;
-      const sandVolumePerPile = (dryVolumePerPile / mixTotal) * 2;
-      const aggregateVolumePerPile = (dryVolumePerPile / mixTotal) * 4;
-      const cementBagsPerPile = cementVolumePerPile / 1.226; // 1 bag = 1.226 CFT
+            // Concrete calculations
+            const pileRadius = (pileDiameter / 2) / 12; // Convert inches to feet
+            const wetVolumePerPile = Math.PI * Math.pow(pileRadius, 2) * pileLength;
+            const dryVolumePerPile = wetVolumePerPile * 1.54;
 
-      // Steel calculations
-      const lappingLength = pileLength > 12 ? (50 * (barSize / 1000)) : 0; // Only add lapping for long piles
-      const totalBarLength = (pileLength * 0.3048) + lappingLength; // Convert feet to meters
-      const weightPerMeter = (barSize * barSize) / 162; // kg/m
-      const steelWeightPerPile = barNos * totalBarLength * weightPerMeter;
+            // Material calculations based on selected mix ratio
+            const mixParts = mixRatio.split(':').map(Number); // Split ratio into [cement, sand, aggregate]
+            const cementPart = mixParts[0];
+            const sandPart = mixParts[1];
+            const aggregatePart = mixParts[2];
+            const mixTotal = cementPart + sandPart + aggregatePart; // Total parts
 
-      // Spiral calculations (assuming 8mm spiral)
-      const pileCircumference = Math.PI * (pileDiameter * 0.0254); // Convert inches to meters
-      const spiralLengthPerLoop = pileCircumference + (50 * (8 / 1000)); // 50d lapping
-      const totalSpirals = (pileLength * 12) / spiralSpacing; // Total loops
-      const spiralWeightPerPile = totalSpirals * spiralLengthPerLoop * 0.395; // 8mm bar weight
+            const cementVolumePerPile = (dryVolumePerPile / mixTotal) * cementPart;
+            const sandVolumePerPile = (dryVolumePerPile / mixTotal) * sandPart;
+            const aggregateVolumePerPile = (dryVolumePerPile / mixTotal) * aggregatePart;
+            const cementBagsPerPile = cementVolumePerPile / 1.226; // 1 bag = 1.226 CFT
 
-      // Totals
-      const totalSteelWeight = (steelWeightPerPile + spiralWeightPerPile) * pileNos;
-      const totalCementBags = cementBagsPerPile * pileNos;
-      const totalSandVolume = sandVolumePerPile * pileNos;
-      const totalAggregateVolume = aggregateVolumePerPile * pileNos;
-      const totalWetVolume = wetVolumePerPile * pileNos;
-      const totalDryVolume = dryVolumePerPile * pileNos;
+            // Steel calculations
+            const lappingLength = pileLength > 12 ? (50 * (barSize / 1000)) : 0; // Lapping for long piles
+            const totalBarLength = (pileLength * 0.3048) + lappingLength; // Convert feet to meters
+            const weightPerMeter = (barSize * barSize) / 162; // kg/m
+            const steelWeightPerPile = barNos * totalBarLength * weightPerMeter;
 
-      // Cost calculations
-      const constructionCost = pileLength * constructionCostPerFoot * pileNos;
-      const cementCostTotal = totalCementBags * cementCost;
-      const sandCostTotal = totalSandVolume * sandCost;
-      const aggregateCostTotal = totalAggregateVolume * aggregateCost;
-      const steelCostTotal = totalSteelWeight * steelCost;
-      const totalCost = constructionCost + cementCostTotal + sandCostTotal + aggregateCostTotal + steelCostTotal;
+            // Spiral calculations (assuming 8mm spiral)
+            const pileCircumference = Math.PI * (pileDiameter * 0.0254); // Convert inches to meters
+            const spiralLengthPerLoop = pileCircumference + (50 * (8 / 1000)); // 50d lapping
+            const totalSpirals = (pileLength * 12) / spiralSpacing; // Total loops
+            const spiralWeightPerPile = totalSpirals * spiralLengthPerLoop * 0.395; // 8mm bar weight
 
-      // Display results
-      document.getElementById('constructionCost').innerText = `Construction Cost: ${constructionCost.toFixed(2)} TK`;
-      document.getElementById('cementCostResult').innerText = `Cement Cost: ${cementCostTotal.toFixed(2)} TK`;
-      document.getElementById('sandCostResult').innerText = `Sand Cost: ${sandCostTotal.toFixed(2)} TK`;
-      document.getElementById('aggregateCostResult').innerText = `Aggregate Cost: ${aggregateCostTotal.toFixed(2)} TK`;
-      document.getElementById('steelCostResult').innerText = `Steel Cost: ${steelCostTotal.toFixed(2)} TK`;
-      document.getElementById('totalCost').innerText = `Total Cost: ${totalCost.toFixed(2)} TK`;
+            // Totals
+            const totalSteelWeight = (steelWeightPerPile + spiralWeightPerPile) * pileNos;
+            const totalCementBags = cementBagsPerPile * pileNos;
+            const totalSandVolume = sandVolumePerPile * pileNos;
+            const totalAggregateVolume = aggregateVolumePerPile * pileNos;
+            const totalWetVolume = wetVolumePerPile * pileNos;
+            const totalDryVolume = dryVolumePerPile * pileNos;
 
-      // Display material quantities
-      document.getElementById('wetVolume').innerText = `Concrete Wet Volume: ${totalWetVolume.toFixed(2)} CFT`;
-      document.getElementById('dryVolume').innerText = `Concrete Dry Volume: ${totalDryVolume.toFixed(2)} CFT`;
-      document.getElementById('cementBags').innerText = `Cement Bags: ${totalCementBags.toFixed(2)}`;
-      document.getElementById('sandVolume').innerText = `Sand Volume: ${totalSandVolume.toFixed(2)} CFT`;
-      document.getElementById('aggregateVolume').innerText = `Aggregate Volume: ${totalAggregateVolume.toFixed(2)} CFT`;
-      document.getElementById('mainBarWeight').innerText = `Main Bar Weight: ${(steelWeightPerPile * pileNos).toFixed(2)} kg`;
-      document.getElementById('spiralWeight').innerText = `Spiral Weight: ${(spiralWeightPerPile * pileNos).toFixed(2)} kg`;
-    }
-</script>
+            // Cost calculations
+            const constructionCost = pileLength * constructionCostPerFoot * pileNos;
+            const cementCostTotal = totalCementBags * cementCost;
+            const sandCostTotal = totalSandVolume * sandCost;
+            const aggregateCostTotal = totalAggregateVolume * aggregateCost;
+            const steelCostTotal = totalSteelWeight * steelCost;
+            const totalCost = constructionCost + cementCostTotal + sandCostTotal + aggregateCostTotal + steelCostTotal;
+
+            // Display results
+            output.innerHTML = `
+                <strong>Material Quantities</strong><br>
+                Concrete Wet Volume: ${totalWetVolume.toFixed(2)} CFT<br>
+                Concrete Dry Volume: ${totalDryVolume.toFixed(2)} CFT<br>
+                Cement Bags: ${totalCementBags.toFixed(2)}<br>
+                Sand Volume: ${totalSandVolume.toFixed(2)} CFT<br>
+                Aggregate Volume: ${totalAggregateVolume.toFixed(2)} CFT<br>
+                Main Bar Weight: ${(steelWeightPerPile * pileNos).toFixed(2)} kg<br>
+                Spiral Weight: ${(spiralWeightPerPile * pileNos).toFixed(2)} kg<br>
+                <br><strong>Cost Breakdown</strong><br>
+                Construction Cost: ${constructionCost.toFixed(2)} TK<br>
+                Cement Cost: ${cementCostTotal.toFixed(2)} TK<br>
+                Sand Cost: ${sandCostTotal.toFixed(2)} TK<br>
+                Aggregate Cost: ${aggregateCostTotal.toFixed(2)} TK<br>
+                Steel Cost: ${steelCostTotal.toFixed(2)} TK<br>
+                Total Cost: <span class="highlight">${totalCost.toFixed(2)} TK</span><br>
+                <small>Based on ${pileNos} piles with ${mixRatio} mix ratio</small>
+            `;
+        }
+    </script>
 </body>
 </html>
