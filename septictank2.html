@@ -6,72 +6,112 @@
     <title>Septic Tank Estimate</title>
     <style>
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
         }
-
+        
         body {
-            background: #f4f4f4;
-            text-align: center;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 400px;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            margin: auto;
-            overflow: hidden;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
         }
 
         h2 {
-            margin-bottom: 15px;
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 24px;
         }
 
         label {
             display: block;
-            margin: 10px 0 5px;
-            font-weight: bold;
+            text-align: left;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
         }
 
         input {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
             font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #007BFF;
         }
 
         button {
-            margin-top: 10px;
-            padding: 10px;
             width: 100%;
-            background: #007bff;
+            padding: 12px;
+            background-color: #007BFF;
             color: white;
             border: none;
+            border-radius: 8px;
             font-size: 16px;
-            border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background: #0056b3;
+            background-color: #0056b3;
         }
 
-        #output {
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
+        .result {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 16px;
             color: #333;
+            line-height: 1.6;
+        }
+
+        .result strong {
+            color: #007BFF;
+            font-weight: 600;
+        }
+
+        .highlight {
+            color: #dc3545; /* Red color for highlighted values */
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            input, button {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
-
     <div class="container">
         <h2>Septic Tank Estimate Calculator</h2>
         
@@ -92,7 +132,9 @@
 
         <button onclick="calculateSepticTank()">Calculate</button>
 
-        <div id="output"></div>
+        <div class="result" id="output">
+            Enter values and click calculate to see results.
+        </div>
     </div>
 
     <script>
@@ -102,32 +144,38 @@
             let persons = parseInt(document.getElementById("persons").value);
             let waterUsage = parseInt(document.getElementById("waterUsage").value);
             let retention = parseInt(document.getElementById("retention").value);
+            const output = document.getElementById("output");
 
             if (floors < 1 || units < 1 || persons < 1 || waterUsage < 50 || retention < 1 || retention > 3) {
-                alert("Please enter valid values.");
+                output.innerHTML = "Please enter valid values.";
+                output.style.color = "#dc3545";
                 return;
             }
 
+            output.style.color = "#333";
+
             let totalPersons = floors * units * persons;
-            let dailyWastewater = totalPersons * waterUsage; // User-defined water usage per person
-            let totalVolume = dailyWastewater * retention; // Retention time in days
+            let dailyWastewater = totalPersons * waterUsage;
+            let totalVolume = dailyWastewater * retention;
 
             let height = 6; // Standard depth in feet
-            let width = Math.sqrt(totalVolume / (height * 7.48)); // Convert liters to cubic feet (7.48L = 1 ft³)
-            let length = 1.5 * width; // Length is usually 1.5 times width
+            let width = Math.sqrt(totalVolume / (height * 7.48)); // Convert liters to cubic feet
+            let length = 1.5 * width;
 
             let capacityDays = Math.round(totalVolume / dailyWastewater);
 
-            document.getElementById("output").innerHTML = `
-                <p>Total Persons: ${totalPersons}</p>
-                <p>Water Usage per Person: ${waterUsage} L</p>
-                <p>Daily Wastewater: ${dailyWastewater} L</p>
-                <p>Tank Volume: ${totalVolume} L</p>
-                <p>Tank Size: ${length.toFixed(2)} ft × ${width.toFixed(2)} ft × ${height} ft</p>
-                <p>Capacity: ${capacityDays} Days</p>
+            output.innerHTML = `
+                <strong>Key Metrics</strong><br>
+                Total Persons: ${totalPersons}<br>
+                Water Usage per Person: ${waterUsage} L<br>
+                Daily Wastewater: ${dailyWastewater} L<br>
+                <br><strong>Tank Specifications</strong><br>
+                Total Volume: <span class="highlight">${totalVolume} L</span><br>
+                Dimensions: ${length.toFixed(2)} ft × ${width.toFixed(2)} ft × ${height} ft<br>
+                Capacity: ${capacityDays} Days<br>
+                <small>Based on ${retention}-day retention and standard ${height} ft depth</small>
             `;
         }
     </script>
-
 </body>
 </html>
