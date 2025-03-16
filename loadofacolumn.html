@@ -5,14 +5,194 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Structure Weight Calculator</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; }
-        input { width: 200px; padding: 5px; }
-        .result { margin-top: 20px; padding: 15px; background: #f0f0f0; }
-        .note { color: #666; font-size: 0.9em; margin-top: 10px; }
-        .highlight { color: #c00; font-weight: bold; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 4px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #007BFF;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group.paired input {
+            width: calc(50% - 5px);
+            display: inline-block;
+            margin-right: 5px; /* Reduced gap between paired inputs */
+        }
+
+        .input-group.paired input:first-child {
+            margin-bottom: 5px; /* Reduced gap between paired inputs */
+        }
+
+        .input-group.paired input:last-child {
+            margin-right: 0;
+            margin-bottom: 20px; /* Maintain gap after the group */
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .result h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .result strong {
+            color: #007BFF;
+            font-weight: 600;
+        }
+
+        .highlight {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .note {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+
+            .container {
+                padding: 20px;
+                max-width: 100%;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            input, button {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .input-group.paired input {
+                width: 100%;
+                margin-right: 0;
+            }
+
+            .input-group.paired input:first-child {
+                margin-bottom: 5px; /* Reduced gap between paired inputs on mobile */
+            }
+
+            .input-group.paired input:last-child {
+                margin-bottom: 20px;
+            }
+
+            label {
+                font-size: 14px;
+                margin-bottom: 4px;
+            }
+
+            .result {
+                font-size: 14px;
+                padding: 12px;
+            }
+
+            .note {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            h1 {
+                font-size: 18px;
+            }
+
+            input, button {
+                font-size: 13px;
+                padding: 8px;
+            }
+
+            label {
+                font-size: 13px;
+                margin-bottom: 4px;
+            }
+
+            .result {
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -24,10 +204,10 @@
             <input type="number" id="numStories" value="1" min="1">
         </div>
 
-        <div class="input-group">
+        <div class="input-group paired">
             <label>Column Dimensions (mm):</label>
-            <input type="number" id="colWidth" value="300"> x 
-            <input type="number" id="colDepth" value="300">
+            <input type="number" id="colWidth" value="300" placeholder="Width">
+            <input type="number" id="colDepth" value="300" placeholder="Depth">
         </div>
 
         <div class="input-group">
@@ -45,10 +225,10 @@
             <input type="number" id="slabThickness" value="125">
         </div>
 
-        <div class="input-group">
+        <div class="input-group paired">
             <label>Beam Dimensions (mm):</label>
-            <input type="number" id="beamWidth" value="250"> x 
-            <input type="number" id="beamDepth" value="250">
+            <input type="number" id="beamWidth" value="250" placeholder="Width">
+            <input type="number" id="beamDepth" value="250" placeholder="Depth">
         </div>
 
         <div class="input-group">
@@ -83,27 +263,27 @@
 
         <button onclick="calculateWeight()">Calculate Total Weight</button>
 
-        <div class="result">
+        <div class="result" id="result">
             <h3>Load Calculations:</h3>
-            <p>Structural Dead Load (Columns+Slab+Beams): <span id="structuralDead">0.00</span> tons</p>
+            <p>Structural Dead Load (Columns + Slab + Beams): <span id="structuralDead">0.00</span> tons</p>
             <p>Floor Finish Dead Load: <span id="floorFinishDead">0.00</span> tons</p>
             <p>Brick Load: <span id="brickLoad">0.00</span> tons</p>
             <p>Total Dead Load: <span id="totalDead">0.00</span> tons</p>
-            <p>Factored Dead Load (DL   Factor): <span id="factoredDead">0.00</span> tons</p>
+            <p>Factored Dead Load (<strong>DL Factor</strong>): <span id="factoredDead">0.00</span> tons</p>
             <p>Live Load: <span id="liveLoadResult">0.00</span> tons</p>
-            <p>Factored Live Load (LL   Factor): <span id="factoredLive">0.00</span> tons</p>
-            <p class="highlight">Total Factored Load: <span id="totalFactored">0.00</span> tons</p>
+            <p>Factored Live Load (<strong>LL Factor</strong>): <span id="factoredLive">0.00</span> tons</p>
+            <p><strong>Total Factored Load:</strong> <span class="highlight" id="totalFactored">0.00</span> tons</p>
         </div>
 
         <div class="note">
-            * Calculations use: Concrete density = 2400 kg/m , 1 lb = 0.453592 kg<br>
+            * Calculations use: Concrete density = 2400 kg/m³, 1 lb = 0.453592 kg<br>
             * Factors follow common structural design standards (e.g., ACI 318)
         </div>
     </div>
 
     <script>
         function calculateWeight() {
-            const concreteDensity = 2400;
+            const concreteDensity = 2400; // kg/m³
             const lbToKg = 0.453592;
 
             const numStories = parseFloat(document.getElementById('numStories').value);
@@ -121,6 +301,19 @@
             const brickWeight = parseFloat(document.getElementById('brickWeight').value);
             const numBricks = parseFloat(document.getElementById('numBricks').value);
 
+            // Validation
+            if ([numStories, colWidth, colDepth, colHeight, slabAreaSqft, slabThickness, beamWidth, beamDepth, 
+                 floorFinish, liveLoad, deadFactor, liveFactor, brickWeight, numBricks].some(isNaN) || 
+                numStories < 1 || colWidth <= 0 || colDepth <= 0 || colHeight <= 0 || slabAreaSqft <= 0 || 
+                slabThickness <= 0 || beamWidth <= 0 || beamDepth <= 0 || floorFinish < 0 || liveLoad < 0 || 
+                deadFactor <= 0 || liveFactor <= 0 || brickWeight <= 0 || numBricks < 0) {
+                document.getElementById('result').innerHTML = `
+                    <h3>Error</h3>
+                    <p>Please enter valid positive values for all fields.</p>
+                `;
+                return;
+            }
+
             const slabAreaSqm = slabAreaSqft * 0.092903;
             const beamLength = 2 * Math.sqrt(slabAreaSqft) * 0.3048;
 
@@ -133,11 +326,9 @@
 
             const structuralDead = colWeight + slabWeight + beamWeight;
             const floorFinishDead = ((slabAreaSqft * floorFinish * lbToKg) / 1000) * numStories;
-            
-            // Brick load in tons
             const brickLoadTon = (brickWeight * numBricks) / 1000;
 
-            const totalDead = structuralDead + floorFinishDead + brickLoadTon;  // Include brick load in total dead load
+            const totalDead = structuralDead + floorFinishDead + brickLoadTon;
             const factoredDead = totalDead * deadFactor;
 
             const liveLoadTon = ((slabAreaSqft * liveLoad * lbToKg) / 1000) * numStories;
@@ -145,16 +336,20 @@
 
             const totalFactored = factoredDead + factoredLive;
 
-            document.getElementById('structuralDead').textContent = structuralDead.toFixed(2);
-            document.getElementById('floorFinishDead').textContent = floorFinishDead.toFixed(2);
-            document.getElementById('brickLoad').textContent = brickLoadTon.toFixed(2);
-            document.getElementById('totalDead').textContent = totalDead.toFixed(2);
-            document.getElementById('factoredDead').textContent = factoredDead.toFixed(2);
-            document.getElementById('liveLoadResult').textContent = liveLoadTon.toFixed(2);
-            document.getElementById('factoredLive').textContent = factoredLive.toFixed(2);
-            document.getElementById('totalFactored').textContent = totalFactored.toFixed(2);
+            document.getElementById('result').innerHTML = `
+                <h3>Load Calculations:</h3>
+                <p>Structural Dead Load (Columns + Slab + Beams): <span id="structuralDead">${structuralDead.toFixed(2)}</span> tons</p>
+                <p>Floor Finish Dead Load: <span id="floorFinishDead">${floorFinishDead.toFixed(2)}</span> tons</p>
+                <p>Brick Load: <span id="brickLoad">${brickLoadTon.toFixed(2)}</span> tons</p>
+                <p>Total Dead Load: <span id="totalDead">${totalDead.toFixed(2)}</span> tons</p>
+                <p>Factored Dead Load (<strong>DL Factor</strong>): <span id="factoredDead">${factoredDead.toFixed(2)}</span> tons</p>
+                <p>Live Load: <span id="liveLoadResult">${liveLoadTon.toFixed(2)}</span> tons</p>
+                <p>Factored Live Load (<strong>LL Factor</strong>): <span id="factoredLive">${factoredLive.toFixed(2)}</span> tons</p>
+                <p><strong>Total Factored Load:</strong> <span class="highlight" id="totalFactored">${totalFactored.toFixed(2)}</span> tons</p>
+            `;
         }
 
+        // Initial calculation with default values
         calculateWeight();
     </script>
 </body>
