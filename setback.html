@@ -5,63 +5,131 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Setback Calculator</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-            background-color: #f4f4f4;
-        }
-        .container {
-            max-width: 400px;
-            margin: auto;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
             padding: 20px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
         }
-        input, button {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
         }
+
+        h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #007BFF;
+        }
+
         button {
+            width: 100%;
+            padding: 12px;
             background-color: #007BFF;
             color: white;
             border: none;
+            border-radius: 8px;
+            font-size: 16px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
+
         button:hover {
             background-color: #0056b3;
         }
+
         .result {
-            font-weight: bold;
-            margin-top: 20px;
-            background: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
+            margin-top: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .result strong {
+            color: #007BFF;
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            input, button {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Setback Calculator</h2>
-        <label for="decimal">Enter Land Area (Decimal):</label>
-        <input type="number" id="decimal" step="0.01" placeholder="Enter Decimal value">
-        <button onclick="calculateSetback()">Calculate</button>
-        <div class="result" id="output"></div>
+        <label for="decimal">Enter Land Area (in Decimal):</label>
+        <input type="number" id="decimal" step="0.01" placeholder="e.g., 5.25" min="0">
+        <button onclick="calculateSetback()">Calculate Setback</button>
+        <div class="result" id="output">
+            Enter a value and click calculate to see results.
+        </div>
     </div>
 
     <script>
         function calculateSetback() {
-            let decimal = parseFloat(document.getElementById("decimal").value);
+            const decimal = parseFloat(document.getElementById("decimal").value);
+            const output = document.getElementById("output");
+
             if (isNaN(decimal) || decimal <= 0) {
-                document.getElementById("output").innerHTML = "Please enter a valid decimal value.";
+                output.innerHTML = "Please enter a valid positive decimal value.";
+                output.style.color = "#dc3545";
                 return;
             }
-            
-            let khatha = (decimal * 435.6) / 720; // Convert decimal to khatha
+
+            output.style.color = "#333";
+            const khatha = (decimal * 435.6) / 720;
             let front, back, side;
 
             if (khatha < 2) {
@@ -82,18 +150,20 @@
                 side = 1.25;
             }
 
-            let roadSetback = 4.5;
+            const roadSetback = 4.5;
             front = Math.max(front, roadSetback);
 
-            let frontFeet = (front * 3.28084).toFixed(2);
-            let backFeet = (back * 3.28084).toFixed(2);
-            let sideFeet = (side * 3.28084).toFixed(2);
+            const frontFeet = (front * 3.28084).toFixed(2);
+            const backFeet = (back * 3.28084).toFixed(2);
+            const sideFeet = (side * 3.28084).toFixed(2);
 
-            document.getElementById("output").innerHTML = `
-                <strong>Setback Distances:</strong><br>
-                Front: ${front}m (${frontFeet} ft)<br>
-                Back: ${back}m (${backFeet} ft)<br>
-                Side: ${side}m (${sideFeet} ft)`;
+            output.innerHTML = `
+                <strong>Setback Distances</strong><br>
+                Front: ${front} m (${frontFeet} ft)<br>
+                Back: ${back} m (${backFeet} ft)<br>
+                Side: ${side} m (${sideFeet} ft)<br>
+                <small>Based on ${khatha.toFixed(2)} khatha</small>
+            `;
         }
     </script>
 </body>
