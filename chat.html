@@ -1,0 +1,349 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Private Chat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .header {
+      background-color: #075e54;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 18px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      overflow-y: auto;
+      background-color: #e5ddd5;
+    }
+    .message {
+      max-width: 70%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      position: relative;
+    }
+    .message.sent {
+      background-color: #dcf8c6;
+      align-self: flex-end;
+    }
+    .message.received {
+      background-color: white;
+      align-self: flex-start;
+    }
+    .message img {
+      max-width: 100%;
+      border-radius: 10px;
+    }
+    .input-container {
+      display: flex;
+      padding: 10px;
+      background-color: white;
+      border-top: 1px solid #ddd;
+      flex-wrap: wrap;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      margin-right: 10px;
+      font-size: 14px;
+      min-width: 100px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      background-color: #075e54;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #054d43;
+    }
+    button.disconnect {
+      background-color: #ff4444;
+    }
+    .my-id {
+      padding: 10px;
+      background-color: #075e54;
+      color: white;
+      text-align: center;
+      font-size: 14px;
+    }
+    .emoji-picker {
+      position: absolute;
+      bottom: 60px;
+      right: 10px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px;
+      display: none;
+    }
+    .emoji-picker span {
+      cursor: pointer;
+      margin: 5px;
+      font-size: 20px;
+    }
+    @media (max-width: 480px) {
+      .header { font-size: 16px; }
+      .message { max-width: 80%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">Privae Chat</div>
+  <div class="my-id" id="my-id">Your ID: Loading...</div>
+  <div class="chat-container" id="chat-box"></div>
+  <div class="input-container">
+    <input type="text" id="peer-id-input" placeholder="Enter Peer ID to connect">
+    <button id="connect-btn">Connect</button>
+    <input type="text" id="message-input" placeholder="Type a message">
+    <button id="emoji-btn">😀</button>
+    <button id="send-btn">Send</button>
+    <input type="file" id="file-input" accept="image/*" style="display: none;">
+    <button id="attach-btn">📎</button>
+    <button id="location-btn">📍 Share Live Location</button>
+  </div>
+  <div class="emoji-picker" id="emoji-picker">
+    <span>😀</span>
+    <span>😂</span>
+    <span>😍</span>
+    <span>😎</span>
+    <span>👍</span>
+    <span>👋</span>
+    <span>🎉</span>
+    <span>❤️</span>
+  </div>
+
+  <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+  <script>
+    // Initialize Peer with a 6-digit random ID
+    const peer = new Peer(Math.floor(100000 + Math.random() * 900000).toString(), {
+      debug: 3,
+    });
+
+    const connections = new Map(); // Store multiple connections
+
+    // When Peer is connected
+    peer.on('open', (id) => {
+      console.log('My Peer ID is: ' + id);
+      document.getElementById('my-id').textContent = `Your ID: ${id}`;
+    });
+
+    // Handle incoming connections
+    peer.on('connection', (conn) => {
+      setupConnection(conn);
+    });
+
+    // Connect to a peer
+    const connectBtn = document.getElementById('connect-btn');
+    const peerIdInput = document.getElementById('peer-id-input');
+
+    connectBtn.addEventListener('click', () => {
+      const peerId = peerIdInput.value.trim();
+      if (peerId && !connections.has(peerId)) {
+        const conn = peer.connect(peerId);
+        setupConnection(conn);
+        peerIdInput.value = '';
+        updateUIForConnectedState();
+      }
+    });
+
+    // Disconnect from all peers
+    function disconnect() {
+      connections.forEach((conn) => {
+        conn.send({ type: 'connection-status', status: 'disconnected' });
+        conn.close();
+      });
+      connections.clear();
+      updateUIForDisconnectedState();
+    }
+
+    // Update UI when connected
+    function updateUIForConnectedState() {
+      connectBtn.textContent = 'Disconnect';
+      connectBtn.classList.add('disconnect');
+      connectBtn.removeEventListener('click', connectBtn.click);
+      connectBtn.addEventListener('click', disconnect);
+      peerIdInput.style.display = 'none';
+    }
+
+    // Update UI when disconnected
+    function updateUIForDisconnectedState() {
+      connectBtn.textContent = 'Connect';
+      connectBtn.classList.remove('disconnect');
+      connectBtn.removeEventListener('click', disconnect);
+      connectBtn.addEventListener('click', connectBtn.click);
+      peerIdInput.style.display = 'inline-block';
+    }
+
+    // Setup connection handlers
+    function setupConnection(conn) {
+      conn.on('open', () => {
+        connections.set(conn.peer, conn);
+        appendMessage(`Connected to peer: ${conn.peer}`, 'status');
+        conn.send({ type: 'connection-status', status: 'connected' });
+      });
+
+      conn.on('data', (data) => {
+        if (typeof data === 'string') {
+          appendMessage(`${conn.peer}: ${data}`, 'received');
+        } else if (data.type === 'image') {
+          appendImage(data.url, 'received');
+        } else if (data.type === 'location') {
+          appendLocation(data.url, 'received');
+        } else if (data.type === 'connection-status') {
+          if (data.status === 'connected') {
+            updateUIForConnectedState();
+          } else if (data.status === 'disconnected') {
+            updateUIForDisconnectedState();
+          }
+        }
+      });
+
+      conn.on('close', () => {
+        connections.delete(conn.peer);
+        appendMessage(`Disconnected from peer: ${conn.peer}`, 'status');
+        if (connections.size === 0) {
+          updateUIForDisconnectedState();
+        }
+      });
+    }
+
+    // Send a message to all connected peers
+    document.getElementById('send-btn').addEventListener('click', () => {
+      const message = document.getElementById('message-input').value.trim();
+      if (message && connections.size > 0) {
+        connections.forEach((conn) => {
+          if (conn.open) {
+            conn.send(message);
+          }
+        });
+        appendMessage(`You: ${message}`, 'sent');
+        document.getElementById('message-input').value = '';
+      } else if (connections.size === 0) {
+        appendMessage('No peers connected yet.', 'status');
+      }
+    });
+
+    // Append messages to the chat box
+    function appendMessage(message, type) {
+      const chatBox = document.getElementById('chat-box');
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message', type);
+      messageElement.textContent = message;
+      chatBox.appendChild(messageElement);
+      chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to bottom
+    }
+
+    // Append images to the chat box
+    function appendImage(url, type) {
+      const chatBox = document.getElementById('chat-box');
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message', type);
+      const imgElement = document.createElement('img');
+      imgElement.src = url;
+      messageElement.appendChild(imgElement);
+      chatBox.appendChild(messageElement);
+      chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to bottom
+    }
+
+    // Append location links to the chat box
+    function appendLocation(url, type) {
+      const chatBox = document.getElementById('chat-box');
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message', type);
+      const linkElement = document.createElement('a');
+      linkElement.href = url;
+      linkElement.textContent = '📍 Live Location';
+      linkElement.target = '_blank';
+      messageElement.appendChild(linkElement);
+      chatBox.appendChild(messageElement);
+      chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to bottom
+    }
+
+    // Handle Enter key for sending messages
+    document.getElementById('message-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        document.getElementById('send-btn').click();
+      }
+    });
+
+    // Emoji picker
+    document.getElementById('emoji-btn').addEventListener('click', () => {
+      const emojiPicker = document.getElementById('emoji-picker');
+      emojiPicker.style.display = emojiPicker.style.display === 'block' ? 'none' : 'block';
+    });
+
+    document.getElementById('emoji-picker').addEventListener('click', (e) => {
+      if (e.target.tagName === 'SPAN') {
+        const messageInput = document.getElementById('message-input');
+        messageInput.value += e.target.textContent;
+        messageInput.focus();
+      }
+    });
+
+    // Image attachment
+    document.getElementById('attach-btn').addEventListener('click', () => {
+      document.getElementById('file-input').click();
+    });
+
+    document.getElementById('file-input').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const url = event.target.result;
+          connections.forEach((conn) => {
+            if (conn.open) {
+              conn.send({ type: 'image', url: url });
+            }
+          });
+          appendImage(url, 'sent');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Share live location
+    document.getElementById('location-btn').addEventListener('click', () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const { latitude, longitude } = position.coords;
+          const googleMapsLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
+          connections.forEach((conn) => {
+            if (conn.open) {
+              conn.send({ type: 'location', url: googleMapsLink });
+            }
+          });
+          appendLocation(googleMapsLink, 'sent');
+        }, (error) => {
+          console.error('Error getting location:', error);
+          appendMessage('Unable to retrieve your location.', 'status');
+        });
+      } else {
+        appendMessage('Geolocation is not supported by your browser.', 'status');
+      }
+    });
+  </script>
+</body>
+</html>
