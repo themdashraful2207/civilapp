@@ -44,7 +44,7 @@
             font-weight: 500;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 12px;
             margin-bottom: 20px;
@@ -54,7 +54,7 @@
             transition: border-color 0.3s ease;
         }
 
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: #007BFF;
         }
@@ -105,7 +105,7 @@
                 font-size: 20px;
             }
             
-            input, button {
+            input, button, select {
                 font-size: 14px;
             }
         }
@@ -118,6 +118,11 @@
         <input type="number" id="decimal" step="0.01" placeholder="e.g., 5.25" min="0">
         <label for="roadWidth">Enter Road Width (in Feet):</label>
         <input type="number" id="roadWidth" step="0.1" placeholder="e.g., 20" min="0">
+        <label for="roadType">Select Road Type:</label>
+        <select id="roadType">
+            <option value="government">Government Road</option>
+            <option value="private">Private Road</option>
+        </select>
         <button onclick="calculateSetback()">Calculate Setback</button>
         <div class="result" id="output">
             Enter values and click calculate to see results.
@@ -128,6 +133,7 @@
         function calculateSetback() {
             const decimal = parseFloat(document.getElementById("decimal").value);
             const roadWidthFeet = parseFloat(document.getElementById("roadWidth").value);
+            const roadType = document.getElementById("roadType").value;
             const output = document.getElementById("output");
 
             // Validation
@@ -143,17 +149,19 @@
             const roadWidthMeters = roadWidthFeet * 0.3048;
             const halfRoadWidthMeters = roadWidthMeters / 2;
 
-            // Setback from road center: half road width + 4.5m into land
-            const setbackFromCenterMeters = halfRoadWidthMeters + 4.5;
-            // Setback from road edge: 4.5m
-            const setbackFromEdgeMeters = 4.5;
-            // Minimum setback: 1.5m
-            const minSetbackMeters = 1.5;
-
-            // Front setback: compare setback from edge with minimum
-            let frontFromEdge = Math.max(minSetbackMeters, setbackFromEdgeMeters - halfRoadWidthMeters);
-            if (frontFromEdge < minSetbackMeters) frontFromEdge = minSetbackMeters;
-            const front = Math.max(minSetbackMeters, frontFromEdge);
+            // Setback calculation based on road type
+            let front;
+            if (roadType === "private") {
+                front = 1.5; // Fixed 1.5m for private road
+            } else {
+                // Government road: original logic
+                const setbackFromCenterMeters = halfRoadWidthMeters + 4.5;
+                const setbackFromEdgeMeters = 4.5;
+                const minSetbackMeters = 1.5;
+                let frontFromEdge = Math.max(minSetbackMeters, setbackFromEdgeMeters - halfRoadWidthMeters);
+                if (frontFromEdge < minSetbackMeters) frontFromEdge = minSetbackMeters;
+                front = Math.max(minSetbackMeters, frontFromEdge);
+            }
 
             // Back and side setbacks based on khatha
             const khatha = (decimal * 435.6) / 720;
@@ -210,7 +218,7 @@
                 Setback Area: ${setbackAreaSqFt.toFixed(2)} sq ft<br>
                 Usable Area: ${usableAreaSqFt.toFixed(2)} sq ft<br>
                 <span class="unused-percentage">% of Land Unused (Setback): ${unusedPercentage.toFixed(2)}%</span><br>
-                <small>Based on ${khatha.toFixed(2)} khatha and ${roadWidthFeet.toFixed(1)} ft road width</small>
+                <small>Based on ${khatha.toFixed(2)} khatha and ${roadWidthFeet.toFixed(1)} ft ${roadType} road</small>
             `;
         }
     </script>
