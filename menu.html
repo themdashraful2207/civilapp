@@ -263,6 +263,18 @@
                 );
                 
                 if (user) {
+                    const subscriptionEnd = new Date(user.subscriptionEnd);
+                    const currentDate = new Date();
+
+                    if (currentDate > subscriptionEnd) {
+                        errorMessage.textContent = "আপনার সাবস্ক্রিপশনের মেয়াদ শেষ হয়েছে";
+                        errorMessage.style.color = "#dc2626";
+                        errorMessage.classList.add('error', 'shake');
+                        setTimeout(() => errorMessage.classList.remove('shake'), 500);
+                        console.log("Subscription expired");
+                        return false;
+                    }
+
                     localStorage.setItem("isLoggedIn", "true");
                     console.log("Login successful, isLoggedIn:", localStorage.getItem("isLoggedIn"));
                     errorMessage.textContent = "লগইন সফল! রিডাইরেক্ট হচ্ছে...";
@@ -304,7 +316,8 @@
         document.querySelector('button[type="submit"]').addEventListener('click', () => {
             console.log("Sign In button clicked");
         });
-                // Register service worker
+
+        // Register service worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/civilapp/sw.js')
                 .then(() => console.log('Service Worker Registered'))
