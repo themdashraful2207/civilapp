@@ -5,7 +5,7 @@ self.addEventListener('install', (event) => {
                 '/civilapp/menu.html',
                 '/civilapp/proxy.html',
                 '/civilapp/manifest.json',
-                '/civilapp/icon.png',
+                '/civilapp/iconr.png',
                 '/civilapp/credentials.json',
                 '/civilapp/home.html' // Add if home.html exists
             ]);
