@@ -223,26 +223,26 @@
             let isValid = true;
             const usernameValue = username.value.trim();
             if (!usernameValue) {
-                usernameError.textContent = "ইউজারনেম প্রয়োজন";
+                usernameError.textContent = "Username is required";
                 username.classList.add('input-error');
                 isValid = false;
             } else if (usernameValue.length < 3) {
-                usernameError.textContent = "ইউজারনেম কমপক্ষে ৩ অক্ষরের হতে হবে";
+                usernameError.textContent = "Username must be at least 3 characters";
                 username.classList.add('input-error');
                 isValid = false;
             } else if (!/^[a-zA-Z0-9_]+$/.test(usernameValue)) {
-                usernameError.textContent = "শুধুমাত্র অক্ষর, সংখ্যা এবং আন্ডারস্কোর ব্যবহার করুন";
+                usernameError.textContent = "Only letters, numbers and underscore allowed";
                 username.classList.add('input-error');
                 isValid = false;
             }
 
             const passwordValue = password.value.trim();
             if (!passwordValue) {
-                passwordError.textContent = "পাসওয়ার্ড প্রয়োজন";
+                passwordError.textContent = "Password is required";
                 password.classList.add('input-error');
                 isValid = false;
             } else if (passwordValue.length < 6) {
-                passwordError.textContent = "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে";
+                passwordError.textContent = "Password must be at least 6 characters";
                 password.classList.add('input-error');
                 isValid = false;
             }
@@ -253,7 +253,7 @@
             }
 
             try {
-                const response = await fetch('credentials.json');
+                const response = await fetch('https://themdashraful2207.github.io/civilapp/credentials.json');
                 if (!response.ok) throw new Error("Credentials file not found");
                 const data = await response.json();
                 
@@ -267,7 +267,7 @@
                     const currentDate = new Date();
 
                     if (currentDate > subscriptionEnd) {
-                        errorMessage.textContent = "আপনার সাবস্ক্রিপশনের মেয়াদ শেষ হয়েছে";
+                        errorMessage.textContent = "Your subscription has expired";
                         errorMessage.style.color = "#dc2626";
                         errorMessage.classList.add('error', 'shake');
                         setTimeout(() => errorMessage.classList.remove('shake'), 500);
@@ -275,13 +275,22 @@
                         return false;
                     }
 
+                    // Store all user data in localStorage
                     localStorage.setItem("isLoggedIn", "true");
+                    localStorage.setItem("username", user.username);
                     localStorage.setItem("usertype", user.usertype);
                     localStorage.setItem("allowedLinks", JSON.stringify(user.allowedLinks));
-                    console.log("Login successful, isLoggedIn:", localStorage.getItem("isLoggedIn"));
-                    console.log("User type set:", localStorage.getItem("usertype"));
-                    console.log("Allowed links set:", localStorage.getItem("allowedLinks"));
-                    errorMessage.textContent = "লগইন সফল! রিডাইরেক্ট হচ্ছে...";
+                    localStorage.setItem("subscriptionEnd", user.subscriptionEnd);
+                    localStorage.setItem("password", user.password); // Only for demo purposes
+
+                    console.log("Login successful, stored data:", {
+                        username: user.username,
+                        usertype: user.usertype,
+                        allowedLinks: user.allowedLinks,
+                        subscriptionEnd: user.subscriptionEnd
+                    });
+
+                    errorMessage.textContent = "Login successful! Redirecting...";
                     errorMessage.style.color = "#16a34a";
                     errorMessage.classList.remove('error');
                     
@@ -290,18 +299,18 @@
                         window.location.replace("./proxy.html");
                     } catch (err) {
                         console.error("Redirect failed:", err);
-                        errorMessage.textContent = "রিডাইরেক্টে সমস্যা";
+                        errorMessage.textContent = "Redirect error";
                         errorMessage.style.color = "#dc2626";
                     }
                 } else {
-                    errorMessage.textContent = "ভুল ইউজারনেম বা পাসওয়ার্ড";
+                    errorMessage.textContent = "Invalid username or password";
                     errorMessage.style.color = "#dc2626";
                     errorMessage.classList.add('error', 'shake');
                     setTimeout(() => errorMessage.classList.remove('shake'), 500);
                     console.log("Invalid credentials");
                 }
             } catch (error) {
-                errorMessage.textContent = "সার্ভারে সমস্যা, পরে চেষ্টা করুন";
+                errorMessage.textContent = "Server error, please try again later";
                 errorMessage.style.color = "#dc2626";
                 errorMessage.classList.add('error', 'shake');
                 setTimeout(() => errorMessage.classList.remove('shake'), 500);
