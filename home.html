@@ -114,6 +114,15 @@
             animation: fadeIn 0.3s ease;
         }
 
+        /* Calculators Section - initially hidden */
+        .calculators-section {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
         /* Profile Section - initially hidden */
         .profile-section {
             display: none;
@@ -199,6 +208,18 @@
             <a href="https://themdashraful2207.github.io/civilapp/pilecapacity1.html" class="menu-item" data-link-id="pilecapacity1">Pile Capacity</a>
             <a href="https://themdashraful2207.github.io/civilapp/situpilecal1.html" class="menu-item" data-link-id="situpilecal1">Situ Pile Calculation</a>
             <a href="https://themdashraful2207.github.io/civilapp/sandpile.html" class="menu-item" data-link-id="sandpile">Sand Pile Calculation</a>
+            <a href="https://themdashraful2207.github.io/civilapp/septictank2.html" class="menu-item" data-link-id="septictank2">Septic Tank</a>
+        </div>
+
+        <!-- Calculators Section (hidden by default) -->
+        <div class="calculators-section" id="calculatorsSection">
+            <a href="https://themdashraful2207.github.io/civilapp/situpilecal1.html" class="menu-item" data-link-id="situpilecal1">Situ Pile Calculation</a>
+            <a href="https://themdashraful2207.github.io/civilapp/sandpile.html" class="menu-item" data-link-id="sandpile">Sand Pile Calculation</a>
+            <a href="https://themdashraful2207.github.io/civilapp/setback.html" class="menu-item" data-link-id="setback">Set Back</a>
+            <a href="https://themdashraful2207.github.io/civilapp/wind.html" class="menu-item" data-link-id="wind">Wind Speed</a>
+            <a href="https://themdashraful2207.github.io/civilapp/loadcombo.html" class="menu-item" data-link-id="loadcombo">Load Combo</a>
+            <a href="https://themdashraful2207.github.io/civilapp/interpolation.html" class="menu-item" data-link-id="interpolation">Interpolation</a>
+            <a href="https://themdashraful2207.github.io/civilapp/volume.html" class="menu-item" data-link-id="volume">Concrete Volume</a>
             <a href="https://themdashraful2207.github.io/civilapp/septictank2.html" class="menu-item" data-link-id="septictank2">Septic Tank</a>
         </div>
 
@@ -311,9 +332,11 @@
         // Bottom nav interaction
         const navItems = document.querySelectorAll('.nav-item');
         const homeNav = document.getElementById('homeNav');
+        const calculatorsNav = document.getElementById('calculatorsNav');
         const estimateNav = document.getElementById('estimateNav');
         const profileNav = document.getElementById('profileNav');
         const mainMenu = document.querySelector('.menu');
+        const calculatorsSection = document.getElementById('calculatorsSection');
         const estimateSection = document.getElementById('estimateSection');
         const profileSection = document.getElementById('profileSection');
 
@@ -326,14 +349,22 @@
                 // Show/hide sections based on nav click
                 if (this === homeNav) {
                     mainMenu.style.display = "grid";
+                    calculatorsSection.style.display = "none";
+                    estimateSection.style.display = "none";
+                    profileSection.style.display = "none";
+                } else if (this === calculatorsNav) {
+                    mainMenu.style.display = "none";
+                    calculatorsSection.style.display = "grid";
                     estimateSection.style.display = "none";
                     profileSection.style.display = "none";
                 } else if (this === estimateNav) {
                     mainMenu.style.display = "none";
+                    calculatorsSection.style.display = "none";
                     estimateSection.style.display = "grid";
                     profileSection.style.display = "none";
                 } else if (this === profileNav) {
                     mainMenu.style.display = "none";
+                    calculatorsSection.style.display = "none";
                     estimateSection.style.display = "none";
                     profileSection.style.display = "block";
                     loadProfileInfo(); // Refresh profile info when clicked
