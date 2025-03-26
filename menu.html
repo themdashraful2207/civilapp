@@ -276,8 +276,10 @@
                     }
 
                     localStorage.setItem("isLoggedIn", "true");
+                    localStorage.setItem("usertype", user.usertype);
                     localStorage.setItem("allowedLinks", JSON.stringify(user.allowedLinks));
                     console.log("Login successful, isLoggedIn:", localStorage.getItem("isLoggedIn"));
+                    console.log("User type set:", localStorage.getItem("usertype"));
                     console.log("Allowed links set:", localStorage.getItem("allowedLinks"));
                     errorMessage.textContent = "লগইন সফল! রিডাইরেক্ট হচ্ছে...";
                     errorMessage.style.color = "#16a34a";
