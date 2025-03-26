@@ -151,12 +151,6 @@
             color: #333;
         }
 
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -187,12 +181,35 @@
         <div class="menu">
             <a href="https://themdashraful2207.github.io/civilapp/setback.html" class="menu-item" data-link-id="setback">Set Back</a>
             <a href="https://themdashraful2207.github.io/civilapp/slabdesignpro.html" class="menu-item" data-link-id="slabdesignpro">Slab Design</a>
-            <!-- Other menu items remain the same -->
+            <a href="https://themdashraful2207.github.io/civilapp/slabmcoefficient.html" class="menu-item" data-link-id="slabmcoefficient">Slab Moment</a>
+            <a href="https://themdashraful2207.github.io/civilapp/slabload.html" class="menu-item" data-link-id="slabload">Slab Load</a>
+            <a href="https://themdashraful2207.github.io/civilapp/slabthbnbc.html" class="menu-item" data-link-id="slabthbnbc">Slab Thickness</a>
+            <a href="https://themdashraful2207.github.io/civilapp/colindex.html" class="menu-item" data-link-id="colindex">Column Design</a>
+            <a href="https://themdashraful2207.github.io/civilapp/footingdesign.html" class="menu-item" data-link-id="footingdesign">Footing Design</a>
+            <a href="https://themdashraful2207.github.io/civilapp/loadrelease1.html" class="menu-item" data-link-id="footing">Footing Analysis</a>
+            <a href="https://themdashraful2207.github.io/civilapp/loadrelease.html" class="menu-item" data-link-id="loadrelease">Load Release</a>
+            <a href="https://themdashraful2207.github.io/civilapp/gradebeam.html" class="menu-item" data-link-id="gradebeam">Grade Beam</a>
+            <a href="https://themdashraful2207.github.io/civilapp/wind.html" class="menu-item" data-link-id="wind">Wind Speed</a>
+            <a href="https://themdashraful2207.github.io/civilapp/loadcombo.html" class="menu-item" data-link-id="loadcombo">Load Combo</a>
+            <a href="https://themdashraful2207.github.io/civilapp/interpolation.html" class="menu-item" data-link-id="interpolation">Interpolation</a>
+            <a href="https://themdashraful2207.github.io/civilapp/volume.html" class="menu-item" data-link-id="volume">Concrete Volume</a>
+            <a href="https://themdashraful2207.github.io/civilapp/loadofacolumn.html" class="menu-item" data-link-id="loadofacolumn">Column Load</a>
+            <a href="https://themdashraful2207.github.io/civilapp/moduluscalculation.html" class="menu-item" data-link-id="modulus">Modulus</a>
+            <a href="https://themdashraful2207.github.io/civilapp/bmdsfd.html" class="menu-item" data-link-id="bmdsfd">BMDSFD</a>
+            <a href="https://themdashraful2207.github.io/civilapp/pilecapacity1.html" class="menu-item" data-link-id="pilecapacity1">Pile Capacity</a>
+            <a href="https://themdashraful2207.github.io/civilapp/situpilecal1.html" class="menu-item" data-link-id="situpilecal1">Situ Pile Calculation</a>
+            <a href="https://themdashraful2207.github.io/civilapp/sandpile.html" class="menu-item" data-link-id="sandpile">Sand Pile Calculation</a>
+            <a href="https://themdashraful2207.github.io/civilapp/septictank2.html" class="menu-item" data-link-id="septictank2">Septic Tank</a>
         </div>
 
         <!-- Estimate Section (hidden by default) -->
         <div class="estimate-section" id="estimateSection">
-            <!-- Estimate links remain the same -->
+            <a href="https://themdashraful2207.github.io/civilapp/estimatecolumnv1.html" class="menu-item" data-link-id="estimatecolumnv1">Column Estimate</a>
+            <a href="https://themdashraful2207.github.io/civilapp/estimatefootingv1.html" class="menu-item" data-link-id="estimatefootingv1">Footing Estimate</a>
+            <a href="https://themdashraful2207.github.io/civilapp/estimatebeam.html" class="menu-item" data-link-id="estimatebeam">Beam Estimate</a>
+            <a href="https://themdashraful2207.github.io/civilapp/estimateslabv1.html" class="menu-item" data-link-id="estimateslabv1">Slab Estimate</a>
+            <a href="https://themdashraful2207.github.io/civilapp/estimatebrickworkpro.html" class="menu-item" data-link-id="estimatebrickworkpro">Brickwork Estimate</a>
+            <a href="https://themdashraful2207.github.io/civilapp/estimatestair.html" class="menu-item" data-link-id="estimatestair">Stair Estimate</a>
         </div>
 
         <!-- Profile Section (hidden by default) -->
@@ -215,13 +232,6 @@
                     <span class="info-label">Access Level:</span>
                     <span class="info-value" id="profileAccess"></span>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Allowed Tools:</span>
-                    <span class="info-value" id="profileTools"></span>
-                </div>
-            </div>
-            <div id="loadingIndicator" class="loading" style="display: none;">
-                <i class="fas fa-spinner fa-spin"></i> Loading profile data...
             </div>
         </div>
     </div>
@@ -247,7 +257,7 @@
     </nav>
 
     <script>
-        console.log("Home page loaded");
+        console.log("Home page loaded (inside iframe)");
         console.log("Initial isLoggedIn:", localStorage.getItem("isLoggedIn"));
 
         if (localStorage.getItem("isLoggedIn") !== "true") {
@@ -260,7 +270,7 @@
             console.log("User type:", usertype);
             console.log("Allowed links for user:", allowedLinks);
 
-            if (usertype !== "admin") {
+            if (usertype !== "admin") { // Only filter for non-admin users
                 const menuItems = document.querySelectorAll(".menu-item");
                 menuItems.forEach(item => {
                     const linkId = item.getAttribute("data-link-id");
@@ -271,59 +281,31 @@
             } else {
                 console.log("Admin user detected, showing all links");
             }
+
+            // Load profile information
+            loadProfileInfo();
         }
 
-        async function loadProfileInfo() {
-            const loadingIndicator = document.getElementById('loadingIndicator');
-            const profileSection = document.getElementById('profileSection');
+        function loadProfileInfo() {
+            const username = localStorage.getItem("username");
+            const password = localStorage.getItem("password");
+            const subscriptionEnd = localStorage.getItem("subscriptionEnd");
+            const usertype = localStorage.getItem("usertype");
+            const allowedLinks = JSON.parse(localStorage.getItem("allowedLinks")) || [];
+
+            document.getElementById("profileUsername").textContent = username;
+            document.getElementById("profilePassword").textContent = password;
             
-            try {
-                // Show loading indicator
-                loadingIndicator.style.display = 'block';
-                profileSection.style.display = 'block';
-                
-                const username = localStorage.getItem("username");
-                if (!username) {
-                    throw new Error("Username not found in local storage");
-                }
-
-                const response = await fetch('https://themdashraful2207.github.io/civilapp/credentials.json');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                
-                const user = data.users.find(u => u.username === username);
-                if (!user) {
-                    throw new Error("User not found in credentials");
-                }
-
-                // Display user data
-                document.getElementById("profileUsername").textContent = user.username;
-                document.getElementById("profilePassword").textContent = '••••••••'; // Masked password
-                document.getElementById("profileAccess").textContent = 
-                    user.usertype === "admin" ? "Admin (Full Access)" : `Standard (${user.allowedLinks.length} tools access)`;
-                document.getElementById("profileTools").textContent = user.allowedLinks.join(', ');
-
-                // Format subscription date
-                const subDate = new Date(user.subscriptionEnd);
-                const formattedDate = subDate.toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                });
-                document.getElementById("profileSubscription").textContent = formattedDate;
-
-            } catch (error) {
-                console.error("Error loading profile info:", error);
-                document.getElementById("profileUsername").textContent = "Error loading data";
-                document.getElementById("profilePassword").textContent = "Error loading data";
-                document.getElementById("profileSubscription").textContent = "Error loading data";
-                document.getElementById("profileAccess").textContent = "Error loading data";
-                document.getElementById("profileTools").textContent = "Error loading data";
-            } finally {
-                loadingIndicator.style.display = 'none';
-            }
+            // Format subscription date
+            const subDate = new Date(subscriptionEnd);
+            const formattedDate = subDate.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            document.getElementById("profileSubscription").textContent = formattedDate;
+            
+            document.getElementById("profileAccess").textContent = usertype === "admin" ? "Admin (Full Access)" : `Standard (${allowedLinks.length} tools access)`;
         }
 
         // Bottom nav interaction
@@ -341,6 +323,7 @@
                 navItems.forEach(nav => nav.classList.remove('active'));
                 this.classList.add('active');
 
+                // Show/hide sections based on nav click
                 if (this === homeNav) {
                     mainMenu.style.display = "grid";
                     estimateSection.style.display = "none";
@@ -353,15 +336,15 @@
                     mainMenu.style.display = "none";
                     estimateSection.style.display = "none";
                     profileSection.style.display = "block";
-                    loadProfileInfo();
+                    loadProfileInfo(); // Refresh profile info when clicked
                 }
             });
         });
 
-        // Auto-reload the page every 1 minute
+        // Auto-reload the page every 1 minute (60,000 milliseconds)
         setTimeout(function() {
             window.location.reload();
-        }, 60000);
+        }, 60000); // 60,000 milliseconds = 1 minute
     </script>
 </body>
 </html>
