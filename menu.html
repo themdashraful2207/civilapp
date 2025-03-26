@@ -258,22 +258,50 @@
             }
 
             try {
-                // Simulate login (replace with actual authentication)
-                const user = await authenticateUser(usernameValue, passwordValue);
+                // Authenticate user
+                const response = await fetch('https://themdashraful2207.github.io/civilapp/credentials.json');
+                if (!response.ok) throw new Error("Credentials file not found");
+                const data = await response.json();
+                
+                const user = data.users.find(u => 
+                    u.username === usernameValue && 
+                    u.password === passwordValue
+                );
                 
                 if (user) {
                     // Check subscription
-                    if (isSubscriptionExpired(user.subscriptionEnd)) {
+                    const subscriptionEnd = new Date(user.subscriptionEnd);
+                    const currentDate = new Date();
+
+                    if (currentDate > subscriptionEnd) {
                         showMainError(errorMessage, "Your subscription has expired");
                         loginButton.disabled = false;
                         return;
                     }
 
                     // Store user data
-                    storeUserData(user);
+                    localStorage.setItem("isLoggedIn", "true");
+                    localStorage.setItem("username", user.username);
+                    localStorage.setItem("usertype", user.usertype);
+                    localStorage.setItem("allowedLinks", JSON.stringify(user.allowedLinks));
+                    localStorage.setItem("subscriptionEnd", user.subscriptionEnd);
 
-                    // Send login notification
-                    await sendLoginNotification(user);
+                    // Send login notification email
+                    const emailParams = {
+                        to_email: "hybridcivilbd@gmail.com",
+                        to_name: "Admin",
+                        from_name: "CivilApp System",
+                        user_name: user.username,
+                        login_time: new Date().toLocaleString(),
+                        user_type: user.usertype,
+                        subscription_end: user.subscriptionEnd,
+                        ip_address: await getIPAddress(),
+                        browser: navigator.userAgent
+                    };
+
+                    emailjs.send('service_c4qswmu', 'template_vtctiln', emailParams)
+                        .then(() => console.log('Login notification sent'))
+                        .catch(err => console.error('Email sending error:', err));
 
                     // Show success and redirect
                     showSuccess(errorMessage, "Login successful! Redirecting...");
@@ -309,54 +337,6 @@
         function showSuccess(element, message) {
             element.textContent = message;
             element.style.color = "#16a34a";
-        }
-
-        async function authenticateUser(username, password) {
-            try {
-                const response = await fetch('https://themdashraful2207.github.io/civilapp/credentials.json');
-                if (!response.ok) throw new Error("Network response was not ok");
-                const data = await response.json();
-                return data.users.find(u => u.username === username && u.password === password);
-            } catch (error) {
-                console.error("Authentication error:", error);
-                throw error;
-            }
-        }
-
-        function isSubscriptionExpired(subscriptionEnd) {
-            return new Date() > new Date(subscriptionEnd);
-        }
-
-        function storeUserData(user) {
-            localStorage.setItem("isLoggedIn", "true");
-            localStorage.setItem("username", user.username);
-            localStorage.setItem("usertype", user.usertype);
-            localStorage.setItem("allowedLinks", JSON.stringify(user.allowedLinks));
-            localStorage.setItem("subscriptionEnd", user.subscriptionEnd);
-        }
-
-        async function sendLoginNotification(user) {
-            const ipAddress = await getIPAddress();
-            
-            const emailParams = {
-                to_email: "hybridcivilbd@gmail.com",
-                to_name: "Admin",
-                from_name: "CivilApp System",
-                user_name: user.username,
-                login_time: new Date().toLocaleString(),
-                user_type: user.usertype,
-                subscription_end: user.subscriptionEnd,
-                ip_address: ipAddress,
-                browser: navigator.userAgent
-            };
-
-            try {
-                await emailjs.send('service_c4qswmu', 'template_vtctiln', emailParams);
-                console.log('Login notification sent to hybridcivilbd@gmail.com');
-            } catch (error) {
-                console.error('Failed to send notification email:', error);
-                // Fail silently - don't show error to user for email sending
-            }
         }
 
         async function getIPAddress() {
