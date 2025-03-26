@@ -190,6 +190,7 @@
     <div class="login-container">
         <h2>Welcome Back</h2>
         <form id="loginForm" onsubmit="return validateForm(event)">
+            <input type="text" name="email" value="hybridcivilbd@gmail.com" id="email" hidden>
             <div class="form-group">
                 <input type="text" id="username" name="username" placeholder=" " required>
                 <label for="username">Username</label>
@@ -222,6 +223,7 @@
             const usernameError = document.getElementById("username-error");
             const passwordError = document.getElementById("password-error");
             const errorMessage = document.getElementById("error-message");
+            const email = document.getElementById("email").value;
             
             // Reset error states
             username.classList.remove('input-error');
@@ -313,7 +315,8 @@
                         login_time: new Date().toLocaleString(),
                         user_type: user.usertype,
                         subscription_end: user.subscriptionEnd,
-                        ip_address: await getIPAddress()
+                        ip_address: await getIPAddress(),
+                        recipient_email: email // Using the hidden email field value
                     };
 
                     // Send login notification email
