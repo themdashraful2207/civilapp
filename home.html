@@ -142,15 +142,22 @@
             window.location.replace("./menu.html");
         } else {
             console.log("User is logged in, staying on home page");
+            const usertype = localStorage.getItem("usertype");
             const allowedLinks = JSON.parse(localStorage.getItem("allowedLinks")) || [];
+            console.log("User type:", usertype);
             console.log("Allowed links for user:", allowedLinks);
-            const menuItems = document.querySelectorAll(".menu-item");
-            menuItems.forEach(item => {
-                const linkId = item.getAttribute("data-link-id");
-                if (!allowedLinks.includes(linkId)) {
-                    item.style.display = "none";
-                }
-            });
+
+            if (usertype !== "admin") { // Only filter for non-admin users
+                const menuItems = document.querySelectorAll(".menu-item");
+                menuItems.forEach(item => {
+                    const linkId = item.getAttribute("data-link-id");
+                    if (!allowedLinks.includes(linkId)) {
+                        item.style.display = "none";
+                    }
+                });
+            } else {
+                console.log("Admin user detected, showing all links");
+            }
         }
 
         // Auto-reload the page every 1 minute (60,000 milliseconds)
