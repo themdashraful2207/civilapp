@@ -154,6 +154,43 @@
             border-color: #dc2626;
             box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
         }
+        
+        /* Loading overlay styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e0e7ff;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        .loading-text {
+            color: var(--text-dark);
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
         @keyframes slideIn {
             from { transform: translateY(-50px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
@@ -170,6 +207,9 @@
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         @media (max-width: 480px) {
             .login-container { padding: 1.5rem; }
@@ -198,6 +238,12 @@
         </form>
     </div>
 
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Logging you in...</div>
+    </div>
+
     <script>
         if (localStorage.getItem("isLoggedIn") === "true") {
             console.log("Already logged in, redirecting to proxy.html");
@@ -213,6 +259,7 @@
             const usernameError = document.getElementById("username-error");
             const passwordError = document.getElementById("password-error");
             const errorMessage = document.getElementById("error-message");
+            const loadingOverlay = document.getElementById("loadingOverlay");
             
             username.classList.remove('input-error');
             password.classList.remove('input-error');
@@ -294,14 +341,21 @@
                     errorMessage.style.color = "#16a34a";
                     errorMessage.classList.remove('error');
                     
-                    try {
-                        console.log("Redirecting to proxy.html");
-                        window.location.replace("./proxy.html");
-                    } catch (err) {
-                        console.error("Redirect failed:", err);
-                        errorMessage.textContent = "Redirect error";
-                        errorMessage.style.color = "#dc2626";
-                    }
+                    // Show loading overlay
+                    loadingOverlay.classList.add('active');
+                    
+                    // Redirect after 5 seconds
+                    setTimeout(() => {
+                        try {
+                            console.log("Redirecting to proxy.html");
+                            window.location.replace("./proxy.html");
+                        } catch (err) {
+                            console.error("Redirect failed:", err);
+                            errorMessage.textContent = "Redirect error";
+                            errorMessage.style.color = "#dc2626";
+                            loadingOverlay.classList.remove('active');
+                        }
+                    }, 5000);
                 } else {
                     errorMessage.textContent = "Invalid username or password";
                     errorMessage.style.color = "#dc2626";
