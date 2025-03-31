@@ -66,40 +66,68 @@
         <button onclick="calculateBearingCapacity()">Calculate</button>
         <h3>Result: <span id="result"></span></h3>
     </div>
+
+    <div id="depthInputs" class="hidden">
+        <h3>Depth of Foundation Calculation</h3>
+        <label for="cohesionDepth">Cohesion (c) kN/m²:</label>
+        <input type="number" id="cohesionDepth" placeholder="Enter cohesion value">
+        <label for="unitWeightDepth">Unit Weight (γ) kN/m³:</label>
+        <input type="number" id="unitWeightDepth" placeholder="Enter unit weight">
+        <label for="widthDepth">Width of Foundation (B) m:</label>
+        <input type="number" id="widthDepth" placeholder="Enter width">
+        <label for="Nq">N<sub>q</sub> Factor:</label>
+        <input type="number" id="Nq" placeholder="Enter Nq factor">
+        <button onclick="calculateDepth()">Calculate</button>
+        <h3>Result: <span id="depthResult"></span></h3>
+    </div>
+
+    <div id="widthInputs" class="hidden">
+        <h3>Width of Foundation Calculation</h3>
+        <label for="cohesionWidth">Cohesion (c) kN/m²:</label>
+        <input type="number" id="cohesionWidth" placeholder="Enter cohesion value">
+        <label for="unitWeightWidth">Unit Weight (γ) kN/m³:</label>
+        <input type="number" id="unitWeightWidth" placeholder="Enter unit weight">
+        <label for="depthWidth">Depth of Foundation (D<sub>f</sub>) m:</label>
+        <input type="number" id="depthWidth" placeholder="Enter depth">
+        <label for="Ngamma">N<sub>γ</sub> Factor:</label>
+        <input type="number" id="Ngamma" placeholder="Enter Ngamma factor">
+        <button onclick="calculateWidth()">Calculate</button>
+        <h3>Result: <span id="widthResult"></span></h3>
+    </div>
 </div>
 
 <script>
     function showInputs() {
         document.getElementById('bearingInputs').classList.add('hidden');
+        document.getElementById('depthInputs').classList.add('hidden');
+        document.getElementById('widthInputs').classList.add('hidden');
+        
         let selected = document.getElementById('calcType').value;
         if (selected === 'bearing') {
             document.getElementById('bearingInputs').classList.remove('hidden');
+        } else if (selected === 'depth') {
+            document.getElementById('depthInputs').classList.remove('hidden');
+        } else if (selected === 'width') {
+            document.getElementById('widthInputs').classList.remove('hidden');
         }
     }
 
-    function getBearingFactors(phi) {
-        let table = {
-            0: [5.7, 1.0, 0.0],
-            5: [6.5, 1.6, 0.5],
-            10: [7.5, 2.7, 1.2],
-            15: [9.0, 4.4, 2.5],
-            20: [11.0, 7.4, 5.0],
-            25: [14.1, 12.7, 9.7],
-            30: [18.6, 22.5, 19.7]
-        };
-        return table[phi] || [0, 0, 0];
+    function calculateDepth() {
+        let c = parseFloat(document.getElementById('cohesionDepth').value);
+        let gamma = parseFloat(document.getElementById('unitWeightDepth').value);
+        let B = parseFloat(document.getElementById('widthDepth').value);
+        let Nq = parseFloat(document.getElementById('Nq').value);
+        let depth = (c * 5.14 + gamma * Nq + 0.5 * gamma * B * 1.5) / gamma;
+        document.getElementById('depthResult').innerText = `Depth required: ${depth.toFixed(2)} m`;
     }
-    
-    function calculateBearingCapacity() {
-        let c = parseFloat(document.getElementById('cohesion').value);
-        let gamma = parseFloat(document.getElementById('unitWeight').value);
-        let Df = parseFloat(document.getElementById('depth').value);
-        let B = parseFloat(document.getElementById('width').value);
-        let phi = parseInt(document.getElementById('frictionAngle').value);
-        
-        let [Nc, Nq, Nγ] = getBearingFactors(phi);
-        let qu = (c * Nc) + (gamma * Df * Nq) + (0.5 * gamma * B * Nγ);
-        document.getElementById('result').innerText = qu.toFixed(2) + ' kN/m²';
+
+    function calculateWidth() {
+        let c = parseFloat(document.getElementById('cohesionWidth').value);
+        let gamma = parseFloat(document.getElementById('unitWeightWidth').value);
+        let Df = parseFloat(document.getElementById('depthWidth').value);
+        let Ngamma = parseFloat(document.getElementById('Ngamma').value);
+        let width = Math.sqrt((c * 5.14 + gamma * Df * 1.5) / (0.5 * gamma * Ngamma));
+        document.getElementById('widthResult').innerText = `Width required: ${width.toFixed(2)} m`;
     }
 </script>
 
