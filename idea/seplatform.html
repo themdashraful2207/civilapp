@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Earning Platform</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Social Earning Platform</h1>
+        
+        <!-- Role Selection -->
+        <div class="role-selector">
+            <button onclick="setRole('client')">Client</button>
+            <button onclick="setRole('repeater')">Repeater</button>
+            <button onclick="setRole('host')">Host</button>
+            <button onclick="setRole('admin')">Admin</button>
+        </div>
+
+        <!-- Client Section -->
+        <div id="client-section" class="hidden">
+            <h2>Post Your Problem</h2>
+            <textarea id="client-problem" placeholder="Describe your problem..."></textarea>
+            <button onclick="postProblem()">Submit Problem</button>
+            <div id="client-message"></div>
+        </div>
+
+        <!-- Repeater Section -->
+        <div id="repeater-section" class="hidden">
+            <h2>Suggest a Host</h2>
+            <div id="problems-list"></div>
+            <select id="host-select">
+                <option value="">Select Host</option>
+                <option value="host1">Host 1 (Tech Expert)</option>
+                <option value="host2">Host 2 (Legal Advisor)</option>
+                <option value="host3">Host 3 (Business Consultant)</option>
+            </select>
+            <button onclick="suggestHost()">Suggest Host</button>
+            <div id="repeater-message"></div>
+        </div>
+
+        <!-- Host Section -->
+        <div id="host-section" class="hidden">
+            <h2>Your Clients</h2>
+            <div id="host-requests"></div>
+            <div id="host-message"></div>
+        </div>
+
+        <!-- Admin Section -->
+        <div id="admin-section" class="hidden">
+            <h2>Admin Dashboard</h2>
+            <div id="transactions-list"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
