@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConnectEarn - Social Earning Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-hand-holding-heart"></i>
+            <h1>ConnectEarn</h1>
+        </div>
+        <div id="user-info">
+            <span id="current-role">Not logged in</span>
+            <span id="points-balance" class="hidden"></span>
+            <button id="logout-btn" class="hidden">Logout</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Login Screen -->
+        <div id="login-section">
+            <h2>Welcome to ConnectEarn</h2>
+            <div class="login-options">
+                <div class="login-card" onclick="showLoginForm('client')">
+                    <i class="fas fa-user"></i>
+                    <h3>Client</h3>
+                    <p>Post your problems</p>
+                </div>
+                <div class="login-card" onclick="showLoginForm('repeater')">
+                    <i class="fas fa-bullhorn"></i>
+                    <h3>Repeater</h3>
+                    <p>Suggest solutions</p>
+                </div>
+                <div class="login-card" onclick="showLoginForm('host')">
+                    <i class="fas fa-briefcase"></i>
+                    <h3>Host</h3>
+                    <p>Provide services</p>
+                </div>
+                <div class="login-card" onclick="showLoginForm('admin')">
+                    <i class="fas fa-cog"></i>
+                    <h3>Admin</h3>
+                    <p>Manage platform</p>
+                </div>
+            </div>
+
+            <div id="login-form" class="hidden">
+                <h3 id="login-title">Login as <span id="role-name"></span></h3>
+                <input type="text" id="username" placeholder="Username">
+                <input type="password" id="password" placeholder="Password">
+                <button onclick="login()">Login</button>
+                <p class="demo-note">For demo: Any credentials will work</p>
+            </div>
+        </div>
+
+        <!-- Client Section -->
+        <div id="client-section" class="hidden">
+            <div class="section-header">
+                <h2><i class="fas fa-question-circle"></i> Post Your Problem</h2>
+                <button onclick="refreshProblems()"><i class="fas fa-sync-alt"></i> Refresh</button>
+            </div>
+            
+            <div class="card">
+                <textarea id="client-problem" placeholder="Describe your problem in detail..."></textarea>
+                <button class="primary" onclick="postProblem()"><i class="fas fa-paper-plane"></i> Submit Problem</button>
+                <div id="client-message" class="message"></div>
+            </div>
+
+            <h3><i class="fas fa-history"></i> Your Problems</h3>
+            <div id="client-problems-list" class="card-list"></div>
+        </div>
+
+        <!-- Repeater Section -->
+        <div id="repeater-section" class="hidden">
+            <div class="section-header">
+                <h2><i class="fas fa-lightbulb"></i> Suggest Solutions</h2>
+                <div class="points-display">
+                    <i class="fas fa-coins"></i>
+                    <span id="repeater-points">0</span> points
+                </div>
+            </div>
+
+            <h3><i class="fas fa-list"></i> Open Problems</h3>
+            <div id="problems-list" class="card-list"></div>
+
+            <div id="suggestion-form" class="card hidden">
+                <h4>Suggest a Host for Problem #<span id="current-problem-id"></span></h4>
+                <p id="current-problem-text"></p>
+                <select id="host-select">
+                    <option value="">Select Host</option>
+                </select>
+                <button class="primary" onclick="suggestHost()"><i class="fas fa-check"></i> Submit Suggestion</button>
+                <button onclick="cancelSuggestion()"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+
+            <h3><i class="fas fa-trophy"></i> Your Successful Suggestions</h3>
+            <div id="repeater-success-list" class="card-list"></div>
+        </div>
+
+        <!-- Host Section -->
+        <div id="host-section" class="hidden">
+            <div class="section-header">
+                <h2><i class="fas fa-briefcase"></i> Your Services</h2>
+                <div class="points-display">
+                    <i class="fas fa-coins"></i>
+                    <span id="host-points">100</span> points available
+                </div>
+            </div>
+
+            <h3><i class="fas fa-bell"></i> Pending Requests</h3>
+            <div id="host-requests" class="card-list"></div>
+
+            <h3><i class="fas fa-history"></i> Completed Services</h3>
+            <div id="host-completed-list" class="card-list"></div>
+        </div>
+
+        <!-- Admin Section -->
+        <div id="admin-section" class="hidden">
+            <div class="section-header">
+                <h2><i class="fas fa-cog"></i> Admin Dashboard</h2>
+            </div>
+
+            <div class="admin-cards">
+                <div class="admin-card">
+                    <h3><i class="fas fa-users"></i> Users</h3>
+                    <div class="stats">
+                        <div>Clients: <span id="client-count">0</span></div>
+                        <div>Repeaters: <span id="repeater-count">0</span></div>
+                        <div>Hosts: <span id="host-count">0</span></div>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <h3><i class="fas fa-exchange-alt"></i> Transactions</h3>
+                    <div class="stats">
+                        <div>Today: <span id="today-tx">0</span></div>
+                        <div>Total: <span id="total-tx">0</span></div>
+                        <div>Points: <span id="total-points">0</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <h3><i class="fas fa-list"></i> All Transactions</h3>
+            <div id="transactions-list" class="card-list"></div>
+
+            <h3><i class="fas fa-user-cog"></i> Manage Hosts</h3>
+            <div class="card">
+                <div class="form-row">
+                    <input type="text" id="new-host-name" placeholder="Host name">
+                    <input type="number" id="new-host-points" placeholder="Initial points" value="100">
+                    <button class="primary" onclick="addHost()"><i class="fas fa-plus"></i> Add Host</button>
+                </div>
+                <div id="hosts-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>ConnectEarn &copy; 2023 | Social Earning Platform</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
