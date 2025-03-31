@@ -1,20 +1,20 @@
 // Data Storage
-let users = JSON.parse(localStorage.getItem('users')) || {
+let users = {
     clients: ['client1', 'client2'],
     repeaters: ['repeater1', 'repeater2'],
     hosts: ['host1', 'host2', 'host3'],
     admin: ['admin']
 };
 
-let problems = JSON.parse(localStorage.getItem('problems')) || [];
-let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-let hostList = JSON.parse(localStorage.getItem('hostList')) || [
+let problems = [];
+let transactions = [];
+let hostList = [
     { id: "host1", name: "Tech Solutions Inc.", points: 100, category: "Technology" },
     { id: "host2", name: "Legal Associates", points: 100, category: "Legal" },
     { id: "host3", name: "Business Consultants", points: 100, category: "Business" }
 ];
 
-let userPoints = JSON.parse(localStorage.getItem('userPoints')) || {
+let userPoints = {
     repeater1: 0,
     repeater2: 0,
     host1: 100,
@@ -22,44 +22,106 @@ let userPoints = JSON.parse(localStorage.getItem('userPoints')) || {
     host3: 100
 };
 
-// Current User
+// Current User and Navigation
 let currentUser = null;
 let currentRole = null;
+let navigationHistory = [];
 
-// DOM Elements
-const loginSection = document.getElementById('login-section');
-const clientSection = document.getElementById('client-section');
-const repeaterSection = document.getElementById('repeater-section');
-const hostSection = document.getElementById('host-section');
-const adminSection = document.getElementById('admin-section');
-const currentRoleDisplay = document.getElementById('current-role');
-const pointsBalance = document.getElementById('points-balance');
-const logoutBtn = document.getElementById('logout-btn');
-
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    updateHostList();
-    logoutBtn.addEventListener('click', logout);
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+    // Load data from localStorage
+    loadData();
+    
+    // Set up event listeners
+    setupEventListeners();
+    
+    // Check if user is already logged in from session
+    checkSession();
 });
 
-// Login Functions
+function loadData() {
+    try {
+        const savedUsers = localStorage.getItem('users');
+        const savedProblems = localStorage.getItem('problems');
+        const savedTransactions = localStorage.getItem('transactions');
+        const savedHostList = localStorage.getItem('hostList');
+        const savedUserPoints = localStorage.getItem('userPoints');
+
+        if (savedUsers) users = JSON.parse(savedUsers);
+        if (savedProblems) problems = JSON.parse(savedProblems);
+        if (savedTransactions) transactions = JSON.parse(savedTransactions);
+        if (savedHostList) hostList = JSON.parse(savedHostList);
+        if (savedUserPoints) userPoints = JSON.parse(savedUserPoints);
+    } catch (e) {
+        console.error("Error loading data:", e);
+    }
+}
+
+function saveData() {
+    try {
+        localStorage.setItem('users', JSON.stringify(users));
+        localStorage.setItem('problems', JSON.stringify(problems));
+        localStorage.setItem('transactions', JSON.stringify(transactions));
+        localStorage.setItem('hostList', JSON.stringify(hostList));
+        localStorage.setItem('userPoints', JSON.stringify(userPoints));
+    } catch (e) {
+        console.error("Error saving data:", e);
+    }
+}
+
+function setupEventListeners() {
+    // Login cards
+    document.querySelectorAll('.login-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const role = this.getAttribute('data-role');
+            showLoginForm(role);
+        });
+    });
+
+    // Login button
+    document.getElementById('login-btn').addEventListener('click', login);
+
+    // Logout button
+    document.getElementById('logout-btn').addEventListener('click', logout);
+
+    // Client buttons
+    document.getElementById('post-problem-btn').addEventListener('click', postProblem);
+    document.getElementById('refresh-problems-btn')?.addEventListener('click', refreshProblems);
+
+    // Repeater buttons
+    document.getElementById('suggest-host-btn').addEventListener('click', suggestHost);
+    document.getElementById('cancel-suggestion-btn').addEventListener('click', cancelSuggestion);
+
+    // Admin buttons
+    document.getElementById('add-host-btn').addEventListener('click', addHost);
+}
+
+function checkSession() {
+    const session = sessionStorage.getItem('currentUser');
+    if (session) {
+        const { user, role } = JSON.parse(session);
+        currentUser = user;
+        currentRole = role;
+        navigationHistory.push(role);
+        updateUIAfterLogin();
+    }
+}
+
 function showLoginForm(role) {
-    document.getElementById('login-title').textContent = `Login as ${role.charAt(0).toUpperCase() + role.slice(1)}`;
-    document.getElementById('role-name').textContent = role;
+    document.getElementById('role-name').textContent = role.charAt(0).toUpperCase() + role.slice(1);
     document.getElementById('login-form').classList.remove('hidden');
 }
 
 function login() {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    
-    // Simple validation for demo
-    if (!username || !password) {
-        alert("Please enter username and password");
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value; // Not used in demo
+
+    if (!username) {
+        alert("Please enter a username");
         return;
     }
 
-    // Check if user exists in any role
+    // Determine role
     let role = null;
     if (users.clients.includes(username)) role = 'client';
     else if (users.repeaters.includes(username)) role = 'repeater';
@@ -75,7 +137,6 @@ function login() {
             userPoints[username] = 0;
             role = 'repeater';
         } else if (username.startsWith('host')) {
-            // Add new host if not exists
             if (!hostList.some(h => h.id === username)) {
                 hostList.push({
                     id: username,
@@ -93,31 +154,48 @@ function login() {
             alert("Invalid credentials for demo. Try client1, repeater1, host1, or admin");
             return;
         }
-        
         saveData();
     }
 
     // Login successful
     currentUser = username;
     currentRole = role;
-    document.getElementById('login-form').classList.add('hidden');
-    loginSection.classList.add('hidden');
+    navigationHistory.push(role);
+    
+    // Save session
+    sessionStorage.setItem('currentUser', JSON.stringify({ user: username, role: role }));
     
     // Update UI
-    currentRoleDisplay.textContent = `${role.charAt(0).toUpperCase() + role.slice(1)}: ${username}`;
+    updateUIAfterLogin();
+}
+
+function updateUIAfterLogin() {
+    document.getElementById('login-form').classList.add('hidden');
+    document.getElementById('login-section').classList.add('hidden');
     
-    if (role === 'repeater' || role === 'host') {
-        pointsBalance.textContent = `${userPoints[username] || 0} points`;
-        pointsBalance.classList.remove('hidden');
+    document.getElementById('current-role').textContent = 
+        `${currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}: ${currentUser}`;
+    
+    if (currentRole === 'repeater' || currentRole === 'host') {
+        document.getElementById('points-balance').textContent = `${userPoints[currentUser] || 0} points`;
+        document.getElementById('points-balance').classList.remove('hidden');
+    } else {
+        document.getElementById('points-balance').classList.add('hidden');
     }
     
-    logoutBtn.classList.remove('hidden');
+    document.getElementById('logout-btn').classList.remove('hidden');
     
-    // Show appropriate section
-    document.getElementById(`${role}-section`).classList.remove('hidden');
+    // Hide all sections first
+    document.getElementById('client-section').classList.add('hidden');
+    document.getElementById('repeater-section').classList.add('hidden');
+    document.getElementById('host-section').classList.add('hidden');
+    document.getElementById('admin-section').classList.add('hidden');
     
-    // Load data for the role
-    switch(role) {
+    // Show current role's section
+    document.getElementById(`${currentRole}-section`).classList.remove('hidden');
+    
+    // Load role-specific data
+    switch(currentRole) {
         case 'client':
             loadClientProblems();
             break;
@@ -136,19 +214,40 @@ function login() {
 function logout() {
     currentUser = null;
     currentRole = null;
-    loginSection.classList.remove('hidden');
-    clientSection.classList.add('hidden');
-    repeaterSection.classList.add('hidden');
-    hostSection.classList.add('hidden');
-    adminSection.classList.add('hidden');
-    pointsBalance.classList.add('hidden');
-    logoutBtn.classList.add('hidden');
-    currentRoleDisplay.textContent = "Not logged in";
+    navigationHistory = [];
+    sessionStorage.removeItem('currentUser');
+    
+    document.getElementById('login-section').classList.remove('hidden');
+    document.getElementById('client-section').classList.add('hidden');
+    document.getElementById('repeater-section').classList.add('hidden');
+    document.getElementById('host-section').classList.add('hidden');
+    document.getElementById('admin-section').classList.add('hidden');
+    
+    document.getElementById('points-balance').classList.add('hidden');
+    document.getElementById('logout-btn').classList.add('hidden');
+    document.getElementById('current-role').textContent = "Not logged in";
+    
+    // Clear form fields
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+}
+
+function goBack() {
+    if (navigationHistory.length > 1) {
+        navigationHistory.pop(); // Remove current
+        
+        // If we have history, go back to login screen
+        logout();
+    } else {
+        // If no history, just logout
+        logout();
+    }
 }
 
 // Client Functions
 function postProblem() {
-    const problemText = document.getElementById('client-problem').value;
+    const problemText = document.getElementById('client-problem').value.trim();
+    
     if (!problemText) {
         showMessage('client-message', 'Please enter a problem description', 'error');
         return;
@@ -231,11 +330,19 @@ function loadOpenProblems() {
                 <h4>Problem #${problem.id}</h4>
                 <p>${problem.text}</p>
                 <p><small>Posted by: ${problem.client}</small></p>
-                <button onclick="showSuggestionForm(${problem.id})" class="primary">
+                <button class="suggest-host-btn primary" data-problem-id="${problem.id}">
                     <i class="fas fa-lightbulb"></i> Suggest Host
                 </button>
             </div>
         `;
+    });
+
+    // Add event listeners to suggestion buttons
+    document.querySelectorAll('.suggest-host-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const problemId = parseInt(this.getAttribute('data-problem-id'));
+            showSuggestionForm(problemId);
+        });
     });
 }
 
@@ -339,15 +446,30 @@ function loadHostRequests() {
                 <p>${problem.text}</p>
                 <p><small>Suggested by: ${problem.repeater}</small></p>
                 <div class="form-row">
-                    <button onclick="acceptClient(${problem.id})" class="primary">
+                    <button class="accept-client-btn primary" data-problem-id="${problem.id}">
                         <i class="fas fa-check"></i> Accept & Reward (10 points)
                     </button>
-                    <button onclick="rejectClient(${problem.id})" class="danger">
+                    <button class="reject-client-btn danger" data-problem-id="${problem.id}">
                         <i class="fas fa-times"></i> Reject
                     </button>
                 </div>
             </div>
         `;
+    });
+
+    // Add event listeners
+    document.querySelectorAll('.accept-client-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const problemId = parseInt(this.getAttribute('data-problem-id'));
+            acceptClient(problemId);
+        });
+    });
+
+    document.querySelectorAll('.reject-client-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const problemId = parseInt(this.getAttribute('data-problem-id'));
+            rejectClient(problemId);
+        });
     });
 }
 
@@ -484,16 +606,24 @@ function loadHostsList() {
                 <p><strong>ID:</strong> ${host.id}</p>
                 <p><strong>Category:</strong> ${host.category}</p>
                 <p><strong>Points:</strong> ${userPoints[host.id] || 0}</p>
-                <button onclick="deleteHost('${host.id}')" class="danger">
+                <button class="delete-host-btn danger" data-host-id="${host.id}">
                     <i class="fas fa-trash"></i> Delete
                 </button>
             </div>
         `;
     });
+
+    // Add event listeners to delete buttons
+    document.querySelectorAll('.delete-host-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const hostId = this.getAttribute('data-host-id');
+            deleteHost(hostId);
+        });
+    });
 }
 
 function addHost() {
-    const name = document.getElementById('new-host-name').value;
+    const name = document.getElementById('new-host-name').value.trim();
     const points = parseInt(document.getElementById('new-host-points').value) || 100;
     
     if (!name) {
@@ -538,24 +668,4 @@ function showMessage(elementId, message, type) {
     const element = document.getElementById(elementId);
     element.innerHTML = `<div class="message ${type}">${message}</div>`;
     setTimeout(() => element.innerHTML = '', 3000);
-}
-
-function saveData() {
-    localStorage.setItem('users', JSON.stringify(users));
-    localStorage.setItem('problems', JSON.stringify(problems));
-    localStorage.setItem('transactions', JSON.stringify(transactions));
-    localStorage.setItem('hostList', JSON.stringify(hostList));
-    localStorage.setItem('userPoints', JSON.stringify(userPoints));
-}
-
-function updateHostList() {
-    // Initialize if empty
-    if (hostList.length === 0) {
-        hostList = [
-            { id: "host1", name: "Tech Solutions Inc.", points: 100, category: "Technology" },
-            { id: "host2", name: "Legal Associates", points: 100, category: "Legal" },
-            { id: "host3", name: "Business Consultants", points: 100, category: "Business" }
-        ];
-        saveData();
-    }
 }
