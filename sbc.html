@@ -316,4 +316,79 @@
         
         document.getElementById('result').innerHTML = `
             Ultimate Bearing Capacity (q<sub>ult</sub>) = ${qult.toFixed(2)} kN/m²<br>
-            <small>Using N<sub>c</sub>=${Nc.toFixed(2)}, N<sub>
+            <small>Using N<sub>c</sub>=${Nc.toFixed(2)}, N<sub>q</sub>=${Nq.toFixed(2)}, N<sub>γ</sub>=${Ngamma.toFixed(2)}</small>
+        `;
+    }
+
+    function calculateDepth() {
+        const c = parseFloat(document.getElementById('cohesionDepth').value) || 0;
+        const gamma = parseFloat(document.getElementById('unitWeightDepth').value) || 0;
+        const B = parseFloat(document.getElementById('widthDepth').value) || 0;
+        const phi = parseFloat(document.getElementById('frictionAngleDepth').value) || 0;
+        const q = parseFloat(document.getElementById('loadDepth').value) || 0;
+        
+        const factors = getTerzaghiFactors(phi);
+        const Nc = parseFloat(factors.Nc);
+        const Nq = parseFloat(factors.Nq);
+        const Ngamma = parseFloat(factors.Ngamma);
+        
+        // Solve Terzaghi's equation for Df
+        // q = c*Nc + γ*Df*Nq + 0.5*γ*B*Nγ
+        // => Df = (q - c*Nc - 0.5*γ*B*Nγ) / (γ*Nq)
+        let Df = (q - c * Nc - 0.5 * gamma * B * Ngamma) / (gamma * Nq);
+        
+        // If result is negative, set to minimum practical depth (0.5m)
+        if (Df < 0 || isNaN(Df)) {
+            Df = 0.5;
+            document.getElementById('depthResult').innerHTML = `
+                Minimum Practical Depth = ${Df.toFixed(2)} m<br>
+                <small>Calculated depth was invalid (negative or NaN). Using minimum practical depth.</small>
+            `;
+        } else {
+            document.getElementById('depthResult').innerHTML = `
+                Minimum Depth Required (D<sub>f</sub>) = ${Df.toFixed(2)} m<br>
+                <small>Using N<sub>c</sub>=${Nc.toFixed(2)}, N<sub>q</sub>=${Nq.toFixed(2)}, N<sub>γ</sub>=${Ngamma.toFixed(2)}</small>
+            `;
+        }
+    }
+
+    function calculateWidth() {
+        const c = parseFloat(document.getElementById('cohesionWidth').value) || 0;
+        const gamma = parseFloat(document.getElementById('unitWeightWidth').value) || 0;
+        const Df = parseFloat(document.getElementById('depthWidth').value) || 0;
+        const phi = parseFloat(document.getElementById('frictionAngleWidth').value) || 0;
+        const q = parseFloat(document.getElementById('loadWidth').value) || 0;
+        
+        const factors = getTerzaghiFactors(phi);
+        const Nc = parseFloat(factors.Nc);
+        const Nq = parseFloat(factors.Nq);
+        const Ngamma = parseFloat(factors.Ngamma);
+        
+        // Solve Terzaghi's equation for B
+        // q = c*Nc + γ*Df*Nq + 0.5*γ*B*Nγ
+        // => B = (q - c*Nc - γ*Df*Nq) / (0.5*γ*Nγ)
+        let B = (q - c * Nc - gamma * Df * Nq) / (0.5 * gamma * Ngamma);
+        
+        // If result is negative or Nγ is 0, set to minimum practical width (0.3m)
+        if (B < 0 || isNaN(B) || Ngamma === 0) {
+            B = 0.3;
+            document.getElementById('widthResult').innerHTML = `
+                Minimum Practical Width = ${B.toFixed(2)} m<br>
+                <small>Calculated width was invalid (negative, NaN, or Nγ=0). Using minimum practical width.</small>
+            `;
+        } else {
+            document.getElementById('widthResult').innerHTML = `
+                Minimum Width Required (B) = ${B.toFixed(2)} m<br>
+                <small>Using N<sub>c</sub>=${Nc.toFixed(2)}, N<sub>q</sub>=${Nq.toFixed(2)}, N<sub>γ</sub>=${Ngamma.toFixed(2)}</small>
+            `;
+        }
+    }
+
+    // Initialize event listeners for angle changes
+    document.getElementById('frictionAngle').addEventListener('input', updateTerzaghiFactors);
+    document.getElementById('frictionAngleDepth').addEventListener('input', updateTerzaghiFactors);
+    document.getElementById('frictionAngleWidth').addEventListener('input', updateTerzaghiFactors);
+    document.getElementById('soilType').addEventListener('change', updateSoilParams);
+</script>
+</body>
+</html>
