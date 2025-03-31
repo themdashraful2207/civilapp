@@ -127,6 +127,23 @@ header {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
+    gap: 15px;
+}
+
+.back-button {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.back-button:hover {
+    background-color: #5a6268;
 }
 
 .card {
