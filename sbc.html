@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soil Bearing Capacity Calculator</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label, select, input, button {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+        }
+        input, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Soil Bearing Capacity Calculator</h2>
+        <label for="calcType">Choose Calculation Type:</label>
+        <select id="calcType" onchange="showInputs()">
+            <option value="">-- Select --</option>
+            <option value="bearing">Bearing Capacity</option>
+            <option value="depth">Depth of Foundation</option>
+            <option value="width">Width of Foundation</option>
+        </select><div id="bearingInputs" class="hidden">
+        <h3>Bearing Capacity Inputs</h3>
+        <label for="cohesion">Cohesion (c) kN/m²:</label>
+        <input type="number" id="cohesion" placeholder="Enter cohesion value">
+        <label for="unitWeight">Unit Weight (γ) kN/m³:</label>
+        <input type="number" id="unitWeight" placeholder="Enter unit weight">
+        <label for="depth">Depth of Foundation (D<sub>f</sub>) m:</label>
+        <input type="number" id="depth" placeholder="Enter depth">
+        <label for="width">Width of Foundation (B) m:</label>
+        <input type="number" id="width" placeholder="Enter width">
+        <label for="frictionAngle">Angle of Internal Friction (ϕ°):</label>
+        <input type="number" id="frictionAngle" placeholder="Enter angle">
+        <button onclick="calculateBearingCapacity()">Calculate</button>
+        <h3>Result: <span id="result"></span></h3>
+    </div>
+</div>
+
+<script>
+    function showInputs() {
+        document.getElementById('bearingInputs').classList.add('hidden');
+        let selected = document.getElementById('calcType').value;
+        if (selected === 'bearing') {
+            document.getElementById('bearingInputs').classList.remove('hidden');
+        }
+    }
+
+    function getBearingFactors(phi) {
+        let table = {
+            0: [5.7, 1.0, 0.0],
+            5: [6.5, 1.6, 0.5],
+            10: [7.5, 2.7, 1.2],
+            15: [9.0, 4.4, 2.5],
+            20: [11.0, 7.4, 5.0],
+            25: [14.1, 12.7, 9.7],
+            30: [18.6, 22.5, 19.7]
+        };
+        return table[phi] || [0, 0, 0];
+    }
+    
+    function calculateBearingCapacity() {
+        let c = parseFloat(document.getElementById('cohesion').value);
+        let gamma = parseFloat(document.getElementById('unitWeight').value);
+        let Df = parseFloat(document.getElementById('depth').value);
+        let B = parseFloat(document.getElementById('width').value);
+        let phi = parseInt(document.getElementById('frictionAngle').value);
+        
+        let [Nc, Nq, Nγ] = getBearingFactors(phi);
+        let qu = (c * Nc) + (gamma * Df * Nq) + (0.5 * gamma * B * Nγ);
+        document.getElementById('result').innerText = qu.toFixed(2) + ' kN/m²';
+    }
+</script>
+
+</body>
+</html>
