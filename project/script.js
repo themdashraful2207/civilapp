@@ -86,7 +86,6 @@ function setupEventListeners() {
 
     // Client buttons
     document.getElementById('post-problem-btn').addEventListener('click', postProblem);
-    document.getElementById('refresh-problems-btn')?.addEventListener('click', refreshProblems);
 
     // Repeater buttons
     document.getElementById('suggest-host-btn').addEventListener('click', suggestHost);
@@ -302,11 +301,6 @@ function loadClientProblems() {
     });
 }
 
-function refreshProblems() {
-    loadClientProblems();
-    showMessage('client-message', 'Problems refreshed', 'success');
-}
-
 // Repeater Functions
 function loadRepeaterData() {
     loadOpenProblems();
@@ -353,12 +347,15 @@ function showSuggestionForm(problemId) {
     document.getElementById('current-problem-id').textContent = problemId;
     document.getElementById('current-problem-text').textContent = problem.text;
     
-    // Populate host select
+    // Populate host select with available hosts
     const hostSelect = document.getElementById('host-select');
     hostSelect.innerHTML = '<option value="">Select Host</option>';
     
     hostList.forEach(host => {
-        hostSelect.innerHTML += `<option value="${host.id}">${host.name} (${host.category})</option>`;
+        // Only show hosts that haven't been suggested for this problem
+        if (!problems.some(p => p.id !== problemId && p.suggestedHost === host.id && p.status === 'pending')) {
+            hostSelect.innerHTML += `<option value="${host.id}">${host.name} (${host.category}) - ${userPoints[host.id]} points</option>`;
+        }
     });
 
     document.getElementById('problems-list').classList.add('hidden');
@@ -375,13 +372,26 @@ function suggestHost() {
     const problemId = parseInt(document.getElementById('current-problem-id').textContent);
     
     if (!hostId) {
-        showMessage('repeater-message', 'Please select a host', 'error');
+        showMessage('suggestion-message', 'Please select a host', 'error');
         return;
     }
 
     const problem = problems.find(p => p.id === problemId);
     if (!problem || problem.status !== 'open') {
-        showMessage('repeater-message', 'Problem is no longer available', 'error');
+        showMessage('suggestion-message', 'Problem is no longer available', 'error');
+        return;
+    }
+
+    // Check if host already suggested for this problem
+    if (problem.suggestedHost) {
+        showMessage('suggestion-message', 'A host has already been suggested for this problem', 'error');
+        return;
+    }
+
+    // Check if host is available (has points)
+    const host = hostList.find(h => h.id === hostId);
+    if (!host || userPoints[hostId] < 10) {
+        showMessage('suggestion-message', 'Selected host does not have enough points', 'error');
         return;
     }
 
@@ -390,9 +400,11 @@ function suggestHost() {
     problem.repeater = currentUser;
     saveData();
 
-    showMessage('repeater-message', 'Host suggested successfully!', 'success');
-    cancelSuggestion();
-    loadRepeaterData();
+    showMessage('suggestion-message', 'Host suggested successfully!', 'success');
+    setTimeout(() => {
+        cancelSuggestion();
+        loadRepeaterData();
+    }, 1500);
 }
 
 function loadRepeaterSuccess() {
