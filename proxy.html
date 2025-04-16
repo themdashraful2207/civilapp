@@ -27,39 +27,69 @@
             padding: 0;
             box-sizing: border-box;
         }
-        .logout-container {
+        .nav-container {
             width: 100%;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 10px 0;
             background: #ffffff;
             border-top: 1px solid #e0e0e0;
         }
-        .logout-link {
+        .nav-button {
+            padding: 8px 15px;
             color: #666;
-            text-decoration: none; /* Remove underline */
+            text-decoration: none;
             font-size: 14px;
             cursor: pointer;
             transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        .nav-button:hover {
+            color: #007BFF;
+        }
+        .nav-button i {
+            margin: 0 5px;
+            font-size: 18px;
+        }
+        .logout-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            padding: 8px 15px;
         }
         .logout-link:hover {
             color: #007BFF;
-            text-decoration: none; /* Ensure no underline on hover */
         }
         @media screen and (max-width: 768px) {
             iframe {
                 height: 100vh;
                 width: 100vw;
             }
-            .logout-link {
+            .nav-button, .logout-link {
                 font-size: 12px;
+                padding: 8px 10px;
             }
         }
     </style>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <iframe src="./home.html"></iframe>
-    <div class="logout-container">
+    <iframe src="./home.html" id="contentFrame"></iframe>
+    <div class="nav-container">
+        <a href="#" class="nav-button" onclick="goBack(event)">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+        </a>
         <a href="#" class="logout-link" onclick="logout(event)">Logout</a>
+        <a href="#" class="nav-button" onclick="goForward(event)">
+            <span>Forward</span>
+            <i class="fas fa-arrow-right"></i>
+        </a>
     </div>
     <script>
         console.log("Proxy page loaded");
@@ -73,17 +103,50 @@
         }
 
         function logout(event) {
-            event.preventDefault(); // Prevent default anchor behavior
+            event.preventDefault();
             console.log("Logout function called from proxy");
             localStorage.removeItem("isLoggedIn");
-            localStorage.setItem("isLoggedIn", "false"); // Explicitly set to false
+            localStorage.setItem("isLoggedIn", "false");
             console.log("isLoggedIn after logout:", localStorage.getItem("isLoggedIn"));
             console.log("Redirecting to menu.html from proxy");
             window.location.replace("./menu.html");
         }
 
+        function goBack(event) {
+            event.preventDefault();
+            const frame = document.getElementById('contentFrame');
+            try {
+                frame.contentWindow.history.back();
+            } catch (e) {
+                console.log("Could not navigate back:", e);
+            }
+        }
 
-    // Add this at the end of your existing script
+        function goForward(event) {
+            event.preventDefault();
+            const frame = document.getElementById('contentFrame');
+            try {
+                frame.contentWindow.history.forward();
+            } catch (e) {
+                console.log("Could not navigate forward:", e);
+            }
+        }
+
+        // Update button states based on iframe history
+        setInterval(() => {
+            const frame = document.getElementById('contentFrame');
+            try {
+                const backButton = document.querySelector('.nav-button:nth-child(1)');
+                const forwardButton = document.querySelector('.nav-button:nth-child(3)');
+                
+                backButton.style.opacity = frame.contentWindow.history.length > 1 ? '1' : '0.5';
+                forwardButton.style.opacity = frame.contentWindow.history.state?.forward ? '1' : '0.5';
+            } catch (e) {
+                console.log("Could not check history state:", e);
+            }
+        }, 500);
+
+            // Add this at the end of your existing script
     window.addEventListener('load', function() {
         // Change the URL without reloading
         history.replaceState(null, null, '/civilapp/');
