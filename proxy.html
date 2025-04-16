@@ -81,6 +81,19 @@
             console.log("Redirecting to menu.html from proxy");
             window.location.replace("./menu.html");
         }
+
+
+    // Add this at the end of your existing script
+    window.addEventListener('load', function() {
+        // Change the URL without reloading
+        history.replaceState(null, null, '/civilapp/');
+        
+        // Prevent navigation away from this URL
+        window.addEventListener('popstate', function(event) {
+            history.replaceState(null, null, '/civilapp/');
+        });
+    });
+
     </script>
 </body>
 </html>
