@@ -128,6 +128,43 @@
             document.getElementById('result-brick').textContent = 
                 E_brick.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
+
+        // Prevent URL display on hover
+document.addEventListener('DOMContentLoaded', function() {
+    const links = document.querySelectorAll('a');
+    links.forEach(link => {
+        link.addEventListener('mouseover', function(e) {
+            // Clear any existing status text
+            window.status = '';
+            return true;
+        });
+        
+        // Alternative method to prevent status bar changes
+        link.onmouseover = link.onmouseout = function() {
+            return true;
+        };
+    });
+});
+
+// Disable right-click
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
+
+// Optional: Disable keyboard shortcuts (F12, Ctrl+Shift+I, etc.)
+document.addEventListener('keydown', function(e) {
+    // Disable F12
+    if (e.key === 'F12') e.preventDefault();
+    
+    // Disable Ctrl+Shift+I (Chrome, Firefox)
+    if (e.ctrlKey && e.shiftKey && e.key === 'I') e.preventDefault();
+    
+    // Disable Ctrl+Shift+J (Chrome)
+    if (e.ctrlKey && e.shiftKey && e.key === 'J') e.preventDefault();
+    
+    // Disable Ctrl+U (View source)
+    if (e.ctrlKey && e.key === 'u') e.preventDefault();
+});
     </script>
 </body>
 </html>
