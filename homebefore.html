@@ -1,1 +1,414 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Construction Menu</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            width: 100%;
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            padding: 20px 0;
+            color: #007BFF;
+            background: #ffffff;
+            border-bottom: 2px solid #007BFF;
+        }
+
+        .container {
+            flex: 1;
+            width: 90%;
+            max-width: 800px;
+            background: #ffffff;
+            padding: 30px;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            max-height: calc(100vh - 250px);
+        }
+
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            transition: transform 0.2s ease-out;
+        }
+
+        .menu-item {
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            color: #333;
+            text-decoration: none;
+            border: 1px solid #e0e0e0;
+            background: #f9f9f9;
+            border-radius: 8px;
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        .menu-item:hover, .menu-item:focus {
+            background: #007BFF;
+            color: #ffffff;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #666;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item i {
+            font-size: 24px;
+            margin-bottom: 3px;
+        }
+
+        .nav-item.active {
+            color: #007BFF;
+        }
+
+        .nav-item:hover {
+            background: #f0f0f0;
+        }
+
+        /* Estimate Section - initially hidden */
+        .estimate-section {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Calculators Section - initially hidden */
+        .calculators-section {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Profile Section - initially hidden */
+        .profile-section {
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .profile-info {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .profile-info h3 {
+            margin-top: 0;
+            color: #007BFF;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .menu {
+                grid-template-columns: 1fr;
+            }
+            header {
+                font-size: 28px;
+            }
+            .menu-item {
+                font-size: 16px;
+            }
+            .container {
+                margin-bottom: 70px;
+                max-height: calc(100vh - 220px);
+            }
+        }
+    </style>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>Construction Tools</header>
+    <div class="container">
+        <div class="menu">
+            <a href="https://themdashraful2207.github.io/civilapp/p2p9.html" class="menu-item" data-link-id="p2p9">File Share</a>
+            <a href="https://themdashraful2207.github.io/civilapp/slabdesignpro.html" class="menu-item" data-link-id="slabdesignpro">Slab Design</a>
+            <a href="https://themdashraful2207.github.io/civilapp/slabmcoefficient.html" class="menu-item" data-link-id="slabmcoefficient">Slab Moment</a>
+            <a href="https://themdashraful2207.github.io/civilapp/slabload.html" class="menu-item" data-link-id="slabload">Slab Load</a>
+            <a href="https://themdashraful2207.github.io/civilapp/slabthbnbc.html" class="menu-item" data-link-id="slabthbnbc">Slab Thickness</a>
+            <a href="https://themdashraful2207.github.io/civilapp/colindex.html" class="menu-item" data-link-id="colindex">Column Design</a>
+            <a href="https://themdashraful2207.github.io/civilapp/footingdesign.html" class="menu-item" data-link-id="footingdesign">Footing Design</a>
+            <a href="https://themdashraful2207.github.io/civilapp/loadrelease1.html" class="menu-item" data-link-id="footing">Footing Analysis</a>
+            <a href="https://themdashraful2207.github.io/civilapp/loadrelease.html" class="menu-item" data-link-id="loadrelease">Load Release</a>
+            <a href="https://themdashraful2207.github.io/civilapp/gradebeam.html" class="menu-item" data-link-id="gradebeam">Grade Beam</a>
+            <a href="https://themdashraful2207.github.io/civilapp/loadofacolumn.html" class="menu-item" data-link-id="loadofacolumn">Column Load</a>
+            <a href="https://themdashraful2207.github.io/civilapp/moduluscalculation.html" class="menu-item" data-link-id="modulus">Modulus</a>
+            <a href="https://themdashraful2207.github.io/civilapp/bmdsfd.html" class="menu-item" data-link-id="bmdsfd">BMDSFD</a>
+            <a href="https://themdashraful2207.github.io/civilapp/pilecapacity1.html" class="menu-item" data-link-id="pilecapacity1">Pile Capacity</a>
+            
+        </div>
+
+        <!-- Calculators Section (hidden by default) -->
+        <div class="calculators-section" id="calculatorsSection">
+            <a href="https://themdashraful2207.github.io/civilapp/situpilecal1.html" class="menu-item" data-link-id="situpilecal1">Situ Pile Calculation</a>
+            <a href="https://themdashraful2207.github.io/civilapp/sandpile.html" class="menu-item" data-link-id="sandpile">Sand Pile Calculation</a>
+            <a href="https://themdashraful2207.github.io/civilapp/setback.html" class="menu-item" data-link-id="setback">Set Back</a>
+            <a href="https://themdashraful2207.github.io/civilapp/wind.html" class="menu-item" data-link-id="wind">Wind Speed</a>
+            <a href="https://themdashraful2207.github.io/civilapp/sbc.html" class="menu-item" data-link-id="sbc">SBC</a>
+            <a href="https://themdashraful2207.github.io/civilapp/loadcombo.html" class="menu-item" data-link-id="loadcombo">Load Combo</a>
+            <a href="https://themdashraful2207.github.io/civilapp/interpolation.html" class="menu-item" data-link-id="interpolation">Interpolation</a>
+            <a href="https://themdashraful2207.github.io/civilapp/volume.html" class="menu-item" data-link-id="volume">Concrete Volume</a>
+            <a href="https://themdashraful2207.github.io/civilapp/septictank2.html" class="menu-item" data-link-id="septictank2">Septic Tank</a>
+        </div>
+
+        <!-- Estimate Section (hidden by default) -->
+        <div class="estimate-section" id="estimateSection">
+            <a href="https://themdashraful2207.github.io/civilapp/estimatecolumnv1.html" class="menu-item" data-link-id="estimatecolumnv1">Column Estimate</a>
+            <a href="https://themdashraful2207.github.io/civilapp/estimatefootingv1.html" class="menu-item" data-link-id="estimatefootingv1">Footing Estimate</a>
+            <a href="https://themdashraful2207.github.io/civilapp/estimatebeam.html" class="menu-item" data-link-id="estimatebeam">Beam Estimate</a>
+            <a href="https://themdashraful2207.github.io/civilapp/estimateslabv1.html" class="menu-item" data-link-id="estimateslabv1">Slab Estimate</a>
+            <a href="https://themdashraful2207.github.io/civilapp/estimatebrickworkpro.html" class="menu-item" data-link-id="estimatebrickworkpro">Brickwork Estimate</a>
+            <a href="https://themdashraful2207.github.io/civilapp/estimatestair.html" class="menu-item" data-link-id="estimatestair">Stair Estimate</a>
+        </div>
+
+        <!-- Profile Section (hidden by default) -->
+        <div class="profile-section" id="profileSection">
+            <div class="profile-info">
+                <h3>Account Information</h3>
+                <div class="info-row">
+                    <span class="info-label">Username:</span>
+                    <span class="info-value" id="profileUsername"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Password:</span>
+                    <span class="info-value" id="profilePassword"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Subscription Ends:</span>
+                    <span class="info-value" id="profileSubscription"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Access Level:</span>
+                    <span class="info-value" id="profileAccess"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" id="homeNav">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="#" class="nav-item" id="calculatorsNav">
+            <i class="fas fa-calculator"></i>
+            <span>Calculators</span>
+        </a>
+        <a href="#" class="nav-item" id="estimateNav">
+            <i class="fas fa-calculator"></i>
+            <span>Estimate</span>
+        </a>
+        <a href="#" class="nav-item" id="profileNav">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script>
+        console.log("Home page loaded (inside iframe)");
+        console.log("Initial isLoggedIn:", localStorage.getItem("isLoggedIn"));
+
+        if (localStorage.getItem("isLoggedIn") !== "true") {
+            console.log("isLoggedIn is not 'true', redirecting to menu.html");
+            window.location.replace("./menu.html");
+        } else {
+            console.log("User is logged in, staying on home page");
+            const usertype = localStorage.getItem("usertype");
+            const allowedLinks = JSON.parse(localStorage.getItem("allowedLinks")) || [];
+            console.log("User type:", usertype);
+            console.log("Allowed links for user:", allowedLinks);
+
+            if (usertype !== "admin") { // Only filter for non-admin users
+                const menuItems = document.querySelectorAll(".menu-item");
+                menuItems.forEach(item => {
+                    const linkId = item.getAttribute("data-link-id");
+                    if (!allowedLinks.includes(linkId)) {
+                        item.style.display = "none";
+                    }
+                });
+            } else {
+                console.log("Admin user detected, showing all links");
+            }
+
+            // Load profile information
+            loadProfileInfo();
+        }
+
+        function loadProfileInfo() {
+            const username = localStorage.getItem("username");
+            const password = localStorage.getItem("password");
+            const subscriptionEnd = localStorage.getItem("subscriptionEnd");
+            const usertype = localStorage.getItem("usertype");
+            const allowedLinks = JSON.parse(localStorage.getItem("allowedLinks")) || [];
+
+            document.getElementById("profileUsername").textContent = username;
+            document.getElementById("profilePassword").textContent = password;
+            
+            // Format subscription date
+            const subDate = new Date(subscriptionEnd);
+            const formattedDate = subDate.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            document.getElementById("profileSubscription").textContent = formattedDate;
+            
+            document.getElementById("profileAccess").textContent = usertype === "admin" ? "Admin (Full Access)" : `Standard (${allowedLinks.length} tools access)`;
+        }
+
+        // Bottom nav interaction
+        const navItems = document.querySelectorAll('.nav-item');
+        const homeNav = document.getElementById('homeNav');
+        const calculatorsNav = document.getElementById('calculatorsNav');
+        const estimateNav = document.getElementById('estimateNav');
+        const profileNav = document.getElementById('profileNav');
+        const mainMenu = document.querySelector('.menu');
+        const calculatorsSection = document.getElementById('calculatorsSection');
+        const estimateSection = document.getElementById('estimateSection');
+        const profileSection = document.getElementById('profileSection');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                navItems.forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+
+                // Show/hide sections based on nav click
+                if (this === homeNav) {
+                    mainMenu.style.display = "grid";
+                    calculatorsSection.style.display = "none";
+                    estimateSection.style.display = "none";
+                    profileSection.style.display = "none";
+                } else if (this === calculatorsNav) {
+                    mainMenu.style.display = "none";
+                    calculatorsSection.style.display = "grid";
+                    estimateSection.style.display = "none";
+                    profileSection.style.display = "none";
+                } else if (this === estimateNav) {
+                    mainMenu.style.display = "none";
+                    calculatorsSection.style.display = "none";
+                    estimateSection.style.display = "grid";
+                    profileSection.style.display = "none";
+                } else if (this === profileNav) {
+                    mainMenu.style.display = "none";
+                    calculatorsSection.style.display = "none";
+                    estimateSection.style.display = "none";
+                    profileSection.style.display = "block";
+                    loadProfileInfo(); // Refresh profile info when clicked
+                }
+            });
+        });
+
+        // Auto-reload the page every 1 minute (60,000 milliseconds)
+        setTimeout(function() {
+            window.location.reload();
+        }, 60000); // 60,000 milliseconds = 1 minute
+
+        // Prevent URL display on hover
+document.addEventListener('DOMContentLoaded', function() {
+    const links = document.querySelectorAll('a');
+    links.forEach(link => {
+        link.addEventListener('mouseover', function(e) {
+            // Clear any existing status text
+            window.status = '';
+            return true;
+        });
+        
+        // Alternative method to prevent status bar changes
+        link.onmouseover = link.onmouseout = function() {
+            return true;
+        };
+    });
+});
+
+// Disable right-click
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
+
+// Optional: Disable keyboard shortcuts (F12, Ctrl+Shift+I, etc.)
+document.addEventListener('keydown', function(e) {
+    // Disable F12
+    if (e.key === 'F12') e.preventDefault();
+    
+    // Disable Ctrl+Shift+I (Chrome, Firefox)
+    if (e.ctrlKey && e.shiftKey && e.key === 'I') e.preventDefault();
+    
+    // Disable Ctrl+Shift+J (Chrome)
+    if (e.ctrlKey && e.shiftKey && e.key === 'J') e.preventDefault();
+    
+    // Disable Ctrl+U (View source)
+    if (e.ctrlKey && e.key === 'u') e.preventDefault();
+});
+    </script>
+</body>
+</html>
