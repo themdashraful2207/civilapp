@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Redirecting...</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        iframe {
+            width: 100%;
+            flex: 1; /* Take remaining space */
+            border: none;
+            display: block;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .logout-container {
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+            background: #ffffff;
+            border-top: 1px solid #e0e0e0;
+        }
+        .logout-link {
+            color: #666;
+            text-decoration: none; /* Remove underline */
+            font-size: 14px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .logout-link:hover {
+            color: #007BFF;
+            text-decoration: none; /* Ensure no underline on hover */
+        }
+        @media screen and (max-width: 768px) {
+            iframe {
+                height: 100vh;
+                width: 100vw;
+            }
+            .logout-link {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <iframe src="./home.html"></iframe>
+    <div class="logout-container">
+        <a href="#" class="logout-link" onclick="logout(event)">Logout</a>
+    </div>
+    <script>
+        console.log("Proxy page loaded");
+        console.log("Initial isLoggedIn:", localStorage.getItem("isLoggedIn"));
+
+        if (localStorage.getItem("isLoggedIn") !== "true") {
+            console.log("isLoggedIn is not 'true', redirecting to menu.html");
+            window.location.replace("./menu.html");
+        } else {
+            console.log("User is logged in, staying on proxy page");
+        }
+
+        function logout(event) {
+            event.preventDefault(); // Prevent default anchor behavior
+            console.log("Logout function called from proxy");
+            localStorage.removeItem("isLoggedIn");
+            localStorage.setItem("isLoggedIn", "false"); // Explicitly set to false
+            console.log("isLoggedIn after logout:", localStorage.getItem("isLoggedIn"));
+            console.log("Redirecting to menu.html from proxy");
+            window.location.replace("./menu.html");
+        }
+
+
+    // Add this at the end of your existing script
+    window.addEventListener('load', function() {
+        // Change the URL without reloading
+        history.replaceState(null, null, '/civilapp/');
+        
+        // Prevent navigation away from this URL
+        window.addEventListener('popstate', function(event) {
+            history.replaceState(null, null, '/civilapp/');
+        });
+    });
+
+    </script>
+</body>
+</html>
