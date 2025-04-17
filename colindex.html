@@ -181,7 +181,8 @@
             const Ast = (Ab * nl).toFixed(2);
             const Ag = (b * h).toFixed(0);
             const Ec = (33 * Math.pow(wc * 1000, 1.5) * Math.sqrt(fc) / 1000).toFixed(2);
-            const steelRatio = (Ast / Ag).toFixed(5);
+            // const steelRatio = (Ast / Ag).toFixed(5);
+            const steelRatio = ((Ast / Ag) * 100).toFixed(2) + '%';
 
             const lx = (b * Math.pow(h, 3) / 12).toFixed(0);
             const ly = (h * Math.pow(b, 3) / 12).toFixed(0);
