@@ -5,61 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Footing Design Calculator</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 0;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            text-align: center;
-        }
-        label {
-            font-weight: bold;
-        }
-        input {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background: #28a745;
-            color: white;
-            border: none;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #218838;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 10px;
-            background: #fff;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .step {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-left: 4px solid #28a745;
-            background: #f9f9f9;
-        }
-    </style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        padding: 0;
+        background-color: #f5f5f5;
+    }
+    .container {
+        max-width: 600px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+        text-align: center;
+    }
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+    input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box; /* Ensures padding doesn't expand width */
+    }
+    button {
+        width: 100%; /* Matches input width */
+        padding: 10px; /* Slightly taller than inputs for better clickability */
+        margin-bottom: 0; /* Remove extra spacing */
+        background: #28a745;
+        color: white;
+        border: none;
+        font-size: 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        box-sizing: border-box; /* Ensures padding doesn't expand width */
+    }
+    button:hover {
+        background: #218838;
+    }
+    .result {
+        margin-top: 20px;
+        padding: 10px;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .step {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-left: 4px solid #28a745;
+        background: #f9f9f9;
+    }
+</style>
 </head>
 <body>
 
@@ -81,8 +85,8 @@
     <label for="columnWidth">Column Width (inches):</label>
     <input type="number" id="columnWidth" placeholder="Enter column width in inches">
     
-    <label for="columnDepth">Column Depth (inches):</label>
-    <input type="number" id="columnDepth" placeholder="Enter column depth in inches">
+    <label for="columnDepth">Column Length (inches):</label>
+    <input type="number" id="columnDepth" placeholder="Enter column length in inches">
 
     <button onclick="calculateFooting()">Calculate</button>
 
@@ -96,15 +100,15 @@
         const qa = parseFloat(document.getElementById('bearingCapacity').value); // ksf
         const fck = parseFloat(document.getElementById('fck').value); // psi
         const fy = parseFloat(document.getElementById('fy').value); // psi
-        const b = parseFloat(document.getElementById('columnWidth').value); // inches
-        const d = parseFloat(document.getElementById('columnDepth').value); // inches
+        const c1 = parseFloat(document.getElementById('columnWidth').value); // inches
+        const c2 = parseFloat(document.getElementById('columnDepth').value); // inches
 
         // Input validation
-        if (isNaN(P) || isNaN(qa) || isNaN(fck) || isNaN(fy) || isNaN(b) || isNaN(d)) {
+        if (isNaN(P) || isNaN(qa) || isNaN(fck) || isNaN(fy) || isNaN(c1) || isNaN(c2)) {
             alert("Please enter valid numbers for all fields.");
             return;
         }
-        if (P <= 0 || qa <= 0 || fck <= 0 || fy <= 0 || b <= 0 || d <= 0) {
+        if (P <= 0 || qa <= 0 || fck <= 0 || fy <= 0 || c1 <= 0 || c2 <= 0) {
             alert("All inputs must be positive numbers.");
             return;
         }
@@ -112,7 +116,9 @@
         // Constants
         const selfWeightFactor = 0.05; // 5% self-weight
         const clearCover = 3; // inches
-        const phi = 0.75; // Strength reduction factor
+        const barDiameter = 1; // Assume #8 bar (1 inch)
+        const phiFlexure = 0.9; // Flexure reduction factor
+        const phiShear = 0.75; // Shear reduction factor
 
         let resultHTML = "<h3>Design Results:</h3>";
 
@@ -126,7 +132,7 @@
             <div class="step">
                 <h3>Step 1: Determine Footing Dimensions</h3>
                 <p><strong>Total Load (P<sub>total</sub>):</strong> ${Ptotal.toFixed(2)} kips</p>
-                <p><strong>Required Area (A):</strong> ${A.toFixed(2)} ft²</p>
+                <p><strong>Required Area (A):</strong> ${A.toFixed(2)} sft</p>
                 <p><strong>Footing Size (B × L):</strong> ${B.toFixed(2)} ft × ${L.toFixed(2)} ft</p>
             </div>
         `;
@@ -140,21 +146,54 @@
             </div>
         `;
 
-        // Step 3: Determine Footing Thickness
-        let h = 12; // Initial effective depth (inches)
-        const totalThickness = h + clearCover; // inches
+        // Step 3: Determine Footing Thickness (Iterative)
+        let d = 8; // Initial effective depth (inches)
+        let totalThickness;
+        let VcOneWay, VuOneWay, VcTwoWay, VuTwoWay;
+        let shearSatisfied = false;
+
+        while (!shearSatisfied) {
+            totalThickness = d + clearCover + barDiameter / 2; // inches
+
+            // One-Way Shear Check
+            const criticalDistance = B / 2 - c1 / 24 - d / 12; // ft
+            VuOneWay = q * B * criticalDistance; // kips
+            VcOneWay = 2 * Math.sqrt(fck) * (12 * B) * d / 1000; // kips
+
+            // Two-Way Shear Check
+            const bo = 2 * (c1 + d) + 2 * (c2 + d); // inches
+            const areaOutside = (B * 12) ** 2 - (c1 + d) * (c2 + d); // in²
+            VuTwoWay = q * (areaOutside / 144); // kips
+            VcTwoWay = 4 * Math.sqrt(fck) * bo * d / 1000; // kips
+
+            if (phiShear * VcOneWay >= VuOneWay && phiShear * VcTwoWay >= VuTwoWay) {
+                shearSatisfied = true;
+            } else {
+                d += 1; // Increase effective depth
+                if (d > 100) {
+                    alert("Footing thickness calculation failed. Check inputs.");
+                    return;
+                }
+            }
+        }
+
         resultHTML += `
             <div class="step">
                 <h3>Step 3: Determine Footing Thickness</h3>
-                <p><strong>Total Thickness:</strong> ${totalThickness} inches</p>
+                <p><strong>Effective Depth (d):</strong> ${d.toFixed(2)} inches</p>
+                <p><strong>Total Thickness:</strong> ${totalThickness.toFixed(2)} inches</p>
+                <p><strong>One-Way Shear (V<sub>u</sub>):</strong> ${VuOneWay.toFixed(2)} kips</p>
+                <p><strong>One-Way Shear Capacity (φV<sub>c</sub>):</strong> ${(phiShear * VcOneWay).toFixed(2)} kips</p>
+                <p><strong>Two-Way Shear (V<sub>u</sub>):</strong> ${VuTwoWay.toFixed(2)} kips</p>
+                <p><strong>Two-Way Shear Capacity (φV<sub>c</sub>):</strong> ${(phiShear * VcTwoWay).toFixed(2)} kips</p>
             </div>
         `;
 
         // Step 4: Reinforcement Design
-        const Mu = q * B * Math.pow((L / 2 - b / 24), 2) / 2; // kip-ft/ft
+        const Mu = q * B * Math.pow((L / 2 - c1 / 24), 2) / 2; // kip-ft/ft
         const MuIn = Mu * 12 * 1000; // lb-in/ft
-        const dEffective = h - 2; // inches
-        const As = MuIn / (phi * fy * dEffective); // in²/ft
+        const As = MuIn / (phiFlexure * fy * d); // in²/ft
+
         resultHTML += `
             <div class="step">
                 <h3>Step 4: Reinforcement Design</h3>
@@ -168,42 +207,65 @@
     }
 
     // Prevent URL display on hover
-document.addEventListener('DOMContentLoaded', function() {
-    const links = document.querySelectorAll('a');
-    links.forEach(link => {
-        link.addEventListener('mouseover', function(e) {
-            // Clear any existing status text
-            window.status = '';
-            return true;
+    document.addEventListener('DOMContentLoaded', function() {
+        const links = document.querySelectorAll('a');
+        links.forEach(link => {
+            link.addEventListener('mouseover', function(e) {
+                window.status = '';
+                return true;
+            });
+            link.onmouseover = link.onmouseout = function() {
+                return true;
+            };
         });
-        
-        // Alternative method to prevent status bar changes
-        link.onmouseover = link.onmouseout = function() {
-            return true;
-        };
     });
-});
 
-// Disable right-click
-document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-});
+    // Disable right-click
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
 
-// Optional: Disable keyboard shortcuts (F12, Ctrl+Shift+I, etc.)
-document.addEventListener('keydown', function(e) {
-    // Disable F12
-    if (e.key === 'F12') e.preventDefault();
-    
-    // Disable Ctrl+Shift+I (Chrome, Firefox)
-    if (e.ctrlKey && e.shiftKey && e.key === 'I') e.preventDefault();
-    
-    // Disable Ctrl+Shift+J (Chrome)
-    if (e.ctrlKey && e.shiftKey && e.key === 'J') e.preventDefault();
-    
-    // Disable Ctrl+U (View source)
-    if (e.ctrlKey && e.key === 'u') e.preventDefault();
-});
+    // Disable keyboard shortcuts (F12, Ctrl+Shift+I, etc.)
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12') e.preventDefault();
+        if (e.ctrlKey && e.shiftKey && e.key === 'I') e.preventDefault();
+        if (e.ctrlKey && e.shiftKey && e.key === 'J') e.preventDefault();
+        if (e.ctrlKey && e.key === 'u') e.preventDefault();
+    });
 </script>
 
+<script>
+(function(){
+    function c(){
+        var b=a.contentDocument||a.contentWindow.document;
+        if(b){
+            var d=b.createElement('script');
+            d.innerHTML="window.__CF$cv$params={r:'931ed1331a39afc2',t:'MTc0NDkyMzI2Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName('head')[0].appendChild(d)
+        }
+    }
+    if(document.body){
+        var a=document.createElement('iframe');
+        a.height=1;
+        a.width=1;
+        a.style.position='absolute';
+        a.style.top=0;
+        a.style.left=0;
+        a.style.border='none';
+        a.style.visibility='hidden';
+        document.body.appendChild(a);
+       essence
+        if('loading'!==document.readyState)c();
+        else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);
+        else{
+            var e=document.onreadystatechange||function(){};
+            document.onreadystatechange=function(b){
+                e(b);
+                'loading'!==document.readyState&&(document.onreadystatechange=e,c())
+            }
+        }
+    }
+})();
+</script>
 </body>
 </html>
