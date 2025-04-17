@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACI 318-19 Min and Max Reinforcement Calculator for Footing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eaf7fd;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .note {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            input, select, button {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ACI 318-19 Min and Max Reinforcement Calculator</h1>
+        <h2>Imperial Units (ft, in, psi)</h2>
+        
+        <div class="input-group">
+            <label for="length">Footing Length (L, ft):</label>
+            <input type="number" id="length" value="6.5" step="0.1">
+        </div>
+        
+        <div class="input-group">
+            <label for="width">Footing Width (B, ft):</label>
+            <input type="number" id="width" value="6.5" step="0.1">
+        </div>
+        
+        <div class="input-group">
+            <label for="thickness">Footing Thickness (h, in):</label>
+            <input type="number" id="thickness" value="14.1" step="0.1">
+        </div>
+        
+        <div class="input-group">
+            <label for="fck">Concrete Strength (f'<sub>c</sub>, psi):</label>
+            <input type="number" id="fck" value="2500" step="100">
+        </div>
+        
+        <div class="input-group">
+            <label for="fy">Steel Yield Strength (f<sub>y</sub>, psi):</label>
+            <select id="fy">
+                <option value="60000">60,000 psi (Grade 60)</option>
+                <option value="72000" selected>72,000 psi (Grade 75)</option>
+            </select>
+        </div>
+        
+        <button onclick="calculate()">Calculate A<sub>s,min</sub> and A<sub>s,max</sub></button>
+        
+        <div id="error" class="error"></div>
+        
+        <div id="result" class="result" style="display: none;">
+            <h2>Results</h2>
+            <div id="output"></div>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            try {
+                // Clear previous results
+                document.getElementById('error').innerHTML = '';
+                document.getElementById('result').style.display = 'none';
+                console.log('Calculate function started');
+
+                // Input values
+                const L = parseFloat(document.getElementById('length').value);
+                const B = parseFloat(document.getElementById('width').value);
+                const h = parseFloat(document.getElementById('thickness').value);
+                const fck = parseFloat(document.getElementById('fck').value);
+                const fy = parseFloat(document.getElementById('fy').value);
+                console.log('Inputs:', { L, B, h, fck, fy });
+
+                // Constants
+                const clearCover = 3; // inches
+                const barDiameter = 0.625; // inches (#5 bar)
+                const b = 12; // inches (per foot of width)
+                const Es = 29000000; // psi (steel modulus)
+                const beta1 = 0.85; // for fck <= 4000 psi
+
+                // Validate inputs
+                if (isNaN(L) || isNaN(B) || isNaN(h) || isNaN(fck) || isNaN(fy)) {
+                    document.getElementById('error').innerHTML = 'Please enter valid numbers for all fields.';
+                    console.error('Validation failed: Missing or invalid inputs');
+                    return;
+                }
+                if (L <= 0 || B <= 0 || h <= 0 || fck <= 0 || fy <= 0) {
+                    document.getElementById('error').innerHTML = 'All inputs must be positive numbers.';
+                    console.error('Validation failed: Non-positive inputs');
+                    return;
+                }
+
+                // Calculate effective depth
+                const d = h - clearCover - barDiameter; // inches
+                if (d <= 0) {
+                    document.getElementById('error').innerHTML = 'Thickness must be greater than cover (3 in) plus bar diameter (0.625 in).';
+                    console.error('Validation failed: Invalid effective depth');
+                    return;
+                }
+                console.log('Parameters:', { b, h, d });
+
+                // ACI 318-19 Minimum Reinforcement (Sections 7.6.2.1, 13.3.3.2)
+                const AsMin1 = 0.0018 * b * h; // in²/ft
+                const AsMin2 = (200 / fy) * b * d; // in²/ft
+                const AsMin = Math.max(AsMin1, AsMin2); // in²/ft
+
+                // ACI 318-19 Maximum Reinforcement (Sections 7.6.1.1, 21.2.2)
+                const epsilon_y = fy / Es; // yield strain
+                const c_b = (0.003 / (0.003 + epsilon_y)) * d; // balanced neutral axis depth
+                const rho_b = (0.85 * fck * beta1 * (c_b / d)) / fy; // balanced reinforcement ratio
+                const AsMax = 0.75 * rho_b * b * d; // in²/ft
+
+                // Total reinforcement for footing
+                const AsMinTotalLengthDir = AsMin * L; // in² (along width, B)
+                const AsMinTotalWidthDir = AsMin * B; // in² (along length, L)
+                const AsMaxTotalLengthDir = AsMax * L; // in² (along width, B)
+                const AsMaxTotalWidthDir = AsMax * B; // in² (along length, L)
+                console.log('Reinforcement:', { AsMin1, AsMin2, AsMin, AsMax, AsMinTotalLengthDir, AsMinTotalWidthDir, AsMaxTotalLengthDir, AsMaxTotalWidthDir });
+
+                // Generate results HTML
+                let html = `
+                    <h3>Reinforcement Limits per Foot of Width</h3>
+                    <p><strong>Section Width (b):</strong> 12 in (per foot, standard for footing design)</p>
+                    <p><strong>Total Thickness (h):</strong> ${h.toFixed(1)} in</p>
+                    <p><strong>Effective Depth (d):</strong> ${d.toFixed(1)} in (h - cover - bar diameter)</p>
+                    <table>
+                        <tr>
+                            <th>Description</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr>
+                            <td>A<sub>s,min</sub> = 0.0018 × b × h</td>
+                            <td>${AsMin1.toFixed(3)} in²/ft</td>
+                        </tr>
+                        <tr>
+                            <td>A<sub>s,min</sub> = (200 / f<sub>y</sub>) × b × d</td>
+                            <td>${AsMin2.toFixed(3)} in²/ft</td>
+                        </tr>
+                        <tr>
+                            <td>Minimum A<sub>s,min</sub> (ACI 318-19)</td>
+                            <td><strong>${AsMin.toFixed(3)} in²/ft</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Maximum A<sub>s,max</sub> = 0.75 × ρ<sub>b</sub> × b × d</td>
+                            <td><strong>${AsMax.toFixed(3)} in²/ft</strong></td>
+                        </tr>
+                    </table>
+                    <h3>Total Reinforcement Limits</h3>
+                    <table>
+                        <tr>
+                            <th>Direction</th>
+                            <th>Total A<sub>s,min</sub></th>
+                            <th>Total A<sub>s,max</sub></th>
+                        </tr>
+                        <tr>
+                            <td>Along Width (B = ${B.toFixed(1)} ft)</td>
+                            <td>${AsMinTotalLengthDir.toFixed(3)} in²</td>
+                            <td>${AsMaxTotalLengthDir.toFixed(3)} in²</td>
+                        </tr>
+                        <tr>
+                            <td>Along Length (L = ${L.toFixed(1)} ft)</td>
+                            <td>${AsMinTotalWidthDir.toFixed(3)} in²</td>
+                            <td>${AsMaxTotalWidthDir.toFixed(3)} in²</td>
+                        </tr>
+                    </table>
+                    <p class="note">Note: Calculated per ACI 318-19 Sections 7.6.2.1, 13.3.3.2 (min), and 7.6.1.1, 21.2.2 (max). Assumes b = 12 in (per foot), clear cover = 3 in, bar diameter = 0.625 in (#5 bar), β<sub>1</sub> = 0.85. A<sub>s</sub> must satisfy A<sub>s,min</sub> ≤ A<sub>s</sub> ≤ A<sub>s,max</sub>.</p>
+                `;
+
+                // Display results
+                document.getElementById('output').innerHTML = html;
+                document.getElementById('result').style.display = 'block';
+                console.log('Results displayed successfully');
+            } catch (error) {
+                document.getElementById('error').innerHTML = 'An error occurred during calculation. Please check inputs and try again.';
+                console.error('Calculation error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
