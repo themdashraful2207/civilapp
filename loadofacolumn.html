@@ -205,14 +205,14 @@
         </div>
 
         <div class="input-group paired">
-            <label>Column Dimensions (mm):</label>
-            <input type="number" id="colWidth" value="300" placeholder="Width">
-            <input type="number" id="colDepth" value="300" placeholder="Depth">
+            <label>Column Dimensions (in):</label>
+            <input type="number" id="colWidth" value="12" placeholder="Width">
+            <input type="number" id="colDepth" value="12" placeholder="Depth">
         </div>
 
         <div class="input-group">
-            <label>Column Height (m):</label>
-            <input type="number" id="colHeight" value="3.281">
+            <label>Column Height (ft):</label>
+            <input type="number" id="colHeight" value="10.76">
         </div>
 
         <div class="input-group">
@@ -221,14 +221,14 @@
         </div>
 
         <div class="input-group">
-            <label>Slab Thickness (mm):</label>
-            <input type="number" id="slabThickness" value="125">
+            <label>Slab Thickness (in):</label>
+            <input type="number" id="slabThickness" value="5">
         </div>
 
         <div class="input-group paired">
-            <label>Beam Dimensions (mm):</label>
-            <input type="number" id="beamWidth" value="250" placeholder="Width">
-            <input type="number" id="beamDepth" value="250" placeholder="Depth">
+            <label>Beam Dimensions (in):</label>
+            <input type="number" id="beamWidth" value="10" placeholder="Width">
+            <input type="number" id="beamDepth" value="10" placeholder="Depth">
         </div>
 
         <div class="input-group">
@@ -270,13 +270,13 @@
             <p>Brick Load: <span id="brickLoad">0.00</span> tons</p>
             <p>Total Dead Load: <span id="totalDead">0.00</span> tons</p>
             <p>Factored Dead Load (<strong>DL Factor</strong>): <span id="factoredDead">0.00</span> tons</p>
-            <p certamente="true">Live Load: <span id="liveLoadResult">0.00</span> tons</p>
+            <p>Live Load: <span id="liveLoadResult">0.00</span> tons</p>
             <p>Factored Live Load (<strong>LL Factor</strong>): <span id="factoredLive">0.00</span> tons</p>
             <p><strong>Total Factored Load:</strong> <span class="highlight" id="totalFactored">0.00</span> tons</p>
         </div>
 
         <div class="note">
-            * Calculations use: Concrete density = 2400 kg/m³, 1 lb = 0.453592 kg<br>
+            * Calculations use: Concrete density = 2400 kg/m³, 1 lb = 0.453592 kg, 1 in = 0.0254 m, 1 ft = 0.3048 m<br>
             * Factors follow common structural design standards (e.g., ACI 318)
         </div>
     </div>
@@ -285,15 +285,17 @@
     function calculateWeight() {
         const concreteDensity = 2400; // kg/m³
         const lbToKg = 0.453592;
+        const inchToMeter = 0.0254; // 1 inch = 0.0254 meters
+        const footToMeter = 0.3048; // 1 foot = 0.3048 meters
 
         const numStories = parseFloat(document.getElementById('numStories').value);
-        const colWidth = parseFloat(document.getElementById('colWidth').value) / 1000;
-        const colDepth = parseFloat(document.getElementById('colDepth').value) / 1000;
-        const colHeight = parseFloat(document.getElementById('colHeight').value);
+        const colWidth = parseFloat(document.getElementById('colWidth').value) * inchToMeter; // Convert inches to meters
+        const colDepth = parseFloat(document.getElementById('colDepth').value) * inchToMeter; // Convert inches to meters
+        const colHeight = parseFloat(document.getElementById('colHeight').value) * footToMeter; // Convert feet to meters
         const slabAreaSqft = parseFloat(document.getElementById('slabArea').value);
-        const slabThickness = parseFloat(document.getElementById('slabThickness').value) / 1000;
-        const beamWidth = parseFloat(document.getElementById('beamWidth').value) / 1000;
-        const beamDepth = parseFloat(document.getElementById('beamDepth').value) / 1000;
+        const slabThickness = parseFloat(document.getElementById('slabThickness').value) * inchToMeter; // Convert inches to meters
+        const beamWidth = parseFloat(document.getElementById('beamWidth').value) * inchToMeter; // Convert inches to meters
+        const beamDepth = parseFloat(document.getElementById('beamDepth').value) * inchToMeter; // Convert inches to meters
         const floorFinish = parseFloat(document.getElementById('floorFinish').value);
         const liveLoad = parseFloat(document.getElementById('liveLoad').value);
         const deadFactor = parseFloat(document.getElementById('deadFactor').value);
