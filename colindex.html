@@ -1,257 +1,265 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RCC Column Capacity Calculator</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f7f9;
-            color: #333;
-        }
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            font-size: 24px;
-            text-align: center;
-            margin-bottom: 20px;
-            color: #0056b3;
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            font-size: 14px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            transition: border-color 0.3s;
-        }
-        input:focus {
-            border-color: #0056b3;
-            outline: none;
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
-            background: #007bff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background: #0056b3;
-        }
-        .result-section {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-        }
-        .result-section h2 {
-            font-size: 20px;
-            text-align: center;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        .result-line {
-            font-size: 14px;
-            padding: 10px 0;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: flex-start;
-        }
-        .result-line:last-child {
-            border-bottom: none;
-        }
-        .result-line span {
-            font-weight: bold;
-            color: #007bff;
-        }
-        @media (max-width: 600px) {
-            .container {
-                padding: 15px;
-            }
-            h1 {
-                font-size: 20px;
-            }
-            button {
-                font-size: 14px;
-                padding: 12px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RCC Column Capacity Calculator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #0056b3;
+    }
+    .input-group {
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      transition: border-color 0.3s;
+    }
+    input:focus {
+      border-color: #0056b3;
+      outline: none;
+    }
+    .stepper {
+      display: flex;
+      gap: 10px;
+    }
+    .stepper input {
+      flex: 1;
+    }
+    .stepper button {
+      width: 40px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .stepper button:hover {
+      background-color: #0056b3;
+    }
+    button {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background: #007bff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result-section {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+    }
+    .result-section h2 {
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .result-line {
+      font-size: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: flex-start;
+    }
+    .result-line:last-child {
+      border-bottom: none;
+    }
+    .result-line span {
+      font-weight: bold;
+      color: #007bff;
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+      h1 {
+        font-size: 20px;
+      }
+      button {
+        font-size: 14px;
+        padding: 12px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>RCC Column Capacity Calculator (aci318-19)</h1>
-        
-        <div class="input-group">
-            <label for="b">Width of Column (b, in):</label>
-            <input type="number" id="b" value="12" step="1">
-        </div>
-        <div class="input-group">
-            <label for="h">Height of Column (h, in):</label>
-            <input type="number" id="h" value="12" step="1">
-        </div>
-        <div class="input-group">
-            <label for="rebarSize">Rebar Size (mm):</label>
-            <input type="number" id="rebarSize" value="16" step="1">
-        </div>
-        <div class="input-group">
-            <label for="lu_x">Unbraced Length About X-Axis (lu,x, ft):</label>
-            <input type="number" id="lu_x" value="10" step="0.1">
-        </div>
-        <div class="input-group">
-            <label for="lu_y">Unbraced Length About Y-Axis (lu,y, ft):</label>
-            <input type="number" id="lu_y" value="10" step="0.1">
-        </div>
-        <div class="input-group">
-            <label for="nl">Number of Longitudinal Bars (nos):</label>
-            <input type="number" id="nl" value="6" step="1">
-        </div>
-        <div class="input-group">
-            <label for="fc">Compressive Strength of Concrete (f'c, psi):</label>
-            <input type="number" id="fc" value="2500" step="100">
-        </div>
-        <div class="input-group">
-            <label for="fy">Steel Yield Strength (fy, psi):</label>
-            <input type="number" id="fy" value="60000" step="1000">
-        </div>
-        <div class="input-group">
-            <label for="wc">Concrete Unit Weight (wc, kcf):</label>
-            <input type="number" id="wc" value="0.15" step="0.01">
-        </div>
-        
-        <button onclick="calculate()">Calculate</button>
-        
-        <div class="result-section">
-            <h2>Results</h2>
-            <div class="result-line">Area of Bar (Ab): <span id="Ab"></span> in²</div>
-            <div class="result-line">Total Steel Area (Ast): <span id="Ast"></span> in²</div>
-            <div class="result-line">Gross Area (Ag): <span id="Ag"></span> in²</div>
-            <div class="result-line">Concrete Modulus (Ec): <span id="Ec"></span> ksi</div>
-            <div class="result-line">Steel Ratio: <span id="steelRatio"></span></div>
-            <div class="result-line">Effective Stiffness (EI): X: <span id="EIeffX"></span>, Y: <span id="EIeffY"></span></div>
-            <div class="result-line">Critical Buckling Load (Pc): <span id="Pc"></span> kips</div>
-            <div class="result-line">Nominal Strength (Po): <span id="Po"></span> kips</div>
-            <div class="result-line">Reduced Strength (Pn): <span id="Pn"></span> kips</div>
-            <div class="result-line">Design Capacity: <span id="finalCapacity"></span> kips</div>
-            <div class="result-line">Axial Capacity: <span id="axialCapacity"></span> kips</div>
-        </div>
+  <div class="container">
+    <h1>RCC Column Capacity Calculator (aci318-19)</h1>
+
+    <div class="input-group">
+      <label for="b">Width of Column (b, in):</label>
+      <input type="number" id="b" value="12" step="1" />
     </div>
 
-    <script>
-        function calculate() {
-            const b = parseFloat(document.getElementById('b').value);
-            const h = parseFloat(document.getElementById('h').value);
-            const rebarSize = parseFloat(document.getElementById('rebarSize').value);
-            const lu_x = parseFloat(document.getElementById('lu_x').value);
-            const lu_y = parseFloat(document.getElementById('lu_y').value);
-            const nl = parseFloat(document.getElementById('nl').value);
-            const fc = parseFloat(document.getElementById('fc').value);
-            const fy = parseFloat(document.getElementById('fy').value);
-            const wc = parseFloat(document.getElementById('wc').value);
+    <div class="input-group">
+      <label for="h">Height of Column (h, in):</label>
+      <input type="number" id="h" value="12" step="1" />
+    </div>
 
-            const Ab = (Math.PI * Math.pow(rebarSize / 2, 2) * 0.00155).toFixed(2);
-            const Ast = (Ab * nl).toFixed(2);
-            const Ag = (b * h).toFixed(0);
-            const Ec = (33 * Math.pow(wc * 1000, 1.5) * Math.sqrt(fc) / 1000).toFixed(2);
-            // const steelRatio = (Ast / Ag).toFixed(5);
-            const steelRatio = ((Ast / Ag) * 100).toFixed(2) + '%';
+    <div class="input-group">
+      <label for="rebarSize">Rebar Size (mm):</label>
+      <div class="stepper">
+        <button type="button" onclick="adjustValue('rebarSize', -1)">−</button>
+        <input type="number" id="rebarSize" value="16" step="1" />
+        <button type="button" onclick="adjustValue('rebarSize', 1)">+</button>
+      </div>
+    </div>
 
-            const lx = (b * Math.pow(h, 3) / 12).toFixed(0);
-            const ly = (h * Math.pow(b, 3) / 12).toFixed(0);
+    <div class="input-group">
+      <label for="lu_x">Unbraced Length About X-Axis (lu,x, ft):</label>
+      <input type="number" id="lu_x" value="10" step="0.1" />
+    </div>
 
-            const beta_dns = 0.6;
-            const EIeff_x = (0.4 * Ec * lx / (1 + beta_dns)).toFixed(2);
-            const EIeff_y = (0.4 * Ec * ly / (1 + beta_dns)).toFixed(2);
+    <div class="input-group">
+      <label for="lu_y">Unbraced Length About Y-Axis (lu,y, ft):</label>
+      <input type="number" id="lu_y" value="10" step="0.1" />
+    </div>
 
-            const Pc_x = (Math.PI * EIeff_x / Math.pow(lu_x * 12, 2)).toFixed(2);
-            const Pc_y = (Math.PI * EIeff_y / Math.pow(lu_y * 12, 2)).toFixed(2);
-            const Pc = Math.min(Pc_x, Pc_y);
+    <div class="input-group">
+      <label for="nl">Number of Longitudinal Bars (nos):</label>
+      <div class="stepper">
+        <button type="button" onclick="adjustValue('nl', -1)">−</button>
+        <input type="number" id="nl" value="6" step="1" />
+        <button type="button" onclick="adjustValue('nl', 1)">+</button>
+      </div>
+    </div>
 
-            const Po = ((0.85 * fc * (Ag - Ast) + fy * Ast) / 1000).toFixed(2);
-            const Pn = (0.8 * Po).toFixed(2);
+    <div class="input-group">
+      <label for="fc">Compressive Strength of Concrete (f'c, psi):</label>
+      <input type="number" id="fc" value="2500" step="100" />
+    </div>
 
-            const phi = 0.65;
-            const designCapacity = (phi * Math.min(Pc, Pn)).toFixed(2);
-            const axialCapacity = (phi * Pn).toFixed(2);
+    <div class="input-group">
+      <label for="fy">Steel Yield Strength (fy, psi):</label>
+      <input type="number" id="fy" value="60000" step="1000" />
+    </div>
 
-            document.getElementById('Ab').textContent = `${Ab}`;
-            document.getElementById('Ast').textContent = `${Ast}`;
-            document.getElementById('Ag').textContent = `${Ag}`;
-            document.getElementById('Ec').textContent = `${Ec}`;
-            document.getElementById('steelRatio').textContent = `${steelRatio}`;
-            document.getElementById('EIeffX').textContent = `${EIeff_x}`;
-            document.getElementById('EIeffY').textContent = `${EIeff_y}`;
-            document.getElementById('Pc').textContent = `${Pc}`;
-            document.getElementById('Po').textContent = `${Po}`;
-            document.getElementById('Pn').textContent = `${Pn}`;
-            document.getElementById('finalCapacity').textContent = `${designCapacity}`;
-            document.getElementById('axialCapacity').textContent = `${axialCapacity}`;
-        }
+    <div class="input-group">
+      <label for="wc">Concrete Unit Weight (wc, kcf):</label>
+      <input type="number" id="wc" value="0.15" step="0.01" />
+    </div>
 
-        // Prevent URL display on hover
-document.addEventListener('DOMContentLoaded', function() {
-    const links = document.querySelectorAll('a');
-    links.forEach(link => {
-        link.addEventListener('mouseover', function(e) {
-            // Clear any existing status text
-            window.status = '';
-            return true;
-        });
-        
-        // Alternative method to prevent status bar changes
-        link.onmouseover = link.onmouseout = function() {
-            return true;
-        };
-    });
-});
+    <button onclick="calculate()">Calculate</button>
 
-// Disable right-click
-document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-});
+    <div class="result-section">
+      <h2>Results</h2>
+      <div class="result-line">Area of Bar (Ab): <span id="Ab"></span> in²</div>
+      <div class="result-line">Total Steel Area (Ast): <span id="Ast"></span> in²</div>
+      <div class="result-line">Gross Area (Ag): <span id="Ag"></span> in²</div>
+      <div class="result-line">Concrete Modulus (Ec): <span id="Ec"></span> ksi</div>
+      <div class="result-line">Steel Ratio: <span id="steelRatio"></span></div>
+      <div class="result-line">Effective Stiffness (EI): X: <span id="EIeffX"></span>, Y: <span id="EIeffY"></span></div>
+      <div class="result-line">Critical Buckling Load (Pc): <span id="Pc"></span> kips</div>
+      <div class="result-line">Nominal Strength (Po): <span id="Po"></span> kips</div>
+      <div class="result-line">Reduced Strength (Pn): <span id="Pn"></span> kips</div>
+      <div class="result-line">Design Capacity: <span id="finalCapacity"></span> kips</div>
+      <div class="result-line">Axial Capacity: <span id="axialCapacity"></span> kips</div>
+    </div>
+  </div>
 
-// Optional: Disable keyboard shortcuts (F12, Ctrl+Shift+I, etc.)
-document.addEventListener('keydown', function(e) {
-    // Disable F12
-    if (e.key === 'F12') e.preventDefault();
-    
-    // Disable Ctrl+Shift+I (Chrome, Firefox)
-    if (e.ctrlKey && e.shiftKey && e.key === 'I') e.preventDefault();
-    
-    // Disable Ctrl+Shift+J (Chrome)
-    if (e.ctrlKey && e.shiftKey && e.key === 'J') e.preventDefault();
-    
-    // Disable Ctrl+U (View source)
-    if (e.ctrlKey && e.key === 'u') e.preventDefault();
-});
-    </script>
+  <script>
+    function adjustValue(id, delta) {
+      const input = document.getElementById(id);
+      const current = parseInt(input.value) || 0;
+      const step = parseInt(input.step) || 1;
+      const newValue = current + delta * step;
+      if (newValue >= 0) {
+        input.value = newValue;
+      }
+    }
+
+    function calculate() {
+      const b = parseFloat(document.getElementById('b').value);
+      const h = parseFloat(document.getElementById('h').value);
+      const rebarSize = parseFloat(document.getElementById('rebarSize').value);
+      const lu_x = parseFloat(document.getElementById('lu_x').value);
+      const lu_y = parseFloat(document.getElementById('lu_y').value);
+      const nl = parseFloat(document.getElementById('nl').value);
+      const fc = parseFloat(document.getElementById('fc').value);
+      const fy = parseFloat(document.getElementById('fy').value);
+      const wc = parseFloat(document.getElementById('wc').value);
+
+      const Ab = (Math.PI * Math.pow(rebarSize / 2, 2) * 0.00155).toFixed(2);
+      const Ast = (Ab * nl).toFixed(2);
+      const Ag = (b * h).toFixed(0);
+      const Ec = (33 * Math.pow(wc * 1000, 1.5) * Math.sqrt(fc) / 1000).toFixed(2);
+      const steelRatio = ((Ast / Ag) * 100).toFixed(2) + '%';
+
+      const lx = (b * Math.pow(h, 3) / 12).toFixed(0);
+      const ly = (h * Math.pow(b, 3) / 12).toFixed(0);
+
+      const beta_dns = 0.6;
+      const EIeff_x = (0.4 * Ec * lx / (1 + beta_dns)).toFixed(2);
+      const EIeff_y = (0.4 * Ec * ly / (1 + beta_dns)).toFixed(2);
+
+      const Pc_x = (Math.PI * EIeff_x / Math.pow(lu_x * 12, 2)).toFixed(2);
+      const Pc_y = (Math.PI * EIeff_y / Math.pow(lu_y * 12, 2)).toFixed(2);
+      const Pc = Math.min(Pc_x, Pc_y);
+
+      const Po = ((0.85 * fc * (Ag - Ast) + fy * Ast) / 1000).toFixed(2);
+      const Pn = (0.8 * Po).toFixed(2);
+
+      const phi = 0.65;
+      const designCapacity = (phi * Math.min(Pc, Pn)).toFixed(2);
+      const axialCapacity = (phi * Pn).toFixed(2);
+
+      document.getElementById('Ab').textContent = `${Ab}`;
+      document.getElementById('Ast').textContent = `${Ast}`;
+      document.getElementById('Ag').textContent = `${Ag}`;
+      document.getElementById('Ec').textContent = `${Ec}`;
+      document.getElementById('steelRatio').textContent = `${steelRatio}`;
+      document.getElementById('EIeffX').textContent = `${EIeff_x}`;
+      document.getElementById('EIeffY').textContent = `${EIeff_y}`;
+      document.getElementById('Pc').textContent = `${Pc}`;
+      document.getElementById('Po').textContent = `${Po}`;
+      document.getElementById('Pn').textContent = `${Pn}`;
+      document.getElementById('finalCapacity').textContent = `${designCapacity}`;
+      document.getElementById('axialCapacity').textContent = `${axialCapacity}`;
+    }
+  </script>
 </body>
 </html>
