@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Column Axial Capacity Calculator (ACI 318-19)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      background: #f4f4f9;
+      color: #333;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .result {
+      background: #eef6ff;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .error {
+      color: red;
+    }
+
+    .note {
+      color: #555;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+
+    .rebar-group {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: #f8f9fa;
+    }
+
+    .rebar-set {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .rebar-set:last-child {
+      margin-bottom: 0;
+    }
+
+    .rebar-set input {
+      flex: 1;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .rebar-set button {
+      width: auto;
+      padding: 8px 12px;
+      font-size: 1rem;
+      background: #dc3545;
+    }
+
+    .rebar-set button:hover {
+      background: #c82333;
+    }
+
+    .rebar-set button:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .add-rebar-btn {
+      display: inline-block;
+      padding: 10px 15px;
+      font-size: 1rem;
+      color: white;
+      background: #28a745;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .add-rebar-btn:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Column Axial Capacity (ACI 318-19)</h2>
+
+    <label for="loadingType">Loading Type:</label>
+    <select id="loadingType">
+      <option value="pure">Pure Axial</option>
+      <option value="uniaxial">Uniaxial Bending</option>
+      <option value="biaxial">Biaxial Bending</option>
+    </select>
+
+    <label for="sizeX">Column Width (in):</label>
+    <input type="number" id="sizeX" placeholder="e.g., 12">
+
+    <label for="sizeY">Column Depth (in):</label>
+    <input type="number" id="sizeY" placeholder="e.g., 18">
+
+    <div class="rebar-group">
+      <label>Rebar Details:</label>
+      <div id="rebar-sets">
+        <div class="rebar-set" data-index="0">
+          <input type="number" id="barSize_0" placeholder="Bar Diameter (mm)" value="20">
+          <input type="number" id="barNos_0" placeholder="Number of Bars" value="6">
+          <button onclick="removeRebarSet(0)">-</button>
+        </div>
+      </div>
+      <button class="add-rebar-btn" onclick="addRebarSet()">+ Add Rebar Set</button>
+    </div>
+
+    <label for="height">Column Height (ft):</label>
+    <input type="number" id="height" placeholder="e.g., 10">
+
+    <label for="fc">Concrete Strength f'c (psi):</label>
+    <input type="number" id="fc" placeholder="e.g., 3000">
+
+    <label for="fy">Steel Strength fy (psi):</label>
+    <input type="number" id="fy" placeholder="e.g., 60000">
+
+    <button onclick="calculateCapacity()">Calculate</button>
+
+    <div id="result" class="result">
+      <p id="capacity"></p>
+      <p id="error" class="error"></p>
+    </div>
+  </div>
+
+  <script>
+    let rebarSetCount = 1;
+
+    function addRebarSet() {
+      const rebarSets = document.getElementById('rebar-sets');
+      const newIndex = rebarSetCount++;
+      const newSet = document.createElement('div');
+      newSet.className = 'rebar-set';
+      newSet.dataset.index = newIndex;
+      newSet.innerHTML = `
+        <input type="number" id="barSize_${newIndex}" placeholder="Bar Diameter (mm)" value="20">
+        <input type="number" id="barNos_${newIndex}" placeholder="Number of Bars" value="6">
+        <button onclick="removeRebarSet(${newIndex})">-</button>
+      `;
+      rebarSets.appendChild(newSet);
+      updateRemoveButtons();
+    }
+
+    function removeRebarSet(index) {
+      const rebarSet = document.querySelector(`.rebar-set[data-index="${index}"]`);
+      if (rebarSet) {
+        rebarSet.remove();
+        updateRemoveButtons();
+      }
+    }
+
+    function updateRemoveButtons() {
+      const rebarSets = document.querySelectorAll('.rebar-set');
+      const buttons = document.querySelectorAll('.rebar-set button');
+      buttons.forEach(button => {
+        button.disabled = rebarSets.length <= 1;
+      });
+    }
+
+    function calculateCapacity() {
+      const resultDiv = document.getElementById('result');
+      const capacityP = document.getElementById('capacity');
+      const errorP = document.getElementById('error');
+      resultDiv.style.display = 'none';
+      capacityP.textContent = '';
+      errorP.textContent = '';
+
+      const loadingType = document.getElementById('loadingType').value;
+      const sizeX = parseFloat(document.getElementById('sizeX').value);
+      const sizeY = parseFloat(document.getElementById('sizeY').value);
+      const height = parseFloat(document.getElementById('height').value); // ft
+      const fc = parseFloat(document.getElementById('fc').value);
+      const fy = parseFloat(document.getElementById('fy').value);
+
+      // Collect all rebar sets
+      const rebarSets = document.querySelectorAll('.rebar-set');
+      let totalAst = 0;
+      let hasValidRebar = true;
+
+      rebarSets.forEach((set) => {
+        const barSize = parseFloat(document.getElementById(`barSize_${set.dataset.index}`).value);
+        const barNos = parseInt(document.getElementById(`barNos_${set.dataset.index}`).value);
+        if (!barSize || !barNos) {
+          hasValidRebar = false;
+        } else {
+          const barArea = Math.PI * (barSize / 25.4 / 2) ** 2;
+          totalAst += barNos * barArea;
+        }
+      });
+
+      if (!sizeX || !sizeY || !height || !fc || !fy || !hasValidRebar) {
+        errorP.textContent = 'Please fill all fields with valid numbers.';
+        resultDiv.style.display = 'block';
+        return;
+      }
+
+      const Ag = sizeX * sizeY;
+      const rho = totalAst / Ag;
+
+      if (rho < 0.01 || rho > 0.08) {
+        errorP.textContent = 'Reinforcement ratio must be between 1% and 8%.';
+        resultDiv.style.display = 'block';
+        return;
+      }
+
+      const k = 1.0;
+      const lu = height * 12; // inches
+      const r = 0.3 * Math.min(sizeX, sizeY);
+      const slenderness = (k * lu) / r;
+      const phi = 0.65;
+
+      const Pn_axial = 0.80 * (0.85 * fc * (Ag - totalAst) + fy * totalAst);
+      let phiPn = phi * Pn_axial;
+
+      if (loadingType === 'uniaxial') {
+        phiPn *= 0.75;
+      } else if (loadingType === 'biaxial') {
+        phiPn *= 0.6;
+      }
+
+      let finalCapacity = phiPn;
+      let note = '';
+
+      if (slenderness > 34) {
+        const Cr = 1 / (1 + Math.pow((slenderness / 100), 2));
+        finalCapacity *= Cr;
+        note = `Column is slender. Slenderness ratio = ${slenderness.toFixed(1)}. Reduction factor = ${Cr.toFixed(2)} applied.`;
+      } else {
+        note = `Column is not slender. Slenderness ratio = ${slenderness.toFixed(1)}.`;
+      }
+
+      capacityP.innerHTML = `Estimated Axial Load Capacity: <b>${(finalCapacity / 1000).toFixed(2)} kips</b><br><span class="note">${note}</span>`;
+      resultDiv.style.display = 'block';
+    }
+
+    // Initialize remove buttons state
+    document.addEventListener('DOMContentLoaded', function() {
+      updateRemoveButtons();
+    });
+  </script>
+</body>
+</html>
