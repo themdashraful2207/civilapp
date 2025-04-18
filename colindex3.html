@@ -324,6 +324,35 @@
     document.addEventListener('DOMContentLoaded', function() {
       updateRemoveButtons();
     });
+
+            // Prevent URL display on hover
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('a');
+            links.forEach(link => {
+                link.addEventListener('mouseover', function(e) {
+                    window.status = '';
+                    return true;
+                });
+                
+                link.onmouseover = link.onmouseout = function() {
+                    return true;
+                };
+            });
+            updateRemoveButtons();
+        });
+
+        // Disable right-click
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Optional: Disable keyboard shortcuts (F12, Ctrl+Shift+I, etc.)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12') e.preventDefault();
+            if (e.ctrlKey && e.shiftKey && e.key === 'I') e.preventDefault();
+            if (e.ctrlKey && e.shiftKey && e.key === 'J') e.preventDefault();
+            if (e.ctrlKey && e.key === 'u') e.preventDefault();
+        });
   </script>
 </body>
 </html>
